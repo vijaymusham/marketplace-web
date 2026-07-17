@@ -1,36 +1,61 @@
 "use client";
 
-import { Smartphone, Code2, Boxes, Flame, Wind, Radio } from "lucide-react";
+import {
+    Smartphone,
+    Laptop,
+    Tv,
+    Car,
+    Bike,
+    Camera,
+    Gamepad2,
+    Refrigerator,
+    Sofa,
+} from "lucide-react";
 import { Reveal } from "@/components/animations/Motion";
 
-const stack = [
-    { name: "React Native", icon: "mobile" },
-    { name: "ReactJS", icon: "code" },
-    { name: "NextJS", icon: "code" },
-    { name: "TailwindCSS", icon: "code" },
-    { name: "Shadcn UI", icon: "code" },
-    { name: "TypeScript", icon: "code" },
-    { name: "Redux Toolkit", icon: "boxes" },
-    { name: "Firebase", icon: "flame" },
-    { name: "NativeWind", icon: "wind" },
-    { name: "Socket.IO", icon: "radio" },
-    { name: "Expo", icon: "code" },
+const brands = [
+    { name: "Apple", icon: "mobile" },
+    { name: "Samsung", icon: "mobile" },
+    { name: "Xiaomi", icon: "mobile" },
+    { name: "OnePlus", icon: "mobile" },
+    { name: "HP", icon: "laptop" },
+    { name: "Dell", icon: "laptop" },
+    { name: "Lenovo", icon: "laptop" },
+    { name: "Sony", icon: "tv" },
+    { name: "LG", icon: "appliance" },
+    { name: "Whirlpool", icon: "appliance" },
+    { name: "Godrej", icon: "appliance" },
+    { name: "IKEA", icon: "sofa" },
+    { name: "Maruti Suzuki", icon: "car" },
+    { name: "Hyundai", icon: "car" },
+    { name: "Honda", icon: "car" },
+    { name: "Royal Enfield", icon: "bike" },
+    { name: "Bajaj", icon: "bike" },
+    { name: "Hero", icon: "bike" },
+    { name: "Canon", icon: "camera" },
+    { name: "PlayStation", icon: "gamepad" },
 ];
 
-function StackIcon({ type }: { type: string }) {
+function BrandIcon({ type }: { type: string }) {
     switch (type) {
         case "mobile":
             return <Smartphone size={26} strokeWidth={3} />;
-        case "code":
-            return <Code2 size={26} strokeWidth={3} />;
-        case "boxes":
-            return <Boxes size={26} strokeWidth={3} />;
-        case "flame":
-            return <Flame size={26} strokeWidth={3} />;
-        case "wind":
-            return <Wind size={26} strokeWidth={3} />;
-        case "radio":
-            return <Radio size={26} strokeWidth={3} />;
+        case "laptop":
+            return <Laptop size={26} strokeWidth={3} />;
+        case "tv":
+            return <Tv size={26} strokeWidth={3} />;
+        case "car":
+            return <Car size={26} strokeWidth={3} />;
+        case "bike":
+            return <Bike size={26} strokeWidth={3} />;
+        case "camera":
+            return <Camera size={26} strokeWidth={3} />;
+        case "gamepad":
+            return <Gamepad2 size={26} strokeWidth={3} />;
+        case "appliance":
+            return <Refrigerator size={26} strokeWidth={3} />;
+        case "sofa":
+            return <Sofa size={26} strokeWidth={3} />;
         default:
             return null;
     }
@@ -52,12 +77,12 @@ export default function TrustedBrands() {
                             <div className="flex marquee-track w-max">
                                 {[0, 1].map((k) => (
                                     <div key={k} className="flex items-center gap-12 md:gap-16 pr-12 md:pr-16">
-                                        {stack.map((b) => (
+                                        {brands.map((b) => (
                                             <span
                                                 key={b.name}
                                                 className="flex items-center gap-2 font-display font-bold text-lg md:text-2xl whitespace-nowrap shrink-0"
                                             >
-                                                <StackIcon type={b.icon} />
+                                                <BrandIcon type={b.icon} />
                                                 {b.name}
                                             </span>
                                         ))}

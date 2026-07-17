@@ -12,10 +12,10 @@ export default function LocationPicker() {
                 onClick={() => setOpen((v) => !v)}
                 className="flex shrink-0 flex-col items-start gap-0.5 text-left"
             >
-                <span className="font-heading text-xs font-medium text-slate-500">
+                <span className="font-heading text-xs font-semibold text-slate-400">
                     Location
                 </span>
-                <span className="flex items-center gap-1 text-sm font-medium text-slate-900 hover:text-primary">
+                <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 hover:text-primary">
                     <span className="max-w-40 truncate">Select location</span>
                     <ChevronDown className="h-4 w-4 shrink-0" />
                 </span>

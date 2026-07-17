@@ -36,12 +36,14 @@ export default function CityExplorer() {
                     className="flex gap-4 overflow-x-auto scroll-smooth pb-1 scrollbar-hide sm:gap-5"
                 >
                     {cities.map(({ name, distance, keyword, lock }) => (
-                        <a key={name} href="#" className="group w-36 shrink-0 sm:w-40">
-                            <div className="relative aspect-[4/3.4] w-full overflow-hidden rounded-xl bg-slate-100">
+                        <a key={name} href="#" className="group w-36 shrink-0 sm:w-42">
+                            <div className="relative aspect-[4/3.4] w-full overflow-hidden rounded-2xl bg-slate-100">
                                 <Image
                                     src={`https://loremflickr.com/400/340/${keyword},city/all?lock=${lock}`}
                                     alt={`Deals in ${name}`}
                                     fill
+                                    priority
+                                    loading="eager"
                                     sizes="160px"
                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                                 />

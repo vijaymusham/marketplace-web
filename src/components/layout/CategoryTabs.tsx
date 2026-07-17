@@ -1,17 +1,52 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { categories } from "@/lib/categories";
+import Link from "next/link";
 
 const PANEL_WIDE = 560;
 const PANEL_NARROW = 320;
 const PANEL_MARGIN = 8;
 
+const EASE = "ease-[cubic-bezier(0.2,0.8,0.2,1)]";
+
 export default function CategoryTabs() {
+    const [collapsed, setCollapsed] = useState(false);
+    const [active, setActive] = useState(0);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [panel, setPanel] = useState({ left: 0, width: PANEL_NARROW });
     const containerRef = useRef<HTMLDivElement>(null);
+    const expandedScrollRef = useRef<HTMLDivElement>(null);
+    const collapsedScrollRef = useRef<HTMLDivElement>(null);
+    const collapsedRef = useRef(false);
+
+    useEffect(() => {
+        let raf = 0;
+        const onScroll = () => {
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(() => {
+                // wide hysteresis gap (larger than the bar's height change)
+                // so the state can never oscillate around the threshold
+                const collapseAt = window.innerHeight * 0.28;
+                const expandAt = Math.max(collapseAt - 140, 40);
+                const next = collapsedRef.current
+                    ? window.scrollY > expandAt
+                    : window.scrollY > collapseAt;
+                if (next !== collapsedRef.current) {
+                    collapsedRef.current = next;
+                    setCollapsed(next);
+                    setOpenIndex(null);
+                }
+            });
+        };
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => {
+            window.removeEventListener("scroll", onScroll);
+            cancelAnimationFrame(raf);
+        };
+    }, []);
 
     const openCategory = openIndex !== null ? categories[openIndex] : null;
 
@@ -38,71 +73,171 @@ export default function CategoryTabs() {
         setOpenIndex(index);
     };
 
-    return (
-        <nav
-            onMouseLeave={() => setOpenIndex(null)}
-            className="sticky top-16 z-20 border-b border-slate-200/70 bg-white/85 shadow-[0_1px_12px_rgba(15,23,42,0.06)] backdrop-blur-md"
-        >
-            <div
-                ref={containerRef}
-                className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-            >
-                <div className="overflow-x-auto scrollbar-hide">
-                    <ul className="mx-auto flex w-max items-center gap-5">
-                        {categories.map(({ name, icon: Icon }, index) => (
-                            <li key={name} className="shrink-0">
-                                <button
-                                    onMouseEnter={(e) => openTab(index, e.currentTarget)}
-                                    onFocus={(e) => openTab(index, e.currentTarget)}
-                                    className={`flex items-center gap-2 border-b-2 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors ${openIndex === index
-                                        ? "border-primary text-primary"
-                                        : "border-transparent text-slate-600 hover:text-primary"
-                                        }`}
-                                >
-                                    <Icon className="h-7 w-7" />
-                                    {name}
-                                    <ChevronDown
-                                        className={`h-3.5 w-3.5 transition-transform duration-200 ${openIndex === index ? "rotate-180" : ""
-                                            }`}
-                                    />
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+    const scrollNext = () => {
+        const el = collapsed ? collapsedScrollRef.current : expandedScrollRef.current;
+        el?.scrollBy({ left: 320, behavior: "smooth" });
+    };
 
-                {openCategory && (
+    const tabHandlers = (index: number) => ({
+        onMouseEnter: (e: React.MouseEvent<HTMLButtonElement>) =>
+            openTab(index, e.currentTarget),
+        onFocus: (e: React.FocusEvent<HTMLButtonElement>) =>
+            openTab(index, e.currentTarget),
+        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+            setActive(index);
+            openTab(index, e.currentTarget);
+        },
+    });
+
+    return (
+        <>
+            {/* fixed (out of flow) so the height animation never reflows the page */}
+            <nav
+                onMouseLeave={() => setOpenIndex(null)}
+                className={`fixed inset-x-0 top-18 z-20 border-b transition-[background-color,box-shadow,border-color] duration-300 ${collapsed
+                    ? "border-slate-200/70 bg-white/85 backdrop-blur-2xl"
+                    : "border-slate-200 bg-white/85 backdrop-blur-2xl"
+                    }`}
+            >
+                <div
+                    ref={containerRef}
+                    className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+                >
+                    {/* height eases between two fixed values; the two layers crossfade */}
                     <div
-                        style={{ left: panel.left, width: panel.width }}
-                        className="absolute top-full rounded-b-2xl border border-t-0 border-slate-200/70 bg-white/95 p-6 shadow-xl backdrop-blur-md"
+                        className={`relative transition-[height] duration-300 ${EASE} ${collapsed ? "h-12" : "h-28"
+                            }`}
                     >
-                        <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-                            <openCategory.icon className="h-9 w-9 text-slate-800" />
-                            <h3 className="font-heading text-sm font-extrabold text-slate-900">
-                                {openCategory.name}
-                            </h3>
+                        {/* expanded layer: icon above label (grid style) */}
+                        <div
+                            className={`absolute inset-0 transition-[opacity,transform] duration-300 ${EASE} ${collapsed
+                                ? "pointer-events-none -translate-y-3 opacity-0"
+                                : "translate-y-0 opacity-100"
+                                }`}
+                            aria-hidden={collapsed}
+                        >
+                            <div
+                                ref={expandedScrollRef}
+                                className="h-full overflow-x-auto scroll-smooth scrollbar-hide"
+                            >
+                                <ul className="mx-auto flex h-full w-max items-stretch gap-1 sm:gap-2">
+                                    {categories.map(({ name, icon: Icon }, index) => {
+                                        const highlighted = openIndex === index || active === index;
+                                        return (
+                                            <li key={name} className="flex shrink-0">
+                                                <button
+                                                    {...tabHandlers(index)}
+                                                    tabIndex={collapsed ? -1 : 0}
+                                                    className={`group relative flex w-24 flex-col items-center justify-center gap-1.5 transition-colors sm:w-28 ${highlighted
+                                                        ? "text-primary"
+                                                        : "text-slate-800 hover:text-primary"
+                                                        }`}
+                                                >
+                                                    <Icon className="h-11 w-11 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 sm:h-13 sm:w-13" />
+                                                    <span className="text-center text-xs leading-tight font-semibold whitespace-normal sm:text-[13px]">
+                                                        {name}
+                                                    </span>
+                                                    <span
+                                                        className={`absolute inset-x-3 bottom-0 h-1 rounded-t-full bg-primary transition-opacity duration-200 ${highlighted ? "opacity-100" : "opacity-0"
+                                                            }`}
+                                                    />
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
                         </div>
 
-                        <ul
-                            className={`mt-3 gap-x-8 ${openCategory.subcategories.length > 6 && panel.width > 420
-                                ? "grid grid-cols-2"
-                                : "flex flex-col"
+                        {/* collapsed layer: icon left, label right, chevron (tab style) */}
+                        <div
+                            className={`absolute inset-0 transition-[opacity,transform] duration-300 ${EASE} ${collapsed
+                                ? "translate-y-0 opacity-100"
+                                : "pointer-events-none translate-y-3 opacity-0"
                                 }`}
+                            aria-hidden={!collapsed}
                         >
-                            {openCategory.subcategories.map((sub) => (
-                                <li key={sub}>
-                                    <a
-                                        href="#"
-                                        className="block py-2 text-sm text-slate-600 transition-colors hover:text-primary"
-                                    >
-                                        {sub}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
+                            <div
+                                ref={collapsedScrollRef}
+                                className="h-full overflow-x-auto scroll-smooth scrollbar-hide"
+                            >
+                                <ul className="mx-auto flex h-full w-max items-stretch gap-5">
+                                    {categories.map(({ name, icon: Icon }, index) => {
+                                        const highlighted = openIndex === index || active === index;
+                                        return (
+                                            <li key={name} className="flex shrink-0">
+                                                <button
+                                                    {...tabHandlers(index)}
+                                                    tabIndex={collapsed ? 0 : -1}
+                                                    className={`relative flex items-center gap-2 text-sm font-semibold whitespace-nowrap transition-colors ${highlighted
+                                                        ? "text-primary"
+                                                        : "text-slate-600 hover:text-primary"
+                                                        }`}
+                                                >
+                                                    <Icon className="h-7 w-7 shrink-0" />
+                                                    {name}
+                                                    <ChevronDown
+                                                        className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${openIndex === index ? "rotate-180" : ""
+                                                            }`}
+                                                    />
+                                                    <span
+                                                        className={`absolute inset-x-1 bottom-0 h-0.5 rounded-t-full bg-primary transition-opacity duration-200 ${highlighted ? "opacity-100" : "opacity-0"
+                                                            }`}
+                                                    />
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                )}
-            </div>
-        </nav>
+
+                    <button
+                        onClick={scrollNext}
+                        aria-label="Show more categories"
+                        className={`absolute top-1/2 right-1 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-all duration-300 ${EASE} hover:text-primary md:flex ${collapsed ? "h-7 w-7" : "h-9 w-9"
+                            }`}
+                    >
+                        <ChevronRight className={collapsed ? "h-4 w-4" : "h-5 w-5"} />
+                    </button>
+
+                    {openCategory && (
+                        <div
+                            style={{ left: panel.left, width: panel.width }}
+                            className="absolute top-full rounded-b-2xl border border-t-0 border-slate-200/70 bg-white/95 p-6 shadow-xl backdrop-blur-2xl"
+                        >
+                            <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                                <openCategory.icon className="h-9 w-9 text-slate-800" />
+                                <h3 className="font-heading text-sm font-extrabold text-slate-900">
+                                    {openCategory.name}
+                                </h3>
+                            </div>
+
+                            <ul
+                                className={`mt-3 gap-x-8 ${openCategory.subcategories.length > 6 && panel.width > 420
+                                    ? "grid grid-cols-2"
+                                    : "flex flex-col"
+                                    }`}
+                            >
+                                {openCategory.subcategories.map((sub) => (
+                                    <li key={sub}>
+                                        <Link
+                                            href={`/category/${sub.toLowerCase().replace(/ /g, '-')}`}
+                                            className="block py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-primary"
+                                        >
+                                            {sub}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            </nav>
+            {/* constant-height spacer keeps the page layout stable while the
+            fixed bar above animates between its two heights */}
+            <div className="h-28" aria-hidden="true" />
+        </>
     );
 }

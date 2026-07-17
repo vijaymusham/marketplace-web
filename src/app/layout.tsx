@@ -5,6 +5,7 @@ import SmoothScroll from "@/components/layout/SmoothScroll";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import TrustedBrands from "@/components/home-ui/TrustedBrands";
+import { Toaster } from "react-hot-toast";
 
 export const display = localFont({
     src: [
@@ -38,6 +39,33 @@ export default function RootLayout({
                 <SmoothScroll>
                     <Navbar />
                     {children}
+                    <Toaster
+                        position="top-center"
+                        reverseOrder={false}
+                        gutter={8}
+                        containerClassName=""
+                        containerStyle={{}}
+                        toasterId="default"
+                        toastOptions={{
+                            // Define default options
+                            className: '',
+                            duration: 5000,
+                            removeDelay: 1000,
+                            style: {
+                                background: '#363636',
+                                color: '#fff',
+                            },
+
+                            // Default options for specific types
+                            success: {
+                                duration: 3000,
+                                iconTheme: {
+                                    primary: 'green',
+                                    secondary: 'black',
+                                },
+                            },
+                        }}
+                    />
                     <TrustedBrands />
                     <Footer />
                 </SmoothScroll>
