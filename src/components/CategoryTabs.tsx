@@ -4,7 +4,7 @@ export default function CategoryTabs() {
   return (
     <nav className="border-b border-slate-200 bg-white">
       <div className="mx-auto max-w-7xl overflow-x-auto px-4 sm:px-6 lg:px-8 scrollbar-hide">
-        <ul className="flex min-w-max items-center gap-8">
+        <ul className="flex w-full min-w-max items-center justify-center gap-8">
           {navCategories.map(({ name, icon: Icon }, index) => (
             <li key={name}>
               <button

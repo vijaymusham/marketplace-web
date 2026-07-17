@@ -1,43 +1,52 @@
-import { Search, ChevronDown, ShieldCheck, User, Tag } from "lucide-react";
+import { Search, User, Heart, ShoppingCart, ShoppingBag } from "lucide-react";
+import LocationPicker from "./LocationPicker";
+
+const iconActions = [
+  { icon: Heart, label: "Wishlist", count: 0 },
+  { icon: ShoppingCart, label: "Cart", count: 0 },
+];
 
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
-        <a href="/" className="flex shrink-0 items-center">
-          <span className="font-heading text-2xl font-extrabold text-primary">
-            marketplace
+      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <a href="/" className="flex shrink-0 items-center gap-2">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
+            <ShoppingBag className="h-5 w-5" strokeWidth={2} />
           </span>
         </a>
 
-        <div className="hidden shrink-0 flex-col gap-0.5 md:flex">
-          <span className="flex items-center gap-1 text-xs font-extrabold text-primary">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Verified Sellers*
-          </span>
-          <button className="flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-primary">
-            Select Location
-            <ChevronDown className="h-4 w-4" />
-          </button>
-        </div>
+        <LocationPicker />
 
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <div className="relative flex flex-1 items-center">
+          <Search className="pointer-events-none absolute left-4 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder='Search for "iPhone 13"'
-            className="w-full rounded-full border border-slate-300 bg-white py-2.5 pl-11 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="Type Your Products ..."
+            className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary"
           />
+          <button className="absolute right-1.5 flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover">
+            Search
+            <Search className="h-3.5 w-3.5" />
+          </button>
         </div>
 
-        <div className="flex shrink-0 items-center gap-6">
-          <button className="hidden flex-col items-center gap-0.5 text-slate-800 hover:text-primary sm:flex">
+        <div className="flex shrink-0 items-center gap-4">
+          {iconActions.map(({ icon: Icon, label, count }) => (
+            <button
+              key={label}
+              aria-label={label}
+              className="relative hidden text-slate-500 hover:text-primary sm:block"
+            >
+              <Icon className="h-6 w-6" strokeWidth={1.75} />
+              <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
+                {count}
+              </span>
+            </button>
+          ))}
+
+          <button aria-label="Account" className="text-slate-500 hover:text-primary">
             <User className="h-6 w-6" strokeWidth={1.75} />
-            <span className="text-xs font-semibold">Login</span>
-          </button>
-          <button className="flex flex-col items-center gap-0.5 text-slate-800 hover:text-primary">
-            <Tag className="h-6 w-6" strokeWidth={1.75} />
-            <span className="text-xs font-semibold">Sell</span>
           </button>
         </div>
       </div>
