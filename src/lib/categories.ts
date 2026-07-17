@@ -1,42 +1,25 @@
 import {
-  ShoppingBag,
-  Headphones,
-  Car,
-  Sofa,
-  Shirt,
-  Smartphone,
-  Building2,
-  BookOpen,
-  Dumbbell,
-  Laptop,
-  Baby,
-  PawPrint,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
-
-export type NavCategory = {
-  name: string;
-  icon: LucideIcon;
-};
+  MobilesTabletsIcon,
+  ElectronicsIcon,
+  FurnitureIcon,
+  FashionIcon,
+  VehiclesIcon,
+  BooksHobbiesIcon,
+  HomeLivingIcon,
+  SportsFitnessIcon,
+  KidsBabyIcon,
+  RealEstateIcon,
+  PetSuppliesIcon,
+  ServicesIcon,
+  type CategoryIconComponent,
+} from "@/components/icons/category-icons";
 
 export type Category = {
   name: string;
-  icon: LucideIcon;
+  icon: CategoryIconComponent;
   image: string;
+  subcategories: string[];
 };
-
-export const navCategories: NavCategory[] = [
-  { name: "All", icon: ShoppingBag },
-  { name: "Electronics", icon: Headphones },
-  { name: "Vehicles", icon: Car },
-  { name: "Furniture", icon: Sofa },
-  { name: "Fashion", icon: Shirt },
-  { name: "Mobiles", icon: Smartphone },
-  { name: "Real Estate", icon: Building2 },
-  { name: "Books", icon: BookOpen },
-  { name: "Sports", icon: Dumbbell },
-];
 
 const img = (keyword: string, lock: number) =>
   `https://loremflickr.com/400/400/${keyword}/all?lock=${lock}`;
@@ -44,22 +27,136 @@ const img = (keyword: string, lock: number) =>
 export const categories: Category[] = [
   {
     name: "Mobiles & Tablets",
-    icon: Smartphone,
+    icon: MobilesTabletsIcon,
     image: img("smartphone", 101),
+    subcategories: ["Mobile Phones", "Tablets", "Accessories", "Smart Watches"],
   },
-  { name: "Electronics", icon: Laptop, image: img("laptop", 102) },
-  { name: "Furniture", icon: Sofa, image: img("sofa", 103) },
-  { name: "Fashion", icon: Shirt, image: img("fashion", 104) },
-  { name: "Vehicles", icon: Car, image: img("car", 105) },
-  { name: "Books & Hobbies", icon: BookOpen, image: img("books", 106) },
+  {
+    name: "Electronics",
+    icon: ElectronicsIcon,
+    image: img("laptop", 102),
+    subcategories: [
+      "TVs, Video - Audio",
+      "Kitchen & Other Appliances",
+      "Computers & Laptops",
+      "Cameras & Lenses",
+      "Games & Entertainment",
+      "Fridges",
+      "Computer Accessories",
+      "Hard Disks, Printers & Monitors",
+      "ACs",
+      "Washing Machines",
+    ],
+  },
+  {
+    name: "Furniture",
+    icon: FurnitureIcon,
+    image: img("sofa", 103),
+    subcategories: [
+      "Sofa & Dining",
+      "Beds & Wardrobes",
+      "Home Decor & Garden",
+      "Kids Furniture",
+      "Other Household Items",
+    ],
+  },
+  {
+    name: "Fashion",
+    icon: FashionIcon,
+    image: img("fashion", 104),
+    subcategories: ["Men", "Women", "Kids"],
+  },
+  {
+    name: "Vehicles",
+    icon: VehiclesIcon,
+    image: img("car", 105),
+    subcategories: [
+      "Cars",
+      "Motorcycles",
+      "Scooters",
+      "Bicycles",
+      "Spare Parts",
+      "Commercial & Other Vehicles",
+    ],
+  },
+  {
+    name: "Books & Hobbies",
+    icon: BooksHobbiesIcon,
+    image: img("books", 106),
+    subcategories: [
+      "Books",
+      "Musical Instruments",
+      "Games & Entertainment",
+      "Other Hobbies",
+    ],
+  },
   {
     name: "Home & Living",
-    icon: ShoppingBag,
+    icon: HomeLivingIcon,
     image: img("homedecor", 107),
+    subcategories: [
+      "Home Decor & Garden",
+      "Kitchenware",
+      "Lighting",
+      "Other Household Items",
+    ],
   },
-  { name: "Sports & Fitness", icon: Dumbbell, image: img("dumbbell", 108) },
-  { name: "Kids & Baby", icon: Baby, image: img("babytoys", 109) },
-  { name: "Real Estate", icon: Building2, image: img("architecture", 110) },
-  { name: "Pet Supplies", icon: PawPrint, image: img("dog", 111) },
-  { name: "Services", icon: Wrench, image: img("handyman", 112) },
+  {
+    name: "Sports & Fitness",
+    icon: SportsFitnessIcon,
+    image: img("dumbbell", 108),
+    subcategories: ["Gym & Fitness", "Sports Equipment", "Cycling", "Other Sports"],
+  },
+  {
+    name: "Kids & Baby",
+    icon: KidsBabyIcon,
+    image: img("babytoys", 109),
+    subcategories: [
+      "Toys",
+      "Prams & Walkers",
+      "Kids Clothing",
+      "Kids Furniture",
+    ],
+  },
+  {
+    name: "Real Estate",
+    icon: RealEstateIcon,
+    image: img("architecture", 110),
+    subcategories: [
+      "For Sale: Houses & Apartments",
+      "For Rent: Houses & Apartments",
+      "Lands & Plots",
+      "For Sale: New Projects & Properties",
+      "For Rent: Shops & Offices",
+      "For Sale: Shops & Offices",
+      "PG & Guest Houses",
+    ],
+  },
+  {
+    name: "Pet Supplies",
+    icon: PetSuppliesIcon,
+    image: img("dog", 111),
+    subcategories: [
+      "Fishes & Aquarium",
+      "Pet Food & Accessories",
+      "Dogs",
+      "Other Pets",
+    ],
+  },
+  {
+    name: "Services",
+    icon: ServicesIcon,
+    image: img("handyman", 112),
+    subcategories: [
+      "Education & Classes",
+      "Tours & Travel",
+      "Electronics Repair & Services",
+      "Health & Beauty",
+      "Home Renovation & Repair",
+      "Cleaning & Pest Control",
+      "Legal & Documentation Services",
+      "Packers & Movers",
+      "Other Services",
+    ],
+  },
 ];

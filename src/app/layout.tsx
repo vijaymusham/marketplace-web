@@ -1,37 +1,38 @@
 import type { Metadata } from "next";
-import { Outfit, Lexend } from "next/font/google";
 import "./globals.css";
+import localFont from "next/font/local";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const lexend = Lexend({
-  variable: "--font-lexend",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+export const display = localFont({
+    src: [
+        { path: "../../public/fonts/Gilroy-Light.woff", weight: '300', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-Regular.woff", weight: '400', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-Medium.woff", weight: '500', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-Bold.woff", weight: '700', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-Heavy.woff", weight: '900', style: 'normal' },
+    ],
+    variable: "--font-display",
+    display: "swap",
+    preload: true,
 });
 
 export const metadata: Metadata = {
-  title: "Marketplace",
-  description: "Buy and sell used products near you",
+    title: "Marketplace",
+    description: "Buy and sell used products near you",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="en"
-      className={`${outfit.variable} ${lexend.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-white font-body text-slate-900">
-        {children}
-      </body>
-    </html>
-  );
+    return (
+        <html
+            lang="en"
+            className={`${display.variable} h-full antialiased`}
+        >
+            <body className="min-h-full flex flex-col bg-white font-display text-slate-900">
+                {children}
+            </body>
+        </html>
+    );
 }

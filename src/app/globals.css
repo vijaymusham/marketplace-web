@@ -15,8 +15,8 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-secondary: var(--color-secondary);
-  --font-heading: var(--font-outfit);
-  --font-body: var(--font-lexend);
+  --font-heading: var(--font-display);
+  --font-body: var(--font-display);
 }
 
 body {
