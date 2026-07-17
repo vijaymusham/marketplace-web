@@ -27,7 +27,7 @@ export default function CityExplorer() {
             <h2 className="font-heading text-xl font-extrabold text-slate-900 sm:text-2xl">
                 Quick and easy deal finder
             </h2>
-            <p className="mt-1 text-sm text-slate-600 sm:text-[15px]">
+            <p className="mt-1 text-sm font-medium text-slate-400 sm:text-[15px]">
                 Pick a vibe and explore the top deals across India
             </p>
             <div className="relative mt-5">

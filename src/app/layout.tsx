@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
+import SmoothScroll from "@/components/layout/SmoothScroll";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import TrustedBrands from "@/components/home-ui/TrustedBrands";
 
 export const display = localFont({
     src: [
@@ -30,8 +34,13 @@ export default function RootLayout({
             lang="en"
             className={`${display.variable} h-full antialiased`}
         >
-            <body className="min-h-full flex flex-col bg-white font-display text-slate-900">
-                {children}
+            <body className="min-h-full flex flex-col bg-white font-display text-slate-900" suppressHydrationWarning>
+                <SmoothScroll>
+                    <Navbar />
+                    {children}
+                    <TrustedBrands />
+                    <Footer />
+                </SmoothScroll>
             </body>
         </html>
     );
