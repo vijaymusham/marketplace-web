@@ -31,38 +31,50 @@ export default function PaginatedListings({ listings }: { listings: Listing[] })
             {totalPages > 1 && (
                 <nav
                     aria-label="Pagination"
-                    className="mt-10 flex items-center justify-center gap-1.5 sm:gap-2"
+                    className="mt-10 flex flex-wrap items-center justify-center gap-1 sm:gap-2 cursor-pointer"
                 >
                     <button
+                        type="button"
                         onClick={() => goTo(page - 1)}
                         disabled={page === 1}
-                        aria-label="Previous page"
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+                        className="mr-1 flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
                     >
-                        <ChevronLeft className="h-4.5 w-4.5" />
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
                     </button>
 
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                        <button
-                            key={n}
-                            onClick={() => goTo(n)}
-                            aria-current={n === page ? "page" : undefined}
-                            className={`h-10 w-10 rounded-full text-sm font-bold transition-colors ${n === page
-                                ? "bg-primary text-white shadow-sm shadow-primary/30"
-                                : "border border-slate-200 text-slate-600 hover:border-primary/40 hover:text-primary"
-                                }`}
-                        >
-                            {n}
-                        </button>
-                    ))}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((n, i) =>
+                        n === totalPages ? (
+                            <span
+                                key={`ellipsis-${i}`}
+                                className="px-1.5 text-sm font-medium text-slate-400 cursor-pointer"
+                            >
+                                …
+                            </span>
+                        ) : (
+                            <button
+                                key={n}
+                                type="button"
+                                onClick={() => goTo(n)}
+                                aria-current={n === page ? "page" : undefined}
+                                className={`flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 text-sm font-semibold transition-colors cursor-pointer ${n === page
+                                    ? "bg-slate-950 text-white"
+                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                    }`}
+                            >
+                                {n}
+                            </button>
+                        ),
+                    )}
 
                     <button
+                        type="button"
                         onClick={() => goTo(page + 1)}
                         disabled={page === totalPages}
-                        aria-label="Next page"
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+                        className="ml-1 flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
                     >
-                        <ChevronRight className="h-4.5 w-4.5" />
+                        Next
+                        <ChevronRight className="h-4 w-4" />
                     </button>
                 </nav>
             )}

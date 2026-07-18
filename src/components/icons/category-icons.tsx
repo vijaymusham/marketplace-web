@@ -9,10 +9,10 @@ export type CategoryIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
  * Strokes use currentColor so active/hover states tint them.
  */
 
-const DEPTH = "#e2e8f0";
-const LIGHT = "#f1f5f9";
+export const DEPTH = "#e2e8f0";
+export const LIGHT = "#f1f5f9";
 
-function Doodle({ children, ...props }: SVGProps<SVGSVGElement>) {
+export function Doodle({ children, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 64 64"
@@ -29,13 +29,13 @@ function Doodle({ children, ...props }: SVGProps<SVGSVGElement>) {
   );
 }
 
-function Shadow({ cx = 32, cy = 55, rx = 18 }: { cx?: number; cy?: number; rx?: number }) {
+export function Shadow({ cx = 32, cy = 55, rx = 18 }: { cx?: number; cy?: number; rx?: number }) {
   return (
     <ellipse cx={cx} cy={cy} rx={rx} ry={3.2} fill="#94a3b8" opacity={0.3} stroke="none" />
   );
 }
 
-function Sparkle({ x, y, s = 3 }: { x: number; y: number; s?: number }) {
+export function Sparkle({ x, y, s = 3 }: { x: number; y: number; s?: number }) {
   return <path d={`M${x} ${y - s}v${2 * s}M${x - s} ${y}h${2 * s}`} strokeWidth={1.5} />;
 }
 

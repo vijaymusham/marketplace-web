@@ -154,7 +154,7 @@ export default function Footer() {
                         </button>
 
                         <p className="mt-8 text-xs text-slate-500">
-                            © 2026 Marketplace Limited
+                            © 2026 Deal Market Limited
                         </p>
                     </div>
 
@@ -199,7 +199,7 @@ export default function Footer() {
                 {/* app download bar */}
                 <div className="mt-14 flex flex-col items-center justify-center gap-5 border-t border-white/10 py-8 sm:flex-row sm:gap-8">
                     <p className="text-sm font-semibold text-white sm:text-base">
-                        For better experience, download the Marketplace app now
+                        For better experience, download the Deal Market app now
                     </p>
                     <div className="flex items-center gap-3">
                         <StoreBadge

@@ -12,6 +12,23 @@ export type SubcategoryMatch = {
   subcategory: string;
 };
 
+export type CategoryMatch = {
+  type: "category";
+  category: Category;
+};
+
+export type SubcategoryRouteMatch = {
+  type: "subcategory";
+  category: Category;
+  subcategory: string;
+};
+
+export type RouteMatch = CategoryMatch | SubcategoryRouteMatch;
+
+export function findCategoryBySlug(slug: string): Category | null {
+  return categories.find((c) => slugify(c.name) === slug) ?? null;
+}
+
 export function findSubcategoryBySlug(slug: string): SubcategoryMatch | null {
   for (const category of categories) {
     const subcategory = category.subcategories.find(
@@ -22,6 +39,25 @@ export function findSubcategoryBySlug(slug: string): SubcategoryMatch | null {
   return null;
 }
 
+/** Resolve a /category/[slug] — category routes win over subcategory on slug clash. */
+export function findRouteBySlug(slug: string): RouteMatch | null {
+  const category = findCategoryBySlug(slug);
+  if (category) return { type: "category", category };
+
+  const sub = findSubcategoryBySlug(slug);
+  if (sub) return { type: "subcategory", ...sub };
+
+  return null;
+}
+
+export function allCategorySlugs(): string[] {
+  return categories.map((c) => slugify(c.name));
+}
+
 export function allSubcategorySlugs(): string[] {
   return categories.flatMap((c) => c.subcategories.map(slugify));
+}
+
+export function allCategoryPageSlugs(): string[] {
+  return [...new Set([...allCategorySlugs(), ...allSubcategorySlugs()])];
 }

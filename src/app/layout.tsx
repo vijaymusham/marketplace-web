@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import TrustedBrands from "@/components/home-ui/TrustedBrands";
 import { Toaster } from "react-hot-toast";
 import SellFab from "@/components/layout/SellFab";
+import Preloader from "@/components/layout/Preloader";
 
 export const display = localFont({
     src: [
@@ -21,7 +22,7 @@ export const display = localFont({
 });
 
 export const metadata: Metadata = {
-    title: "Marketplace",
+    title: "Deal Market",
     description: "Buy and sell used products near you",
 };
 
@@ -37,34 +38,16 @@ export default function RootLayout({
         >
             <body className="min-h-full flex flex-col bg-white font-display text-slate-900" suppressHydrationWarning>
                 <SmoothScroll>
+                    <Preloader />
                     <Navbar />
                     {children}
                     <Toaster
-                        position="top-center"
+                        position="top-right"
                         reverseOrder={false}
                         gutter={8}
                         containerClassName=""
                         containerStyle={{}}
                         toasterId="default"
-                        toastOptions={{
-                            // Define default options
-                            className: '',
-                            duration: 5000,
-                            removeDelay: 1000,
-                            style: {
-                                background: '#363636',
-                                color: '#fff',
-                            },
-
-                            // Default options for specific types
-                            success: {
-                                duration: 3000,
-                                iconTheme: {
-                                    primary: 'green',
-                                    secondary: 'black',
-                                },
-                            },
-                        }}
                     />
                     <TrustedBrands />
                     <Footer />

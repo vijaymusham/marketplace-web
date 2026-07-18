@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { Heart, MapPin } from "lucide-react";
 import { Listing } from "@/lib/listings";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function ListingCard({
     listing,
@@ -15,12 +15,11 @@ export default function ListingCard({
     liked?: boolean;
     onToggleLike?: () => void;
 }) {
-    // Uncontrolled fallback so server components can render the card
-    // without passing an event handler across the RSC boundary.
-    const [internalLiked, setInternalLiked] = useState(false);
-    const isLiked = liked ?? internalLiked;
+    const wishlist = useWishlist();
+    const isControlled = liked !== undefined && onToggleLike !== undefined;
+    const isLiked = isControlled ? liked : wishlist.isLiked(listing.id);
     const handleToggleLike =
-        onToggleLike ?? (() => setInternalLiked((v) => !v));
+        onToggleLike ?? (() => wishlist.toggle(listing.id));
 
     return (
         <div className="group flex flex-col">
@@ -34,7 +33,7 @@ export default function ListingCard({
                 />
 
                 {listing.featured && (
-                    <span className="absolute top-3 left-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-primary shadow-sm">
+                    <span className="absolute top-3 left-3 rounded-full bg-black/30 backdrop-blur-lg px-2.5 py-1 text-[11px] font-bold text-white ">
                         Featured
                     </span>
                 )}
@@ -42,11 +41,11 @@ export default function ListingCard({
                 <button
                     onClick={handleToggleLike}
                     aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
-                    className={`absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-colors ${isLiked ? "bg-white" : "bg-slate-900/25 hover:bg-slate-900/40"
+                    className={`absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-lg transition-colors ${isLiked ? "bg-white" : "bg-black/30 hover:bg-black/40"
                         }`}
                 >
                     <Heart
-                        className={`h-4 w-4 ${isLiked ? "fill-rose-500 text-rose-500" : "text-white"}`}
+                        className={`h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : "text-white"}`}
                         strokeWidth={2}
                     />
                 </button>

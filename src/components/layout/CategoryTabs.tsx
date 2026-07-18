@@ -79,17 +79,6 @@ export default function CategoryTabs() {
         el?.scrollBy({ left: 320, behavior: "smooth" });
     };
 
-    const tabHandlers = (index: number) => ({
-        onMouseEnter: (e: React.MouseEvent<HTMLButtonElement>) =>
-            openTab(index, e.currentTarget),
-        onFocus: (e: React.FocusEvent<HTMLButtonElement>) =>
-            openTab(index, e.currentTarget),
-        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-            setActive(index);
-            openTab(index, e.currentTarget);
-        },
-    });
-
     return (
         <>
             {/* fixed (out of flow) so the height animation never reflows the page */}
@@ -126,8 +115,11 @@ export default function CategoryTabs() {
                                         const highlighted = openIndex === index || active === index;
                                         return (
                                             <li key={name} className="flex shrink-0">
-                                                <button
-                                                    {...tabHandlers(index)}
+                                                <Link
+                                                    href={`/category/${slugify(name)}`}
+                                                    onMouseEnter={(e) => openTab(index, e.currentTarget)}
+                                                    onFocus={(e) => openTab(index, e.currentTarget)}
+                                                    onClick={() => setActive(index)}
                                                     tabIndex={collapsed ? -1 : 0}
                                                     className={`group relative flex w-24 flex-col items-center justify-center gap-1.5 transition-colors sm:w-28 ${highlighted
                                                         ? "text-primary"
@@ -142,7 +134,7 @@ export default function CategoryTabs() {
                                                         className={`absolute inset-x-3 bottom-0 h-1 rounded-t-full bg-primary transition-opacity duration-200 ${highlighted ? "opacity-100" : "opacity-0"
                                                             }`}
                                                     />
-                                                </button>
+                                                </Link>
                                             </li>
                                         );
                                     })}
@@ -167,8 +159,11 @@ export default function CategoryTabs() {
                                         const highlighted = openIndex === index || active === index;
                                         return (
                                             <li key={name} className="flex shrink-0">
-                                                <button
-                                                    {...tabHandlers(index)}
+                                                <Link
+                                                    href={`/category/${slugify(name)}`}
+                                                    onMouseEnter={(e) => openTab(index, e.currentTarget)}
+                                                    onFocus={(e) => openTab(index, e.currentTarget)}
+                                                    onClick={() => setActive(index)}
                                                     tabIndex={collapsed ? 0 : -1}
                                                     className={`relative flex items-center gap-2 text-sm font-semibold whitespace-nowrap transition-colors ${highlighted
                                                         ? "text-primary"
@@ -185,7 +180,7 @@ export default function CategoryTabs() {
                                                         className={`absolute inset-x-1 bottom-0 h-0.5 rounded-t-full bg-primary transition-opacity duration-200 ${highlighted ? "opacity-100" : "opacity-0"
                                                             }`}
                                                     />
-                                                </button>
+                                                </Link>
                                             </li>
                                         );
                                     })}
@@ -209,10 +204,15 @@ export default function CategoryTabs() {
                             className="absolute top-full rounded-b-2xl border border-t-0 border-slate-200/70 bg-white/95 p-6 shadow-xl backdrop-blur-2xl"
                         >
                             <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-                                <openCategory.icon className="h-9 w-9 text-slate-800" />
-                                <h3 className="font-heading text-sm font-extrabold text-slate-900">
-                                    {openCategory.name}
-                                </h3>
+                                <Link
+                                    href={`/category/${slugify(openCategory.name)}`}
+                                    className="flex items-center gap-2.5 transition-colors hover:text-primary"
+                                >
+                                    <openCategory.icon className="h-9 w-9 text-slate-800" />
+                                    <h3 className="font-heading text-sm font-extrabold text-slate-900">
+                                        {openCategory.name}
+                                    </h3>
+                                </Link>
                             </div>
 
                             <ul
