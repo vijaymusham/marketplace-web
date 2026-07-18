@@ -9,7 +9,7 @@ export default function Home() {
     return (
         <>
             <CategoryTabs />
-            <main className="flex-1 bg-white">
+            <main className="flex-1 bg-white relative">
                 <CityExplorer />
                 <FreshRecommendations />
                 <BannerSection />

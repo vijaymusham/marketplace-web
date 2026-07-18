@@ -39,23 +39,23 @@ const brands = [
 function BrandIcon({ type }: { type: string }) {
     switch (type) {
         case "mobile":
-            return <Smartphone size={26} strokeWidth={3} />;
+            return <Smartphone size={26} strokeWidth={2.3} />;
         case "laptop":
-            return <Laptop size={26} strokeWidth={3} />;
+            return <Laptop size={26} strokeWidth={2.3} />;
         case "tv":
-            return <Tv size={26} strokeWidth={3} />;
+            return <Tv size={26} strokeWidth={2.3} />;
         case "car":
-            return <Car size={26} strokeWidth={3} />;
+            return <Car size={26} strokeWidth={2.3} />;
         case "bike":
-            return <Bike size={26} strokeWidth={3} />;
+            return <Bike size={26} strokeWidth={2.3} />;
         case "camera":
-            return <Camera size={26} strokeWidth={3} />;
+            return <Camera size={26} strokeWidth={2.3} />;
         case "gamepad":
-            return <Gamepad2 size={26} strokeWidth={3} />;
+            return <Gamepad2 size={26} strokeWidth={2.3} />;
         case "appliance":
-            return <Refrigerator size={26} strokeWidth={3} />;
+            return <Refrigerator size={26} strokeWidth={2.3} />;
         case "sofa":
-            return <Sofa size={26} strokeWidth={3} />;
+            return <Sofa size={26} strokeWidth={2.3} />;
         default:
             return null;
     }
@@ -80,7 +80,7 @@ export default function TrustedBrands() {
                                         {brands.map((b) => (
                                             <span
                                                 key={b.name}
-                                                className="flex items-center gap-2 font-display font-bold text-lg md:text-2xl whitespace-nowrap shrink-0"
+                                                className="flex items-center gap-2 font-display font-bold text-lg md:text-2xl whitespace-nowrap shrink-0 text-slate-400"
                                             >
                                                 <BrandIcon type={b.icon} />
                                                 {b.name}

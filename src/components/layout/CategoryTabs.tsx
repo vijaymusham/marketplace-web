@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { categories } from "@/lib/categories";
+import { slugify } from "@/lib/slug";
 import Link from "next/link";
 
 const PANEL_WIDE = 560;
@@ -223,7 +224,7 @@ export default function CategoryTabs() {
                                 {openCategory.subcategories.map((sub) => (
                                     <li key={sub}>
                                         <Link
-                                            href={`/category/${sub.toLowerCase().replace(/ /g, '-')}`}
+                                            href={`/category/${slugify(sub)}`}
                                             className="block py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-primary"
                                         >
                                             {sub}

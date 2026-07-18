@@ -133,7 +133,7 @@ export default function Footer() {
                                 <ShoppingBag className="h-4.5 w-4.5" strokeWidth={2} />
                             </span>
                             <span className="font-heading text-lg font-extrabold tracking-tight text-white">
-                                Market<span className="text-indigo-400">place</span>
+                                Deal<span className="text-indigo-400">Market</span>
                                 <sup className="ml-0.5 text-[10px]">®</sup>
                             </span>
                         </Link>
@@ -219,7 +219,7 @@ export default function Footer() {
             {/* giant watermark */}
             <div className="relative select-none" aria-hidden="true">
                 <p className="mb-[-0.26em] text-center font-heading text-[19vw] leading-none font-extrabold tracking-tight whitespace-nowrap text-white/4">
-                    Marketplace<sup className="text-[0.25em]">®</sup>
+                    DealMarket<sup className="text-[0.25em]">®</sup>
                 </p>
             </div>
         </footer>

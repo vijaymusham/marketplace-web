@@ -6,14 +6,14 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import TrustedBrands from "@/components/home-ui/TrustedBrands";
 import { Toaster } from "react-hot-toast";
+import SellFab from "@/components/layout/SellFab";
 
 export const display = localFont({
     src: [
-        { path: "../../public/fonts/Gilroy-Light.woff", weight: '300', style: 'normal' },
-        { path: "../../public/fonts/Gilroy-Regular.woff", weight: '400', style: 'normal' },
-        { path: "../../public/fonts/Gilroy-Medium.woff", weight: '500', style: 'normal' },
-        { path: "../../public/fonts/Gilroy-Bold.woff", weight: '700', style: 'normal' },
-        { path: "../../public/fonts/Gilroy-Heavy.woff", weight: '900', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-Medium.woff2", weight: '500', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-SemiBold.woff2", weight: '600', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-Bold.woff2", weight: '700', style: 'normal' },
+        { path: "../../public/fonts/Gilroy-ExtraBold.woff2", weight: '900', style: 'normal' },
     ],
     variable: "--font-display",
     display: "swap",
@@ -68,6 +68,7 @@ export default function RootLayout({
                     />
                     <TrustedBrands />
                     <Footer />
+                    <SellFab />
                 </SmoothScroll>
             </body>
         </html>

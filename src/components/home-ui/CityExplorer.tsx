@@ -13,6 +13,14 @@ const cities = [
     { name: "Bengaluru", distance: "845 km away", keyword: "bangalore", lock: 306 },
     { name: "Hyderabad", distance: "623 km away", keyword: "hyderabad", lock: 307 },
     { name: "Delhi", distance: "1,148 km away", keyword: "delhi", lock: 308 },
+    { name: "Chennai", distance: "1,248 km away", keyword: "chennai", lock: 309 },
+    { name: "Kolkata", distance: "1,348 km away", keyword: "kolkata", lock: 310 },
+    { name: "Jaipur", distance: "1,448 km away", keyword: "jaipur", lock: 311 },
+    { name: "Lucknow", distance: "1,548 km away", keyword: "lucknow", lock: 312 },
+    { name: "Kanpur", distance: "1,648 km away", keyword: "kanpur", lock: 313 },
+    { name: "Indore", distance: "1,748 km away", keyword: "indore", lock: 314 },
+    { name: "Bhopal", distance: "1,848 km away", keyword: "bhopal", lock: 315 },
+    { name: "Coimbatore", distance: "1,948 km away", keyword: "coimbatore", lock: 316 },
 ];
 
 export default function CityExplorer() {
@@ -36,33 +44,33 @@ export default function CityExplorer() {
                     className="flex gap-4 overflow-x-auto scroll-smooth pb-1 scrollbar-hide sm:gap-5"
                 >
                     {cities.map(({ name, distance, keyword, lock }) => (
-                        <a key={name} href="#" className="group w-36 shrink-0 sm:w-42">
-                            <div className="relative aspect-[4/3.4] w-full overflow-hidden rounded-2xl bg-slate-100">
+                        <a key={name} href="#" className="group w-36 shrink-0 sm:w-29 items-center justify-center">
+                            <div className="relative aspect-square w-full overflow-hidden rounded-full bg-slate-100">
                                 <Image
                                     src={`https://loremflickr.com/400/340/${keyword},city/all?lock=${lock}`}
                                     alt={`Deals in ${name}`}
                                     fill
                                     priority
                                     loading="eager"
-                                    sizes="160px"
-                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                    sizes="100px"
+                                    className="object-cover transition-transform duration-500 group-hover:scale-105 border-2  border-orange-500 p-1 border-dotted rounded-full"
                                 />
                             </div>
-                            <p className="mt-2.5 text-sm font-bold text-slate-900">
-                                {name} <span className="align-middle text-base leading-none">🇮🇳</span>
+                            <p className="mt-2.5 text-sm font-bold text-slate-900 text-center">
+                                {name}
                             </p>
-                            <p className="mt-0.5 text-[13px] text-slate-500">{distance}</p>
+                            <p className="mt-0.5 text-[13px]  text-slate-500 text-center font-medium">{distance}</p>
                         </a>
                     ))}
                 </div>
 
-                <button
+                {/* <button
                     onClick={scrollNext}
                     aria-label="Show more cities"
                     className="absolute top-[38%] right-0 hidden h-9 w-9 -translate-y-1/2 translate-x-1/3 items-center justify-center rounded-full bg-white text-slate-700 shadow-md ring-1 ring-slate-900/10 transition-colors hover:text-primary md:flex"
                 >
                     <ChevronRight className="h-5 w-5" />
-                </button>
+                </button> */}
             </div>
         </section>
     );
