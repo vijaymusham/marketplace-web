@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
 import { Listing } from "@/lib/listings";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -11,7 +12,6 @@ export default function ListingCard({
     onToggleLike,
 }: {
     listing: Listing;
-    /** Controlled mode: pass both `liked` and `onToggleLike` (client components only). */
     liked?: boolean;
     onToggleLike?: () => void;
 }) {
@@ -22,7 +22,7 @@ export default function ListingCard({
         onToggleLike ?? (() => wishlist.toggle(listing.id));
 
     return (
-        <div className="group flex flex-col">
+        <Link href={`/listing/${listing.id}`} className="group flex flex-col">
             <div className="relative aspect-12/11 w-full overflow-hidden rounded-2xl bg-slate-100">
                 <Image
                     src={listing.image}
@@ -33,13 +33,18 @@ export default function ListingCard({
                 />
 
                 {listing.featured && (
-                    <span className="absolute top-3 left-3 rounded-full bg-black/30 backdrop-blur-lg px-2.5 py-1 text-[11px] font-bold text-white ">
+                    <span className="absolute top-3 left-3 rounded-full bg-black/30 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-lg">
                         Featured
                     </span>
                 )}
 
                 <button
-                    onClick={handleToggleLike}
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleToggleLike();
+                    }}
                     aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
                     className={`absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-lg transition-colors ${isLiked ? "bg-white" : "bg-black/30 hover:bg-black/40"
                         }`}
@@ -49,15 +54,6 @@ export default function ListingCard({
                         strokeWidth={2}
                     />
                 </button>
-
-                <span className="absolute inset-x-0 bottom-2.5 flex items-center justify-center gap-1">
-                    {[0, 1, 2, 3, 4].map((dot) => (
-                        <span
-                            key={dot}
-                            className={`h-1.5 w-1.5 rounded-full ${dot === 0 ? "bg-white" : "bg-white/50"}`}
-                        />
-                    ))}
-                </span>
             </div>
 
             <div className="flex flex-1 flex-col pt-3">
@@ -77,6 +73,6 @@ export default function ListingCard({
                     <p className="text-xs text-slate-500">{listing.date}</p>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }

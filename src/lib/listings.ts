@@ -12,6 +12,189 @@ export type Listing = {
 const img = (keyword: string, lock: number) =>
   `https://loremflickr.com/480/440/${keyword}/all?lock=${lock}`;
 
+const SELLERS = [
+  { name: "Aarav Sharma", city: "Noida" },
+  { name: "Priya Patel", city: "Hyderabad" },
+  { name: "Rohan Deshmukh", city: "Nagpur" },
+  { name: "Ananya Iyer", city: "Pune" },
+  { name: "Vikram Singh", city: "Hinganghat" },
+];
+
+export function getListingById(id: number): Listing | undefined {
+  return listings.find((l) => l.id === id);
+}
+
+/** Extra gallery frames derived from the main image (varied locks). */
+export function getListingImages(listing: Listing): string[] {
+  const base = listing.image.split("?")[0];
+  const seed = listing.id * 17;
+  return [
+    listing.image,
+    `${base}?lock=${seed + 1}`,
+    `${base}?lock=${seed + 2}`,
+    `${base}?lock=${seed + 3}`,
+    `${base}?lock=${seed + 4}`,
+  ];
+}
+
+export function getListingSeller(listing: Listing) {
+  const seller = SELLERS[listing.id % SELLERS.length];
+  return {
+    name: seller.name,
+    memberSince: 2019 + (listing.id % 6),
+    adsPosted: 4 + ((listing.id * 3) % 28),
+    verified: listing.id % 3 !== 0,
+    initials: seller.name
+      .split(" ")
+      .map((p) => p[0])
+      .join("")
+      .slice(0, 2),
+  };
+}
+
+export type ListingKind =
+  | "vehicle"
+  | "bike"
+  | "mobile"
+  | "property"
+  | "fashion"
+  | "electronics"
+  | "general";
+
+export function getListingKind(listing: Listing): ListingKind {
+  const t = `${listing.title} ${listing.meta ?? ""} ${listing.image}`.toLowerCase();
+  if (/bike|motorcycle|scooter|activa/.test(t)) return "bike";
+  if (/bmw|honda city|dzire|car|xdrive|petrol|diesel|\bkm\b/.test(t)) return "vehicle";
+  if (/iphone|vivo|phone|mobile|tablet|watch/.test(t)) return "mobile";
+  if (/bhk|house|flat|plot|sqfeet|sqft|rent|shop for sale|apartment/.test(t)) return "property";
+  if (/shirt|kurti|dress|earring|jhumka|wig|fashion/.test(t)) return "fashion";
+  if (/drone|projector|tv|laptop|camera|console|forza|gaming|usb|hdmi/.test(t))
+    return "electronics";
+  return "general";
+}
+
+export function getListingKindLabel(kind: ListingKind): string {
+  const map: Record<ListingKind, string> = {
+    vehicle: "Cars",
+    bike: "Bikes",
+    mobile: "Mobiles",
+    property: "Property",
+    fashion: "Fashion",
+    electronics: "Electronics",
+    general: "Marketplace",
+  };
+  return map[kind];
+}
+
+export function getListingDescription(listing: Listing): string {
+  const kind = getListingKind(listing);
+  const intros: Record<ListingKind, string> = {
+    vehicle:
+      "Clean ownership papers and a smooth drive experience. Inspected for engine health and body condition.",
+    bike: "Ready to ride — clutch, brakes and tyres checked. Ideal for daily commute or weekend trips.",
+    mobile:
+      "Fully tested — display, battery and cameras work as expected. Original accessories mentioned by seller.",
+    property:
+      "Spacious layout with natural light. Suitable for families looking for a comfortable living space.",
+    fashion:
+      "Gently used and carefully stored. Fits true to size based on seller notes.",
+    electronics:
+      "Powered on and verified before listing. Comes with available cables or box where mentioned.",
+    general:
+      "Well maintained and ready for a quick handover. Posted on DealMarket by a local seller.",
+  };
+  return [
+    listing.title + ".",
+    listing.meta ? `Key info: ${listing.meta}.` : null,
+    intros[kind],
+    listing.featured ? "Featured for higher visibility." : null,
+    `Posted ${listing.date}.`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+export function getListingSpecs(listing: Listing): { label: string; value: string }[] {
+  const kind = getListingKind(listing);
+  const condition = listing.id % 2 === 0 ? "Used · Good" : "Like New";
+  const base = [
+    { label: "Condition", value: condition },
+    { label: "Posted", value: listing.date },
+    { label: "Ad ID", value: `DM-${1848200000 + listing.id}` },
+  ];
+
+  if (kind === "vehicle") {
+    const [year, km] = (listing.meta ?? "2020 · 45,000 km").split("·").map((s) => s.trim());
+    return [
+      { label: "Year", value: year || "—" },
+      { label: "Kilometers", value: km || "—" },
+      { label: "Fuel", value: /diesel/i.test(listing.title) ? "Diesel" : "Petrol" },
+      { label: "Transmission", value: listing.id % 2 ? "Automatic" : "Manual" },
+      { label: "Owners", value: listing.id % 3 === 0 ? "2nd" : "1st" },
+      ...base,
+    ];
+  }
+
+  if (kind === "bike") {
+    const [year, km] = (listing.meta ?? "2018 · 22,000 km").split("·").map((s) => s.trim());
+    return [
+      { label: "Year", value: year || "—" },
+      { label: "Kilometers", value: km || "—" },
+      { label: "Engine", value: `${100 + (listing.id % 5) * 25} cc` },
+      { label: "Owners", value: "1st" },
+      ...base,
+    ];
+  }
+
+  if (kind === "mobile") {
+    return [
+      { label: "Brand", value: /iphone|apple/i.test(listing.title) ? "Apple" : /vivo/i.test(listing.title) ? "Vivo" : "Smartphone" },
+      { label: "Storage", value: listing.id % 2 ? "256 GB" : "128 GB" },
+      { label: "RAM", value: listing.id % 2 ? "8 GB" : "6 GB" },
+      { label: "Battery health", value: `${88 + (listing.id % 10)}%` },
+      { label: "Warranty", value: listing.id % 2 ? "3 months left" : "Bill + box" },
+      ...base,
+    ];
+  }
+
+  if (kind === "property") {
+    const meta = listing.meta ?? "2 BHK · 2 Bathroom · 1100 sqft";
+    const parts = meta.split("·").map((s) => s.trim());
+    return [
+      { label: "Type", value: /plot|sqfeet|land/i.test(listing.title) ? "Plot" : /rent/i.test(listing.title) ? "For rent" : "For sale" },
+      { label: "Configuration", value: parts[0] || "—" },
+      { label: "Bathrooms", value: parts[1] || "—" },
+      { label: "Area", value: parts[2] || parts[0] || "—" },
+      { label: "Furnishing", value: listing.id % 2 ? "Semi-furnished" : "Unfurnished" },
+      ...base,
+    ];
+  }
+
+  if (kind === "fashion") {
+    return [
+      { label: "Category", value: "Apparel" },
+      { label: "Size", value: ["S", "M", "L", "XL"][listing.id % 4] },
+      { label: "Material", value: listing.id % 2 ? "Cotton blend" : "Premium fabric" },
+      ...base,
+    ];
+  }
+
+  if (kind === "electronics") {
+    return [
+      { label: "Category", value: "Gadgets" },
+      { label: "Power", value: "Tested & working" },
+      { label: "Includes", value: listing.id % 2 ? "Box + cable" : "Device only" },
+      ...(listing.meta ? [{ label: "Notes", value: listing.meta }] : []),
+      ...base,
+    ];
+  }
+
+  return [
+    ...(listing.meta ? [{ label: "Highlights", value: listing.meta }] : []),
+    ...base,
+  ];
+}
+
 export const listings: Listing[] = [
   {
     id: 1,

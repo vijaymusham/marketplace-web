@@ -1,18 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Star } from "lucide-react";
+import Link from "next/link";
 import type { Listing } from "@/lib/listings";
-
-function formatReviews(id: number) {
-  const n = 200 + ((id * 37) % 1800);
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
-}
-
-function ratingFor(id: number) {
-  return (4.2 + ((id * 13) % 9) / 10).toFixed(1);
-}
 
 export default function ListCard({
   listing,
@@ -21,12 +11,10 @@ export default function ListCard({
   listing: Listing;
   badge?: string;
 }) {
-  const rating = ratingFor(listing.id);
-  const reviews = formatReviews(listing.id);
   const tag = badge ?? (listing.featured ? "Featured" : "Other");
 
   return (
-    <article className="flex flex-col">
+    <Link href={`/listing/${listing.id}`} className="flex flex-col">
       <div className="relative aspect-square overflow-hidden rounded-[1.35rem] bg-[#f3f3f3]">
         <Image
           src={listing.image}
@@ -45,32 +33,10 @@ export default function ListCard({
           {listing.title}
         </h3>
 
-        <div className="mt-2.5 flex items-center justify-between gap-2">
-          <p className="flex items-center gap-1 text-xs font-medium text-slate-500">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-            <span className="text-slate-800">{rating}</span>
-            <span>({reviews} Reviews)</span>
-          </p>
-          <p className="shrink-0 text-[15px] font-extrabold text-slate-900">
-            {listing.price}
-          </p>
-        </div>
-
-        <div className="mt-3.5 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            className="rounded-full border border-slate-200 bg-white py-2.5 text-xs font-semibold text-slate-900 transition-colors hover:border-slate-400"
-          >
-            Add to Cart
-          </button>
-          <button
-            type="button"
-            className="rounded-full bg-slate-950 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
-          >
-            Buy Now
-          </button>
-        </div>
+        <p className="mt-2.5 text-[15px] font-extrabold text-slate-900">
+          {listing.price}
+        </p>
       </div>
-    </article>
+    </Link>
   );
 }
