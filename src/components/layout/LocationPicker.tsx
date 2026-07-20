@@ -51,11 +51,11 @@ export default function LocationPicker() {
                 aria-expanded={open}
                 className="flex shrink-0 flex-col items-start gap-0.5 text-left"
             >
-                <span className="font-heading text-xs font-semibold text-slate-400">
+                <span className="font-heading text-xs font-semibold text-slate-500">
                     Location
                 </span>
                 <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 hover:text-primary">
-                    <span className="max-w-40 truncate">Select location</span>
+                    <span className="max-w-40 truncate font-semibold ">Select location</span>
                     <ChevronDown
                         className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                     />

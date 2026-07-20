@@ -6,6 +6,7 @@ import CategorySidebar from "@/components/category-ui/CategorySidebar";
 import ListCard from "@/components/category-ui/ListCard";
 import SubcategoryTabs from "@/components/category-ui/SubcategoryTabs";
 import type { Listing } from "@/lib/listings";
+import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
 
 const PAGE_SIZE = 12;
 
@@ -58,24 +59,31 @@ export default function SubcategoryBrowse({
                     />
 
                     <div className="min-w-0 flex-1">
-                        <header className="mb-6 md:mb-8">
-                            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
-                                {activeSubcategory}
-                            </h1>
-                            <p className="mt-1.5 text-sm font-medium text-slate-500">
-                                {listings.length} products in {categoryName}
-                            </p>
-                        </header>
+                        <Enter>
+                            <header className="mb-6 md:mb-8">
+                                <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
+                                    {activeSubcategory}
+                                </h1>
+                                <p className="mt-1.5 text-sm font-medium text-slate-500">
+                                    {listings.length} products in {categoryName}
+                                </p>
+                            </header>
+                        </Enter>
 
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-8">
+                        <Stagger
+                            key={`${activeSubcategory}-${page}`}
+                            className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-8"
+                            stagger={0.07}
+                        >
                             {visible.map((listing) => (
-                                <ListCard
-                                    key={listing.id}
-                                    listing={listing}
-                                    badge={activeSubcategory.split(" ")[0]}
-                                />
+                                <StaggerItem key={listing.id} y={38}>
+                                    <ListCard
+                                        listing={listing}
+                                        badge={activeSubcategory.split(" ")[0]}
+                                    />
+                                </StaggerItem>
                             ))}
-                        </div>
+                        </Stagger>
 
                         {totalPages > 1 && (
                             <nav

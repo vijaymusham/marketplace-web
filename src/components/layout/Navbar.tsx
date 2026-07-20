@@ -5,6 +5,7 @@ import SignInButton from "@/components/auth/SignInButton";
 import WishlistButton from "./WishlistButton";
 import NotificationButton from "./NotificationButton";
 import Link from "next/link";
+import SellFab from "./SellFab";
 
 export default function Navbar() {
     return (
@@ -39,6 +40,8 @@ export default function Navbar() {
                     </button>
 
                     <NotificationButton />
+
+                    <SellFab />
 
                     <SignInButton />
                 </div>

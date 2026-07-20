@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ListingCard from "@/components/sections/ListingCard";
 import type { Listing } from "@/lib/listings";
+import { Stagger, StaggerItem } from "@/components/animations/Motion";
 
 const PAGE_SIZE = 20;
 
@@ -22,11 +23,17 @@ export default function PaginatedListings({ listings }: { listings: Listing[] })
 
     return (
         <div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
+            <Stagger
+                key={page}
+                className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6"
+                stagger={0.07}
+            >
                 {visible.map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
+                    <StaggerItem key={listing.id} y={38}>
+                        <ListingCard listing={listing} />
+                    </StaggerItem>
                 ))}
-            </div>
+            </Stagger>
 
             {totalPages > 1 && (
                 <nav

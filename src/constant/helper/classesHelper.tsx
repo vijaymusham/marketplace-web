@@ -1,0 +1,2 @@
+export const inputClassName =
+    "w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-3 text-[15px] font-semibold text-slate-900 placeholder:font-semibold placeholder:text-slate-400 outline-none transition-[border-color,box-shadow,transform] duration-200 hover:border-slate-300  aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus:border-red-400 aria-[invalid=true]:focus:ring-red-400/15 aria-[invalid=true]:focus:shadow-[0_0_0_4px_rgba(248,113,113,0.12)]";

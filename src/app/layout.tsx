@@ -6,9 +6,10 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import TrustedBrands from "@/components/home-ui/TrustedBrands";
 import { Toaster } from "react-hot-toast";
-import SellFab from "@/components/layout/SellFab";
 import Preloader from "@/components/layout/Preloader";
+import { IntroProvider } from "@/components/layout/IntroContext";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import TanstackProvider from "@/components/providers/TanstackProvider";
 
 export const display = localFont({
     src: [
@@ -35,27 +36,30 @@ export default function RootLayout({
     return (
         <html
             lang="en"
-            className={`${display.variable} h-full antialiased`}
+            className={`${display.variable} h-full antialiased intro-pending`}
         >
             <body className="min-h-full flex flex-col bg-white font-display text-slate-900" suppressHydrationWarning>
-                <AuthProvider>
-                    <SmoothScroll>
-                        <Preloader />
-                        <Navbar />
-                        {children}
-                        <Toaster
-                            position="top-right"
-                            reverseOrder={false}
-                            gutter={8}
-                            containerClassName=""
-                            containerStyle={{}}
-                            toasterId="default"
-                        />
-                        <TrustedBrands />
-                        <Footer />
-                        <SellFab />
-                    </SmoothScroll>
-                </AuthProvider>
+                <TanstackProvider>
+                    <AuthProvider>
+                        <IntroProvider>
+                            <SmoothScroll>
+                                <Preloader />
+                                <Navbar />
+                                {children}
+                                <Toaster
+                                    position="top-right"
+                                    reverseOrder={false}
+                                    gutter={8}
+                                    containerClassName=""
+                                    containerStyle={{}}
+                                    toasterId="default"
+                                />
+                                <TrustedBrands />
+                                <Footer />
+                            </SmoothScroll>
+                        </IntroProvider>
+                    </AuthProvider>
+                </TanstackProvider>
             </body>
         </html>
     );
