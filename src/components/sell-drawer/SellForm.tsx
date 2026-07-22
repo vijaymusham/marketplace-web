@@ -398,6 +398,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
     };
 
     const onSubmit = async (data: SellFormValues) => {
+        console.log("data", data, photos);
         if (photos.length === 0) {
             setPhotoError("Add at least one photo");
             return;

@@ -138,7 +138,7 @@ function EmptySelect({
                         label={label}
                         required={required}
                         options={data.map((item) => ({ label: item.label, value: item.value })) ?? []}
-                        value={field.value ?? ""}
+                        value={typeof field.value === "string" ? field.value : field.value?.[0] ?? ""}
                         placeholder={placeholder}
                         error={error}
                         onChange={field.onChange}
