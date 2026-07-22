@@ -16,8 +16,8 @@ import { X, Camera, MapPin, Navigation, ImagePlus, Send } from "lucide-react";
 import { normalizeApiCategories } from "@/lib/apiCategories";
 import { locationTree } from "@/lib/locations";
 import SelectDropdown from "./SelectDropdown";
-import type { ApiCity, SellFormValues } from "../types/AllTypes";
-import { emptySellFormValues } from "../types/AllTypes";
+import type { ApiCity, CreateAdPayload, SellFormValues } from "../types/AllTypes";
+import { emptySellFormValues, SELL_FORM_COMMON_KEYS } from "../types/AllTypes";
 import { inputClassName } from "@/constant/helper/classesHelper";
 import { Field, formContainer, formItem } from "../../constant/helper/TextField";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -342,17 +342,93 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
         return Promise.all(files.map((file) => uploadToS3(file, folder)));
     };
 
+    const buildCreateAdPayload = (
+        data: SellFormValues,
+        imageUrls: string[],
+    ): CreateAdPayload => {
+        const category = categories.find((c) => c.name === data.category);
+        const subcategory = category?.subcategoryItems.find(
+            (s) => s.name === data.subcategory,
+        );
+        if (!category?.id || !subcategory?.id) {
+            throw new Error("Please select a valid category and subcategory");
+        }
+
+        const selectedCityRow = apiCities.find((c) => String(c.id) === data.city);
+
+        const categoryAttributes: Record<string, string> = {};
+        for (const [key, value] of Object.entries(data)) {
+            if ((SELL_FORM_COMMON_KEYS as readonly string[]).includes(key)) continue;
+            if (typeof value !== "string" || value === "") continue;
+            categoryAttributes[key] = value;
+        }
+
+        const latitude =
+            selectedCityRow != null
+                ? selectedCityRow.latitude ?? 0
+                : Number(data.latitude) || 0;
+        const longitude =
+            selectedCityRow != null
+                ? selectedCityRow.longitude ?? 0
+                : Number(data.longitude) || 0;
+
+        return {
+            categoryId: category.id,
+            subCategoryId: subcategory.id,
+            title: data.title,
+            description: data.description,
+            price: Number(data.price) || 0,
+            isNegotiable: data.isNegotiable === "true",
+            stateId: data.state,
+            cityId: data.city,
+            locality: data.neighbourhood,
+            latitude,
+            longitude,
+            sellerName: data.sellerName,
+            mobileNumber: data.mobile,
+            images: imageUrls
+                .filter(Boolean)
+                .map((url, index) => ({
+                    url,
+                    displayOrder: index,
+                    isCover: index === 0,
+                })),
+            categoryAttributes,
+        };
+    };
+
     const onSubmit = async (data: SellFormValues) => {
-        console.log(data);
         if (photos.length === 0) {
             setPhotoError("Add at least one photo");
             return;
         }
         if (createSellFormMutation.isPending) return;
-        createSellFormMutation.mutate({
-            ...data,
-            images: (await uploadMultipleToS3(photos.map((photo) => photo.file))).map((response) => response.url || ""),
-        });
+
+        let imageUrls: string[];
+        try {
+            const uploaded = await uploadMultipleToS3(
+                photos.map((photo) => photo.file),
+            );
+            imageUrls = uploaded.map((response) => response.url || "");
+        } catch {
+            toast.error("Failed to upload one or more photos");
+            return;
+        }
+
+        if (imageUrls.some((url) => !url)) {
+            toast.error("Failed to upload one or more photos");
+            return;
+        }
+
+        try {
+            createSellFormMutation.mutate(buildCreateAdPayload(data, imageUrls));
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to create listing",
+            );
+        }
     };
 
     const isPosting = createSellFormMutation.isPending;
@@ -953,6 +1029,24 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                                             onChange={(value) => {
                                                                 field.onChange(value);
                                                                 setValue("neighbourhood", "");
+                                                                const city = apiCities.find(
+                                                                    (c) => String(c.id) === value,
+                                                                );
+                                                                // Always replace prior coords so a city without lat/lng cannot keep stale values.
+                                                                setValue(
+                                                                    "latitude",
+                                                                    city?.latitude != null
+                                                                        ? String(city.latitude)
+                                                                        : "",
+                                                                    { shouldValidate: true },
+                                                                );
+                                                                setValue(
+                                                                    "longitude",
+                                                                    city?.longitude != null
+                                                                        ? String(city.longitude)
+                                                                        : "",
+                                                                    { shouldValidate: true },
+                                                                );
                                                             }}
                                                         />
                                                     )}

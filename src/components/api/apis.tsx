@@ -1,5 +1,5 @@
 import customAxios, { type ApiError } from "./customAxios";
-import type { ApiAdsBySection, ApiCity, ApiFreshRecommendation, ApiState, SellFormValues } from "@/components/types/AllTypes";
+import type { ApiAdsBySection, ApiCity, ApiFreshRecommendation, ApiState, CreateAdPayload } from "@/components/types/AllTypes";
 
 
 
@@ -66,7 +66,7 @@ export const getAdById = async (id: string) => {
     }
 };
 
-export const createSellForm = async (payload: SellFormValues) => {
+export const createSellForm = async (payload: CreateAdPayload) => {
     try {
         const { data } = await customAxios.post("/ads", payload);
         return data;
@@ -150,7 +150,7 @@ export const getFreshAds = async ({ latitude, longitude }: { latitude: number, l
 };
 export const getAdsBySection = async ({ latitude, longitude }: { latitude: number, longitude: number }): Promise<ApiAdsBySection | null> => {
     try {
-        const { data } = await customAxios.get(`/ads/section?latitude=${latitude}&longitude=${longitude}`);
+        const { data } = await customAxios.get(`/ads/sections?latitude=${latitude}&longitude=${longitude}`);
         return unwrapData<ApiAdsBySection>(data);
     } catch (error) {
         console.log("====== Error getAdsBySection ===> ", error);

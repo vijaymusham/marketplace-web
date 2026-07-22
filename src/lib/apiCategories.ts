@@ -24,6 +24,7 @@ export type NormalizedCategory = {
   slug?: string;
   icon: CategoryIconComponent;
   subcategories: string[];
+  subcategoryItems: ApiSubCategory[];
 };
 
 export function resolveLocalCategoryIcon(name: string): CategoryIconComponent {
@@ -39,24 +40,38 @@ export function resolveLocalCategoryIcon(name: string): CategoryIconComponent {
   return partial?.icon ?? ServicesIcon;
 }
 
-export function getSubcategoryNames(cat: ApiCategory): string[] {
-  if (Array.isArray(cat.subCategories)) {
-    return cat.subCategories.map((s) => s.name).filter(Boolean);
+export function getSubcategoryItems(cat: ApiCategory): ApiSubCategory[] {
+  if (Array.isArray(cat.subCategories) && cat.subCategories.length > 0) {
+    return cat.subCategories.filter((s) => Boolean(s?.name));
   }
   if (!Array.isArray(cat.subcategories)) return [];
   return cat.subcategories
-    .map((s) => (typeof s === "string" ? s : s.name))
-    .filter(Boolean);
+    .map((s) => (typeof s === "string" ? { id: s, name: s } : s))
+    .filter((s) => Boolean(s?.name));
+}
+
+export function getSubcategoryNames(cat: ApiCategory): string[] {
+  return getSubcategoryItems(cat).map((s) => s.name);
 }
 
 /** Normalize GET /categories payload (API uses `subCategories`). */
 export function normalizeApiCategories(raw: unknown): NormalizedCategory[] {
-  const list = Array.isArray(raw) ? (raw as ApiCategory[]) : [];
-  return list.map((cat) => ({
-    id: cat.id,
-    name: cat.name,
-    slug: cat.slug,
-    icon: resolveLocalCategoryIcon(cat.name),
-    subcategories: getSubcategoryNames(cat),
-  }));
+  const list = Array.isArray(raw)
+    ? (raw as ApiCategory[])
+    : raw &&
+        typeof raw === "object" &&
+        Array.isArray((raw as { data?: unknown }).data)
+      ? ((raw as { data: ApiCategory[] }).data)
+      : [];
+  return list.map((cat) => {
+    const subcategoryItems = getSubcategoryItems(cat);
+    return {
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      icon: resolveLocalCategoryIcon(cat.name),
+      subcategories: subcategoryItems.map((s) => s.name),
+      subcategoryItems,
+    };
+  });
 }

@@ -1,3 +1,46 @@
+/** Form-only common keys — mapped to CreateAdPayload; not sent inside categoryAttributes. */
+export const SELL_FORM_COMMON_KEYS = [
+    "title",
+    "category",
+    "subcategory",
+    "price",
+    "isNegotiable",
+    "description",
+    "state",
+    "city",
+    "neighbourhood",
+    "latitude",
+    "longitude",
+    "sellerName",
+    "mobile",
+    "images",
+] as const;
+
+export type CreateAdImage = {
+    url: string;
+    displayOrder: number;
+    isCover: boolean;
+};
+
+/** POST /ads body — common fields + category-specific attrs. */
+export type CreateAdPayload = {
+    categoryId: string;
+    subCategoryId: string;
+    title: string;
+    description: string;
+    price: number;
+    isNegotiable: boolean;
+    stateId: string;
+    cityId: string;
+    locality: string;
+    latitude: number;
+    longitude: number;
+    sellerName: string;
+    mobileNumber: string;
+    images: CreateAdImage[];
+    categoryAttributes: Record<string, string>;
+};
+
 export type SellFormValues = {
     // Common ad fields
     title: string;
