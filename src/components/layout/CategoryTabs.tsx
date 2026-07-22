@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { categories } from "@/lib/categories";
+import { normalizeApiCategories } from "@/lib/apiCategories";
 import { slugify } from "@/lib/slug";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getCategories } from "../api/apis";
 
 const PANEL_WIDE = 560;
 const PANEL_NARROW = 320;
@@ -21,6 +23,13 @@ export default function CategoryTabs() {
     const expandedScrollRef = useRef<HTMLDivElement>(null);
     const collapsedScrollRef = useRef<HTMLDivElement>(null);
     const collapsedRef = useRef(false);
+
+    const { data: apiCategories } = useQuery({
+        queryKey: ["categories"],
+        queryFn: getCategories,
+    });
+
+    const categories = normalizeApiCategories(apiCategories);
 
     useEffect(() => {
         let raf = 0;
@@ -49,16 +58,18 @@ export default function CategoryTabs() {
         };
     }, []);
 
-    const openCategory = openIndex !== null ? categories[openIndex] : null;
+    const openCategory = openIndex !== null ? categories[openIndex] ?? null : null;
+    const OpenIcon = openCategory?.icon;
 
     const openTab = (index: number, target: HTMLElement) => {
         const container = containerRef.current;
-        if (!container) return;
+        const category = categories[index];
+        if (!container || !category) return;
 
         const containerRect = container.getBoundingClientRect();
         // never let the panel exceed the container (8px inset on each side)
         const width = Math.min(
-            categories[index].subcategories.length > 6 ? PANEL_WIDE : PANEL_NARROW,
+            category.subcategories.length > 6 ? PANEL_WIDE : PANEL_NARROW,
             containerRect.width - PANEL_MARGIN * 2,
         );
         const tabRect = target.getBoundingClientRect();
@@ -93,12 +104,10 @@ export default function CategoryTabs() {
                     ref={containerRef}
                     className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
                 >
-                    {/* height eases between two fixed values; the two layers crossfade */}
                     <div
                         className={`relative transition-[height] duration-300 ${EASE} ${collapsed ? "h-12" : "h-28"
                             }`}
                     >
-                        {/* expanded layer: icon above label (grid style) */}
                         <div
                             className={`absolute inset-0 transition-[opacity,transform] duration-300 ${EASE} ${collapsed
                                 ? "pointer-events-none -translate-y-3 opacity-0"
@@ -142,7 +151,6 @@ export default function CategoryTabs() {
                             </div>
                         </div>
 
-                        {/* collapsed layer: icon left, label right, chevron (tab style) */}
                         <div
                             className={`absolute inset-0 transition-[opacity,transform] duration-300 ${EASE} ${collapsed
                                 ? "translate-y-0 opacity-100"
@@ -208,7 +216,7 @@ export default function CategoryTabs() {
                                     href={`/category/${slugify(openCategory.name)}`}
                                     className="flex items-center gap-2.5 transition-colors hover:text-primary"
                                 >
-                                    <openCategory.icon className="h-9 w-9 text-slate-800" />
+                                    {OpenIcon && <OpenIcon className="h-9 w-9 text-slate-800" />}
                                     <h3 className="font-heading text-sm font-extrabold text-slate-900">
                                         {openCategory.name}
                                     </h3>
@@ -236,8 +244,6 @@ export default function CategoryTabs() {
                     )}
                 </div>
             </nav>
-            {/* constant-height spacer keeps the page layout stable while the
-            fixed bar above animates between its two heights */}
             <div className="h-28" aria-hidden="true" />
         </>
     );

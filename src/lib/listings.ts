@@ -1,5 +1,5 @@
 export type Listing = {
-  id: number;
+  id: string | number;
   title: string;
   price: string;
   meta?: string;
@@ -20,14 +20,21 @@ const SELLERS = [
   { name: "Vikram Singh", city: "Hinganghat" },
 ];
 
-export function getListingById(id: number): Listing | undefined {
-  return listings.find((l) => l.id === id);
+export function getListingById(id: string | number): Listing | undefined {
+  return listings.find((l) => String(l.id) === String(id));
+}
+
+function listingSeed(id: string | number): number {
+  if (typeof id === "number") return id;
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  return Math.abs(hash);
 }
 
 /** Extra gallery frames derived from the main image (varied locks). */
 export function getListingImages(listing: Listing): string[] {
   const base = listing.image.split("?")[0];
-  const seed = listing.id * 17;
+  const seed = listingSeed(listing.id) * 17;
   return [
     listing.image,
     `${base}?lock=${seed + 1}`,
@@ -38,12 +45,13 @@ export function getListingImages(listing: Listing): string[] {
 }
 
 export function getListingSeller(listing: Listing) {
-  const seller = SELLERS[listing.id % SELLERS.length];
+  const seed = listingSeed(listing.id);
+  const seller = SELLERS[seed % SELLERS.length];
   return {
     name: seller.name,
-    memberSince: 2019 + (listing.id % 6),
-    adsPosted: 4 + ((listing.id * 3) % 28),
-    verified: listing.id % 3 !== 0,
+    memberSince: 2019 + (seed % 6),
+    adsPosted: 4 + ((seed * 3) % 28),
+    verified: seed % 3 !== 0,
     initials: seller.name
       .split(" ")
       .map((p) => p[0])
@@ -116,11 +124,12 @@ export function getListingDescription(listing: Listing): string {
 
 export function getListingSpecs(listing: Listing): { label: string; value: string }[] {
   const kind = getListingKind(listing);
-  const condition = listing.id % 2 === 0 ? "Used · Good" : "Like New";
+  const seed = listingSeed(listing.id);
+  const condition = seed % 2 === 0 ? "Used · Good" : "Like New";
   const base = [
     { label: "Condition", value: condition },
     { label: "Posted", value: listing.date },
-    { label: "Ad ID", value: `DM-${1848200000 + listing.id}` },
+    { label: "Ad ID", value: `DM-${1848200000 + seed}` },
   ];
 
   if (kind === "vehicle") {
@@ -129,8 +138,8 @@ export function getListingSpecs(listing: Listing): { label: string; value: strin
       { label: "Year", value: year || "—" },
       { label: "Kilometers", value: km || "—" },
       { label: "Fuel", value: /diesel/i.test(listing.title) ? "Diesel" : "Petrol" },
-      { label: "Transmission", value: listing.id % 2 ? "Automatic" : "Manual" },
-      { label: "Owners", value: listing.id % 3 === 0 ? "2nd" : "1st" },
+      { label: "Transmission", value: seed % 2 ? "Automatic" : "Manual" },
+      { label: "Owners", value: seed % 3 === 0 ? "2nd" : "1st" },
       ...base,
     ];
   }
@@ -140,7 +149,7 @@ export function getListingSpecs(listing: Listing): { label: string; value: strin
     return [
       { label: "Year", value: year || "—" },
       { label: "Kilometers", value: km || "—" },
-      { label: "Engine", value: `${100 + (listing.id % 5) * 25} cc` },
+      { label: "Engine", value: `${100 + (seed % 5) * 25} cc` },
       { label: "Owners", value: "1st" },
       ...base,
     ];
@@ -149,10 +158,10 @@ export function getListingSpecs(listing: Listing): { label: string; value: strin
   if (kind === "mobile") {
     return [
       { label: "Brand", value: /iphone|apple/i.test(listing.title) ? "Apple" : /vivo/i.test(listing.title) ? "Vivo" : "Smartphone" },
-      { label: "Storage", value: listing.id % 2 ? "256 GB" : "128 GB" },
-      { label: "RAM", value: listing.id % 2 ? "8 GB" : "6 GB" },
-      { label: "Battery health", value: `${88 + (listing.id % 10)}%` },
-      { label: "Warranty", value: listing.id % 2 ? "3 months left" : "Bill + box" },
+      { label: "Storage", value: seed % 2 ? "256 GB" : "128 GB" },
+      { label: "RAM", value: seed % 2 ? "8 GB" : "6 GB" },
+      { label: "Battery health", value: `${88 + (seed % 10)}%` },
+      { label: "Warranty", value: seed % 2 ? "3 months left" : "Bill + box" },
       ...base,
     ];
   }
@@ -165,7 +174,7 @@ export function getListingSpecs(listing: Listing): { label: string; value: strin
       { label: "Configuration", value: parts[0] || "—" },
       { label: "Bathrooms", value: parts[1] || "—" },
       { label: "Area", value: parts[2] || parts[0] || "—" },
-      { label: "Furnishing", value: listing.id % 2 ? "Semi-furnished" : "Unfurnished" },
+      { label: "Furnishing", value: seed % 2 ? "Semi-furnished" : "Unfurnished" },
       ...base,
     ];
   }
@@ -173,8 +182,8 @@ export function getListingSpecs(listing: Listing): { label: string; value: strin
   if (kind === "fashion") {
     return [
       { label: "Category", value: "Apparel" },
-      { label: "Size", value: ["S", "M", "L", "XL"][listing.id % 4] },
-      { label: "Material", value: listing.id % 2 ? "Cotton blend" : "Premium fabric" },
+      { label: "Size", value: ["S", "M", "L", "XL"][seed % 4] },
+      { label: "Material", value: seed % 2 ? "Cotton blend" : "Premium fabric" },
       ...base,
     ];
   }
@@ -183,7 +192,7 @@ export function getListingSpecs(listing: Listing): { label: string; value: strin
     return [
       { label: "Category", value: "Gadgets" },
       { label: "Power", value: "Tested & working" },
-      { label: "Includes", value: listing.id % 2 ? "Box + cable" : "Device only" },
+      { label: "Includes", value: seed % 2 ? "Box + cable" : "Device only" },
       ...(listing.meta ? [{ label: "Notes", value: listing.meta }] : []),
       ...base,
     ];

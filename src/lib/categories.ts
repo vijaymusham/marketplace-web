@@ -143,6 +143,17 @@ export const categories: Category[] = [
       "Other Pets",
     ],
   },
+//   {
+//     name: "Jobs",
+//     icon: ServicesIcon,
+//     image: img("office", 113),
+//     subcategories: [
+//       "Full-time",
+//       "Part-time",
+//       "Internships",
+//       "Work from Home",
+//     ],
+//   },
   {
     name: "Services",
     icon: ServicesIcon,

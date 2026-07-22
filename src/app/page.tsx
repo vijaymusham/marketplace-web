@@ -1,11 +1,38 @@
+"use client";
+
 import CategoryTabs from "@/components/layout/CategoryTabs";
 import CityExplorer from "@/components/home-ui/CityExplorer";
 import FreshRecommendations from "@/components/home-ui/FreshRecommendations";
-import { listings } from "@/lib/listings";
+import type { Listing } from "@/lib/listings";
 import HorizontalList from "@/components/home-ui/HorizontalList";
 import BannerSection from "@/components/home-ui/BannerSection";
+import { useQuery } from "@tanstack/react-query";
+import { getAdsBySection } from "@/components/api/apis";
+import type { ApiAdsBySectionAd, ApiAdsSection } from "@/components/types/AllTypes";
+
+function formatPrice(price: number, currency?: string) {
+    const amount = Number.isFinite(price) ? price.toLocaleString("en-IN") : "0";
+    if (!currency || currency === "INR" || currency === "₹") return `₹${amount}`;
+    return `${currency} ${amount}`;
+}
+
+function toListing(ad: ApiAdsBySectionAd): Listing {
+    return {
+        id: ad.id,
+        title: ad.title,
+        price: formatPrice(ad.price, ad.currency),
+        location: ad.location,
+        date: ad.postedAtLabel || ad.postedAt,
+        image: ad.imageUrl,
+    };
+}
 
 export default function Home() {
+    const { data } = useQuery({
+        queryKey: ["adsBySection"],
+        queryFn: () => getAdsBySection({ latitude: 12.9716, longitude: 77.5946 }),
+    });
+
     return (
         <>
             <CategoryTabs />
@@ -13,10 +40,19 @@ export default function Home() {
                 <CityExplorer />
                 <FreshRecommendations />
                 <BannerSection />
-                <HorizontalList className="bg-sky-50 my-8 " title="Laptop & Desktop for Sale" description="Find the best deals on laptops and desktops for sale in your area" data={listings?.slice(5)} />
-                <HorizontalList className="bg-white my-8 " title="Mobile & Tablets for Sale" description="Find the best deals on mobile and tablets for sale in your area" data={listings?.slice(5)} />
-                <HorizontalList className="bg-violet-50 my-8 " title="TV & Audio for Sale" description="Find the best deals on TVs and audio for sale in your area" data={listings?.slice(5)} />
-                <HorizontalList className="bg-white my-8 " title="Home & Kitchen for Sale" description="Find the best deals on home and kitchen for sale in your area" data={listings?.slice(5)} />
+                {
+                    data && Object.values(data).map((item: ApiAdsSection) => {
+                        return (
+                            <HorizontalList
+                                key={item?.title}
+                                className={`${item?.bgClass} my-8 `}
+                                title={item?.title}
+                                description={item?.subtitle}
+                                data={item?.ads.map(toListing)}
+                            />
+                        )
+                    })
+                }
             </main>
         </>
     );

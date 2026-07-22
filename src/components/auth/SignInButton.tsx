@@ -3,19 +3,28 @@
 import { useState } from "react";
 import { LogOut, User } from "lucide-react";
 import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
 import AuthDrawer from "./AuthDrawer";
 import { useAuth } from "./AuthProvider";
+import { clearuser } from "@/components/redux/slices/authSlice";
+import type { AppDispatch, RootState } from "@/components/redux/store";
 
 export default function SignInButton() {
-    const { user, loading, signOut } = useAuth();
+    const { signOut } = useAuth();
+    const dispatch = useDispatch<AppDispatch>();
+    const authData = useSelector((state: RootState) => state.user.user);
     const [open, setOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
 
-    // Keep Sign In clickable while auth resolves — don't block on a non-clickable skeleton.
-    if (!loading && user) {
+    // Backend session is the source of truth — Firebase OTP must not close the drawer mid-signup.
+    const isLoggedIn = Boolean(authData?.accessToken);
+    const profile = authData?.user;
+
+    if (isLoggedIn && profile) {
         const label =
-            user.displayName?.split(" ")[0] ||
-            user.phoneNumber?.slice(-4) ||
+            profile.firstName ||
+            profile.username ||
+            profile.phone?.slice(-4) ||
             "Account";
 
         return (
@@ -42,12 +51,14 @@ export default function SignInButton() {
                         />
                         <div className="absolute top-full right-0 z-50 mt-2 min-w-44 overflow-hidden rounded-2xl border border-slate-100 bg-white py-1 shadow-lg shadow-slate-200/60">
                             <p className="border-b border-slate-100 px-4 py-2.5 text-xs font-medium text-slate-400">
-                                {user.phoneNumber}
+                                {profile.phone}
                             </p>
                             <button
                                 type="button"
                                 onClick={async () => {
                                     setMenuOpen(false);
+                                    localStorage.removeItem("token");
+                                    dispatch(clearuser());
                                     await signOut();
                                     toast.success("Signed out");
                                 }}

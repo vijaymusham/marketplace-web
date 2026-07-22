@@ -4,14 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, X, LocateFixed, Search } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import { setLocation } from "../redux/slices/authSlice";
 
 export default function LocationPicker() {
+    const dispatch = useDispatch<AppDispatch>();
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0 });
     const triggerRef = useRef<HTMLButtonElement>(null);
 
-    useEffect(() => setMounted(true), []);
+
+    useEffect(() => {
+        setTimeout(() => {
+            setMounted(true);
+        }, 100);
+    }, []);
 
     useEffect(() => {
         if (!open) return;
@@ -113,6 +122,15 @@ export default function LocationPicker() {
                                     <div className="mt-6 flex flex-col gap-4">
                                         <button
                                             type="button"
+                                            onClick={() => {
+                                                navigator.geolocation.getCurrentPosition((position) => {
+                                                    dispatch(setLocation({
+                                                        latitude: position.coords.latitude,
+                                                        longitude: position.coords.longitude,
+                                                    }));
+                                                    setOpen(false);
+                                                });
+                                            }}
                                             className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
                                         >
                                             <LocateFixed className="h-4 w-4" />

@@ -5,15 +5,19 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { X, ArrowLeft, ShieldCheck } from "lucide-react";
+import { useDispatch } from "react-redux";
 import {
-    getAdditionalUserInfo,
     initializeRecaptchaConfig,
     RecaptchaVerifier,
     signInWithPhoneNumber,
-    updateProfile,
     type ConfirmationResult,
+    type User,
 } from "firebase/auth";
 import { auth } from "@/constant/firebase/firebase";
+import { authApi, authPhoneCheck, getUser } from "@/components/api/apis";
+import type { ApiError } from "@/components/api/customAxios";
+import { setUser } from "@/components/redux/slices/authSlice";
+import type { AppDispatch } from "@/components/redux/store";
 
 type View = "phone" | "otp" | "details";
 
@@ -103,7 +107,16 @@ export default function AuthDrawer({
     );
 }
 
+function apiErrorMessage(error: unknown, fallback = "Something went wrong. Please try again.") {
+    if (error && typeof error === "object" && "message" in error) {
+        const message = String((error as ApiError).message || "").trim();
+        if (message) return message;
+    }
+    return fallback;
+}
+
 function AuthDrawerSession({ onClose }: { onClose: () => void }) {
+    const dispatch = useDispatch<AppDispatch>();
     const [view, setView] = useState<View>("phone");
     const [phone, setPhone] = useState("");
     const [name, setName] = useState("");
@@ -117,6 +130,41 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
     const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
     const confirmationRef = useRef<ConfirmationResult | null>(null);
     const verifierRef = useRef<RecaptchaVerifier | null>(null);
+
+    // Backend phone/check result — Firebase is only used for SMS OTP.
+    const phoneExistsRef = useRef(false);
+
+    const completeBackendAuth = async (
+        firebaseUser: User,
+        profile: { name: string; email: string; referralCode?: string; exists?: boolean }
+    ) => {
+        const idToken = await firebaseUser.getIdToken(true);
+
+        const payload = {
+            name: profile.name.trim(),
+            email: profile.email.trim(),
+            referralCode: profile.referralCode?.trim() || undefined,
+        };
+
+        const authData = await authApi(idToken, !profile?.exists ? payload : undefined);
+
+        if (authData?.accessToken) {
+            localStorage.setItem("token", authData.accessToken);
+        }
+
+        dispatch(setUser(authData));
+
+        const me = await getUser();
+        if (me) {
+            if (me.user && me.accessToken) {
+                dispatch(setUser(me));
+            } else if (me.id && authData) {
+                dispatch(setUser({ ...authData, user: me }));
+            }
+        }
+
+        return authData;
+    };
 
     useEffect(() => {
         let cancelled = false;
@@ -179,6 +227,14 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
 
         setSending(true);
         try {
+            const check = await authPhoneCheck(`+91${phone}`);
+            if (check == null || typeof check.exists !== "boolean") {
+                toast.error("Unable to verify this phone number. Please try again.");
+                return;
+            }
+
+            phoneExistsRef.current = check.exists;
+
             let appVerifier = verifierRef.current;
             if (!appVerifier) {
                 const el = document.getElementById(RECAPTCHA_ID);
@@ -207,7 +263,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                 /* ignore */
             }
             verifierRef.current = null;
-            toast.error(firebaseAuthErrorMessage(error));
+            toast.error(apiErrorMessage(error, firebaseAuthErrorMessage(error)));
         } finally {
             setSending(false);
         }
@@ -247,34 +303,47 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         if (otp.some((d) => !d) || verifying || !confirmationRef.current) return;
         setVerifying(true);
         try {
+            // Firebase: verify OTP only. Account create/login is backend-only.
             const result = await confirmationRef.current.confirm(otp.join(""));
-            const info = getAdditionalUserInfo(result);
-            const needsProfile = info?.isNewUser || !result.user.displayName;
 
-            if (needsProfile) {
+            if (!phoneExistsRef.current) {
+                // New number → collect profile, then create account on backend.
                 setView("details");
-            } else {
-                toast.success("Logged in successfully!");
-                onClose();
+                return;
             }
+
+            // Existing number → login via backend with Firebase idToken.
+            await completeBackendAuth(result.user, {
+                name: result.user.displayName || "",
+                email: result.user.email || "",
+                exists: phoneExistsRef.current,
+            });
+            toast.success("Logged in successfully!");
+            onClose();
         } catch (error) {
-            toast.error(firebaseAuthErrorMessage(error));
+            toast.error(apiErrorMessage(error, firebaseAuthErrorMessage(error)));
         } finally {
             setVerifying(false);
         }
     };
 
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
     const handleSaveProfile = async () => {
-        if (!name.trim() || savingProfile || !auth.currentUser) return;
+        if (!name.trim() || !emailValid || savingProfile || !auth.currentUser) return;
         setSavingProfile(true);
         try {
-            await updateProfile(auth.currentUser, {
-                displayName: name.trim(),
+            // Signup: send name/email/referral + Firebase idToken to backend only.
+            await completeBackendAuth(auth.currentUser, {
+                name: name.trim(),
+                email: email.trim(),
+                referralCode: referral.trim() || undefined,
+                exists: phoneExistsRef.current,
             });
             toast.success("Account created successfully!");
             onClose();
         } catch (error) {
-            toast.error(firebaseAuthErrorMessage(error));
+            toast.error(apiErrorMessage(error, firebaseAuthErrorMessage(error)));
         } finally {
             setSavingProfile(false);
         }
@@ -471,7 +540,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                 className="mt-8 flex flex-col gap-4"
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    if (name.trim()) void handleSaveProfile();
+                                    if (name.trim() && emailValid) void handleSaveProfile();
                                 }}
                             >
                                 <Field label="Phone number">
@@ -530,7 +599,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
 
                                 <button
                                     type="submit"
-                                    disabled={!name.trim() || savingProfile}
+                                    disabled={!name.trim() || !emailValid || savingProfile}
                                     className="mt-2 rounded-2xl bg-primary py-3.5 text-sm font-bold tracking-wide text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300"
                                 >
                                     {savingProfile ? "Saving..." : "Finish"}

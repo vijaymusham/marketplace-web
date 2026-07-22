@@ -1,3 +1,5 @@
+"use client";
+
 import axios, {
     AxiosError,
     type InternalAxiosRequestConfig,
@@ -12,21 +14,50 @@ export type ApiError = {
     data?: unknown;
 };
 
+const PUBLIC_API_PATHS = [
+    "/auth/phone/check",
+    "/auth/firebase/verify",
+    "/categories",
+    "/states",
+    "/cities",
+    "/cities/popular",
+    "/ads/fresh",
+    "/ads/section",
+];
+
+/** Browser → same-origin `/backend/*` (Next rewrite). Avoids CORS so requests show in Network. */
+function getBaseURL() {
+    const envUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+    if (typeof window !== "undefined") return "/backend";
+    return envUrl || "/backend";
+}
+
 let isLoggingOut = false;
+
+function isPublicPath(url = "") {
+    return PUBLIC_API_PATHS.some((path) => url.includes(path));
+}
 
 async function getAccessToken(): Promise<string | null> {
     if (typeof window === "undefined") return null;
 
-    const user = auth.currentUser;
-    if (user) {
-        try {
-            return await user.getIdToken();
-        } catch {
-            // Fall through to stored token
-        }
-    }
+    // Prefer app token first so interceptors never block the XHR on Firebase.
+    const stored = localStorage.getItem("token");
+    if (stored) return stored;
 
-    return localStorage.getItem("token");
+    const user = auth.currentUser;
+    if (!user) return null;
+
+    try {
+        return await Promise.race([
+            user.getIdToken(),
+            new Promise<null>((resolve) => {
+                window.setTimeout(() => resolve(null), 2500);
+            }),
+        ]);
+    } catch {
+        return null;
+    }
 }
 
 async function handleAutoLogout() {
@@ -91,19 +122,24 @@ function getErrorMessage(error: AxiosError): string {
 }
 
 const customAxios = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    baseURL: getBaseURL(),
     headers: {
         "Content-Type": "application/json",
     },
-    withCredentials: true,
+    withCredentials: false,
     timeout: 30_000,
 });
 
 customAxios.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
-        const token = await getAccessToken();
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Keep baseURL correct even if the module was evaluated early.
+        config.baseURL = getBaseURL();
+
+        if (!isPublicPath(config.url)) {
+            const token = await getAccessToken();
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
 
         // Let the browser set multipart boundary for FormData

@@ -308,5 +308,169 @@ export const bicycleBrandOptions = [
     { value: "Trek", label: "Trek" },
     { value: "Triban", label: "Triban" },
     { value: "Vector 91", label: "Vector 91" },
-    { value: "Other Brands", label: "Other Brands" }
+    { value: "Other Brands", label: "Other Brands" },
+];
+
+/** API-aligned option values from frontend-categories-ads-binding.md */
+export const conditionOptions = [
+    { value: "new", label: "New" },
+    { value: "like_new", label: "Like New" },
+    { value: "good", label: "Good" },
+    { value: "fair", label: "Fair" },
+    { value: "poor", label: "Poor" },
+];
+
+export const fuelTypeOptions = [
+    { value: "petrol", label: "Petrol" },
+    { value: "diesel", label: "Diesel" },
+    { value: "cng", label: "CNG" },
+    { value: "electric", label: "Electric" },
+    { value: "hybrid", label: "Hybrid" },
+    { value: "lpg", label: "LPG" },
+];
+
+export const transmissionOptions = [
+    { value: "manual", label: "Manual" },
+    { value: "automatic", label: "Automatic" },
+];
+
+export const ownerTypeOptions = [
+    { value: "first", label: "1st" },
+    { value: "second", label: "2nd" },
+    { value: "third", label: "3rd" },
+    { value: "fourth_plus", label: "4+" },
+];
+
+export const yesNoOptions = [
+    { value: "true", label: "Yes" },
+    { value: "false", label: "No" },
+];
+
+export const furnishingApiOptions = [
+    { value: "furnished", label: "Furnished" },
+    { value: "semi-furnished", label: "Semi-Furnished" },
+    { value: "unfurnished", label: "Unfurnished" },
+];
+
+export const listingTypeOptions = [
+    { value: "sell", label: "Sell" },
+    { value: "rent", label: "Rent" },
+];
+
+export const fashionGenderOptions = [
+    { value: "men", label: "Men" },
+    { value: "women", label: "Women" },
+    { value: "unisex", label: "Unisex" },
+    { value: "kids", label: "Kids" },
+];
+
+export const petGenderOptions = [
+    { value: "male", label: "Male" },
+    { value: "female", label: "Female" },
+];
+
+export const workModeOptions = [
+    { value: "onsite", label: "Onsite" },
+    { value: "remote", label: "Remote" },
+    { value: "hybrid", label: "Hybrid" },
+];
+
+export const ramOptions = [
+    { value: "2 GB", label: "2 GB" },
+    { value: "3 GB", label: "3 GB" },
+    { value: "4 GB", label: "4 GB" },
+    { value: "6 GB", label: "6 GB" },
+    { value: "8 GB", label: "8 GB" },
+    { value: "12 GB", label: "12 GB" },
+    { value: "16 GB", label: "16 GB" },
+];
+
+export const storageOptions = [
+    { value: "16 GB", label: "16 GB" },
+    { value: "32 GB", label: "32 GB" },
+    { value: "64 GB", label: "64 GB" },
+    { value: "128 GB", label: "128 GB" },
+    { value: "256 GB", label: "256 GB" },
+    { value: "512 GB", label: "512 GB" },
+    { value: "1 TB", label: "1 TB" },
+];
+
+export const furnitureTypeOptions = [
+    { value: "Sofa & Dining", label: "Sofa & Dining" },
+    { value: "Beds & Wardrobes", label: "Beds & Wardrobes" },
+    { value: "Home Decor", label: "Home Decor" },
+    { value: "Kids Furniture", label: "Kids Furniture" },
+    { value: "Other", label: "Other" },
+];
+
+export const materialOptions = [
+    { value: "Wood", label: "Wood" },
+    { value: "Metal", label: "Metal" },
+    { value: "Plastic", label: "Plastic" },
+    { value: "Glass", label: "Glass" },
+    { value: "Fabric", label: "Fabric" },
+    { value: "Leather", label: "Leather" },
+    { value: "Other", label: "Other" },
+];
+
+export const fashionSizeOptions = [
+    { value: "XS", label: "XS" },
+    { value: "S", label: "S" },
+    { value: "M", label: "M" },
+    { value: "L", label: "L" },
+    { value: "XL", label: "XL" },
+    { value: "XXL", label: "XXL" },
+    { value: "Free Size", label: "Free Size" },
+];
+
+export const petTypeOptions = [
+    { value: "Dogs", label: "Dogs" },
+    { value: "Cats", label: "Cats" },
+    { value: "Fishes", label: "Fishes" },
+    { value: "Birds", label: "Birds" },
+    { value: "Other", label: "Other" },
+];
+
+export const jobTypeOptions = [
+    { value: "Full-time", label: "Full-time" },
+    { value: "Part-time", label: "Part-time" },
+    { value: "Contract", label: "Contract" },
+    { value: "Internship", label: "Internship" },
+    { value: "Freelance", label: "Freelance" },
+];
+
+export const indianStateCodeOptions = [
+    { value: "AN", label: "Andaman and Nicobar (AN)" },
+    { value: "AP", label: "Andhra Pradesh (AP)" },
+    { value: "AR", label: "Arunachal Pradesh (AR)" },
+    { value: "AS", label: "Assam (AS)" },
+    { value: "BR", label: "Bihar (BR)" },
+    { value: "CH", label: "Chandigarh (CH)" },
+    { value: "CG", label: "Chhattisgarh (CG)" },
+    { value: "DL", label: "Delhi (DL)" },
+    { value: "GA", label: "Goa (GA)" },
+    { value: "GJ", label: "Gujarat (GJ)" },
+    { value: "HR", label: "Haryana (HR)" },
+    { value: "HP", label: "Himachal Pradesh (HP)" },
+    { value: "JK", label: "Jammu and Kashmir (JK)" },
+    { value: "JH", label: "Jharkhand (JH)" },
+    { value: "KA", label: "Karnataka (KA)" },
+    { value: "KL", label: "Kerala (KL)" },
+    { value: "LA", label: "Ladakh (LA)" },
+    { value: "MP", label: "Madhya Pradesh (MP)" },
+    { value: "MH", label: "Maharashtra (MH)" },
+    { value: "MN", label: "Manipur (MN)" },
+    { value: "ML", label: "Meghalaya (ML)" },
+    { value: "MZ", label: "Mizoram (MZ)" },
+    { value: "NL", label: "Nagaland (NL)" },
+    { value: "OD", label: "Odisha (OD)" },
+    { value: "PB", label: "Punjab (PB)" },
+    { value: "RJ", label: "Rajasthan (RJ)" },
+    { value: "SK", label: "Sikkim (SK)" },
+    { value: "TN", label: "Tamil Nadu (TN)" },
+    { value: "TS", label: "Telangana (TS)" },
+    { value: "TR", label: "Tripura (TR)" },
+    { value: "UP", label: "Uttar Pradesh (UP)" },
+    { value: "UK", label: "Uttarakhand (UK)" },
+    { value: "WB", label: "West Bengal (WB)" },
 ];

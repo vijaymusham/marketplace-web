@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Check } from "lucide-react";
 
 export type SelectOption = {
-    value: string;
+    value: string | number;
     label: string;
     icon?: ReactNode;
 };
@@ -34,7 +34,7 @@ export default function SelectDropdown({
     const [open, setOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
     const listId = useId();
-    const selected = options.find((o) => o.value === value);
+    const selected = options?.find((o: SelectOption) => o.value === value);
 
     useEffect(() => {
         if (!open) return;
@@ -140,7 +140,7 @@ export default function SelectDropdown({
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                onChange(option.value);
+                                                onChange(String(option.value));
                                                 setOpen(false);
                                             }}
                                             className={`flex w-full items-center cursor-pointer gap-2.5 px-3 py-2 text-left transition-colors ${isSelected

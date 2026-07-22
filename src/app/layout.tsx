@@ -3,13 +3,12 @@ import "./globals.css";
 import localFont from "next/font/local";
 import SmoothScroll from "@/components/layout/SmoothScroll";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import TrustedBrands from "@/components/home-ui/TrustedBrands";
 import { Toaster } from "react-hot-toast";
 import Preloader from "@/components/layout/Preloader";
 import { IntroProvider } from "@/components/layout/IntroContext";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import TanstackProvider from "@/components/providers/TanstackProvider";
+import SiteChrome from "@/components/layout/SiteChrome";
 
 export const display = localFont({
     src: [
@@ -50,12 +49,10 @@ export default function RootLayout({
                                     position="top-right"
                                     reverseOrder={false}
                                     gutter={8}
-                                    containerClassName=""
-                                    containerStyle={{}}
+                                    containerStyle={{ zIndex: 100000 }}
                                     toasterId="default"
                                 />
-                                <TrustedBrands />
-                                <Footer />
+                                <SiteChrome />
                             </SmoothScroll>
                         </IntroProvider>
                     </AuthProvider>

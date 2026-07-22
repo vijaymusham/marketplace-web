@@ -1,12 +1,19 @@
-"use client";
-
+"use client";;
 import Image from "next/image";
 import Link from "next/link";
-import { cities, getCityImage } from "@/lib/cities";
 import { slugify } from "@/lib/slug";
 import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
+import { useQuery } from "@tanstack/react-query";
+import { getPopularCities } from "../api/apis";
+import type { ApiCity } from "../types/AllTypes";
 
 export default function CityExplorer() {
+
+    const { data } = useQuery({
+        queryKey: ["popularCities"],
+        queryFn: () => getPopularCities({ latitude: 12.9716, longitude: 77.5946 }),
+    });
+
     return (
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <Enter>
@@ -23,30 +30,32 @@ export default function CityExplorer() {
                     className="flex gap-4 overflow-x-auto scroll-smooth pb-1 scrollbar-hide sm:gap-5"
                     stagger={0.055}
                 >
-                    {cities.map((city) => (
-                        <StaggerItem key={city.name} className="w-36 shrink-0 sm:w-29" y={24}>
-                            <Link
-                                href={`/city/${slugify(city.name)}`}
-                                className="group block items-center justify-center"
-                            >
-                                <div className="relative aspect-square w-full overflow-hidden rounded-full bg-slate-100">
-                                    <Image
-                                        src={getCityImage(city, "400/340")}
-                                        alt={`Deals in ${city.name}`}
-                                        fill
-                                        sizes="116px"
-                                        className="rounded-full border-2 border-dotted border-orange-500 object-cover p-1 transition-transform duration-500 group-hover:scale-105"
-                                    />
-                                </div>
-                                <p className="mt-2.5 text-center text-sm font-bold text-slate-900">
-                                    {city.name}
-                                </p>
-                                <p className="mt-0.5 text-center text-[13px] font-medium text-slate-500">
-                                    {city.distance}
-                                </p>
-                            </Link>
-                        </StaggerItem>
-                    ))}
+                    {data?.map((city: ApiCity) => {
+                        return (
+                            <StaggerItem key={city.name} className="w-36 shrink-0 sm:w-29" y={24}>
+                                <Link
+                                    href={`/city/${slugify(city.name)}`}
+                                    className="group block items-center justify-center"
+                                >
+                                    <div className="relative aspect-square w-full overflow-hidden rounded-full bg-slate-100">
+                                        <Image
+                                            src={city.imageUrl || "/images/city-placeholder.png"}
+                                            alt={`Deals in ${city.name || "No name"}`}
+                                            fill
+                                            sizes="116px"
+                                            className="rounded-full border-2 border-dotted border-orange-500 object-cover p-1 transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                    </div>
+                                    <p className="mt-2.5 text-center text-sm font-bold text-slate-900">
+                                        {city.name || "No name"}
+                                    </p>
+                                    <p className="mt-0.5 text-center text-[13px] font-medium text-slate-500">
+                                        {city.distanceLabel || "No distance label"}
+                                    </p>
+                                </Link>
+                            </StaggerItem>
+                        )
+                    })}
                 </Stagger>
             </div>
         </section>

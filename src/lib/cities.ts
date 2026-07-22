@@ -87,7 +87,7 @@ export const cities: City[] = [
     keyword: "kolkata",
     lock: 310,
     description:
-      "Warm neighbourhood deals on books, bikes, and home essentials from Salt Lake to South Kolkata.",
+      "Warm locality deals on books, bikes, and home essentials from Salt Lake to South Kolkata.",
   },
   {
     name: "Jaipur",

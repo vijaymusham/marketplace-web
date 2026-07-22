@@ -7,13 +7,53 @@ import { Field, formItem } from "@/constant/helper/TextField";
 import { inputClassName } from "@/constant/helper/classesHelper";
 import SelectDropdown from "./SelectDropdown";
 import type { SellFormValues } from "../types/AllTypes";
-import { bicycleBrandOptions, bikeBrandOptions, carBrands, commercialVehicleTypeOptions, facingOptions, laptopBrandOptions, mobileBrandOptions, projectLaunchMonthOptions, propertyTypeOptions, scooterBrandOptions } from "../data/FormOptions";
+import {
+    bicycleBrandOptions,
+    bikeBrandOptions,
+    carBrands,
+    commercialVehicleTypeOptions,
+    conditionOptions,
+    electronicsTypeOptions,
+    facingOptions,
+    fashionGenderOptions,
+    fashionSizeOptions,
+    fuelTypeOptions,
+    furnitureTypeOptions,
+    furnishingApiOptions,
+    homeServiceTypeOptions,
+    indianStateCodeOptions,
+    jobTypeOptions,
+    laptopBrandOptions,
+    listingTypeOptions,
+    materialOptions,
+    mobileBrandOptions,
+    ownerTypeOptions,
+    petGenderOptions,
+    petTypeOptions,
+    projectLaunchMonthOptions,
+    propertyTypeOptions,
+    ramOptions,
+    scooterBrandOptions,
+    serviceTypeOptions,
+    storageOptions,
+    transmissionOptions,
+    workModeOptions,
+    yesNoOptions,
+} from "../data/FormOptions";
 
 export type SubFormProps = {
     control: Control<SellFormValues>;
     register: UseFormRegister<SellFormValues>;
     errors: FieldErrors<SellFormValues>;
 };
+
+type ChipOption = string | { value: string; label: string };
+
+function normalizeChipOptions(options: ChipOption[]) {
+    return options.map((option) =>
+        typeof option === "string" ? { value: option, label: option } : option
+    );
+}
 
 function ChoiceChips({
     label,
@@ -25,11 +65,13 @@ function ChoiceChips({
 }: {
     label: string;
     name: Path<SellFormValues>;
-    options: string[];
+    options: ChipOption[];
     control: Control<SellFormValues>;
     error?: string;
     required?: boolean;
 }) {
+    const normalized = normalizeChipOptions(options);
+
     return (
         <motion.div variants={formItem} className="flex flex-col gap-1.5 sm:col-span-2">
             <label className="text-[15px] font-semibold text-black">
@@ -42,19 +84,19 @@ function ChoiceChips({
                 rules={required ? { required: `${label} is required` } : undefined}
                 render={({ field }) => (
                     <div className="flex flex-wrap gap-2">
-                        {options.map((option) => {
-                            const active = field.value === option;
+                        {normalized.map((option) => {
+                            const active = field.value === option.value;
                             return (
                                 <button
-                                    key={option}
+                                    key={option.value}
                                     type="button"
-                                    onClick={() => field.onChange(option)}
+                                    onClick={() => field.onChange(option.value)}
                                     className={`cursor-pointer rounded-xl border px-3.5 py-2 text-sm font-semibold transition-colors ${active
                                         ? "border-primary bg-primary/10 text-primary"
                                         : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300"
                                         }`}
                                 >
-                                    {option}
+                                    {option.label}
                                 </button>
                             );
                         })}
@@ -150,15 +192,18 @@ function SubFormGrid({ children }: { children: ReactNode }) {
     );
 }
 
-/** No subcategory-specific fields in the PDF / form. */
+/** Fallback when a subcategory has no extra fields. */
 function EmptySubForm(_props: SubFormProps) {
     void _props;
     return null;
 }
 
+// Keep export for rare empty cases (unused in current binding map)
+void EmptySubForm;
+
 // ─── Mobiles & Tablets ───────────────────────────────────────────────────────
 
-export function MobilePhonesForm({ control, errors }: SubFormProps) {
+export function MobilePhonesForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
             <EmptySelect
@@ -170,11 +215,59 @@ export function MobilePhonesForm({ control, errors }: SubFormProps) {
                 error={errors.brand?.message}
                 placeholder="Select Brand"
             />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. iPhone 14"
+            />
+            <ChoiceChips
+                label="RAM"
+                name="ram"
+                control={control}
+                required
+                options={ramOptions}
+                error={errors.ram?.message}
+            />
+            <ChoiceChips
+                label="Storage"
+                name="storage"
+                control={control}
+                required
+                options={storageOptions}
+                error={errors.storage?.message}
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+            <ChoiceChips
+                label="Warranty Available"
+                name="warrantyAvailable"
+                control={control}
+                required
+                options={yesNoOptions}
+                error={errors.warrantyAvailable?.message}
+            />
+            <ChoiceChips
+                label="Bill Available"
+                name="billAvailable"
+                control={control}
+                required
+                options={yesNoOptions}
+                error={errors.billAvailable?.message}
+            />
         </SubFormGrid>
     );
 }
 
-export function TabletsForm({ control, errors }: SubFormProps) {
+export function TabletsForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
             <ChoiceChips
@@ -184,6 +277,22 @@ export function TabletsForm({ control, errors }: SubFormProps) {
                 required
                 options={["iPads", "Samsung", "Other Tablets"]}
                 error={errors.type?.message}
+            />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. Watch Series 9"
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
             />
         </SubFormGrid>
     );
@@ -200,24 +309,110 @@ export function AccessoriesForm({ control, errors }: SubFormProps) {
                 options={["Mobile", "Tablets"]}
                 error={errors.type?.message}
             />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
         </SubFormGrid>
     );
 }
 
-export const SmartWatchesForm = EmptySubForm;
+export function SmartWatchesForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
+                required
+                error={errors.brand?.message}
+                placeholder="e.g. Apple"
+            />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. Watch Series 9"
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
 
 // ─── Electronics ─────────────────────────────────────────────────────────────
 
-export const TVsVideoAudioForm = EmptySubForm;
-export const KitchenOtherAppliancesForm = EmptySubForm;
+function ElectronicsBaseForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <EmptySelect
+                data={electronicsTypeOptions}
+                label="Category"
+                name="type"
+                control={control}
+                required
+                error={errors.type?.message}
+                placeholder="Select category"
+            />
+            <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
+                required
+                error={errors.brand?.message}
+                placeholder="e.g. Samsung"
+            />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. Galaxy Tab"
+            />
+            <TextInput
+                label="Warranty"
+                name="warranty"
+                register={register}
+                required
+                error={errors.warranty?.message}
+                placeholder="e.g. 6 months"
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
 
-export function ComputersLaptopsForm({ control, errors }: SubFormProps) {
+export const TVsVideoAudioForm = ElectronicsBaseForm;
+export const KitchenOtherAppliancesForm = ElectronicsBaseForm;
+
+export function ComputersLaptopsForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
             <ChoiceChips
                 label="Type"
                 name="type"
                 control={control}
+                required
                 options={["Laptop", "Computer/Desktop"]}
                 error={errors.type?.message}
             />
@@ -226,34 +421,150 @@ export function ComputersLaptopsForm({ control, errors }: SubFormProps) {
                 label="Brand"
                 name="brand"
                 control={control}
+                required
                 error={errors.brand?.message}
                 placeholder="Select Brand"
+            />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. MacBook Air M2"
+            />
+            <TextInput
+                label="Warranty"
+                name="warranty"
+                register={register}
+                required
+                error={errors.warranty?.message}
+                placeholder="e.g. 1 year"
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
             />
         </SubFormGrid>
     );
 }
 
-export const CamerasLensesForm = EmptySubForm;
-export const GamesEntertainmentForm = EmptySubForm;
-export const FridgesForm = EmptySubForm;
-export const ComputerAccessoriesForm = EmptySubForm;
-export const HardDisksPrintersMonitorsForm = EmptySubForm;
-export const ACsForm = EmptySubForm;
-export const WashingMachinesForm = EmptySubForm;
+export const CamerasLensesForm = ElectronicsBaseForm;
+export const GamesEntertainmentForm = ElectronicsBaseForm;
+export const FridgesForm = ElectronicsBaseForm;
+export const ComputerAccessoriesForm = ElectronicsBaseForm;
+export const HardDisksPrintersMonitorsForm = ElectronicsBaseForm;
+export const ACsForm = ElectronicsBaseForm;
+export const WashingMachinesForm = ElectronicsBaseForm;
 
 // ─── Furniture ───────────────────────────────────────────────────────────────
 
-export const SofaDiningForm = EmptySubForm;
-export const BedsWardrobesForm = EmptySubForm;
-export const HomeDecorGardenForm = EmptySubForm;
-export const KidsFurnitureForm = EmptySubForm;
-export const OtherHouseholdItemsForm = EmptySubForm;
+function FurnitureBaseForm({ control, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <EmptySelect
+                data={furnitureTypeOptions}
+                label="Furniture Type"
+                name="furnitureType"
+                control={control}
+                required
+                error={errors.furnitureType?.message}
+                placeholder="Select type"
+            />
+            <EmptySelect
+                data={materialOptions}
+                label="Material"
+                name="material"
+                control={control}
+                required
+                error={errors.material?.message}
+                placeholder="Select material"
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
+
+export const SofaDiningForm = FurnitureBaseForm;
+export const BedsWardrobesForm = FurnitureBaseForm;
+export const HomeDecorGardenForm = FurnitureBaseForm;
+export const KidsFurnitureForm = FurnitureBaseForm;
+export const OtherHouseholdItemsForm = FurnitureBaseForm;
 
 // ─── Fashion ─────────────────────────────────────────────────────────────────
 
-export const MenForm = EmptySubForm;
-export const WomenForm = EmptySubForm;
-export const KidsForm = EmptySubForm;
+function FashionBaseForm({
+    control,
+    register,
+    errors,
+    defaultGender,
+}: SubFormProps & { defaultGender?: string }) {
+    return (
+        <SubFormGrid>
+            <TextInput
+                label="Category"
+                name="type"
+                register={register}
+                required
+                error={errors.type?.message}
+                placeholder={defaultGender ? `${defaultGender} wear` : "e.g. T-Shirt"}
+            />
+            <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
+                required
+                error={errors.brand?.message}
+                placeholder="e.g. Nike"
+            />
+            <ChoiceChips
+                label="Size"
+                name="size"
+                control={control}
+                required
+                options={fashionSizeOptions}
+                error={errors.size?.message}
+            />
+            <ChoiceChips
+                label="Gender"
+                name="gender"
+                control={control}
+                required
+                options={fashionGenderOptions}
+                error={errors.gender?.message}
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
+
+export function MenForm(props: SubFormProps) {
+    return <FashionBaseForm {...props} defaultGender="Men" />;
+}
+export function WomenForm(props: SubFormProps) {
+    return <FashionBaseForm {...props} defaultGender="Women" />;
+}
+export function KidsForm(props: SubFormProps) {
+    return <FashionBaseForm {...props} defaultGender="Kids" />;
+}
 
 // ─── Vehicles ────────────────────────────────────────────────────────────────
 
@@ -270,19 +581,36 @@ export function CarsForm({ control, register, errors }: SubFormProps) {
                 placeholder="Select Brand"
             />
             <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. City"
+            />
+            <TextInput
+                label="Variant"
+                name="variant"
+                register={register}
+                required
+                error={errors.variant?.message}
+                placeholder="e.g. VX CVT"
+            />
+            <TextInput
                 label="Year"
                 name="year"
                 register={register}
                 required
                 error={errors.year?.message}
                 placeholder="e.g. 2020"
+                type="number"
             />
             <ChoiceChips
                 label="Fuel"
                 name="fuel"
                 control={control}
                 required
-                options={["CNG & Hybrids", "Diesel", "Electric", "LPG", "Petrol"]}
+                options={fuelTypeOptions}
                 error={errors.fuel?.message}
             />
             <ChoiceChips
@@ -290,7 +618,7 @@ export function CarsForm({ control, register, errors }: SubFormProps) {
                 name="transmission"
                 control={control}
                 required
-                options={["Automatic", "Manual"]}
+                options={transmissionOptions}
                 error={errors.transmission?.message}
             />
             <TextInput
@@ -301,14 +629,41 @@ export function CarsForm({ control, register, errors }: SubFormProps) {
                 maxLength={6}
                 error={errors.kmDriven?.message}
                 placeholder="e.g. 25000"
+                type="number"
             />
             <ChoiceChips
                 label="No. of Owners"
                 name="owners"
                 control={control}
                 required
-                options={["1st", "2nd", "3rd", "4th", "4+"]}
+                options={ownerTypeOptions}
                 error={errors.owners?.message}
+            />
+            <TextInput
+                label="Insurance Valid Till"
+                name="insuranceValidTill"
+                register={register}
+                required
+                error={errors.insuranceValidTill?.message}
+                placeholder="YYYY-MM-DD"
+                type="date"
+            />
+            <EmptySelect
+                data={indianStateCodeOptions}
+                label="Registration State"
+                name="registrationState"
+                control={control}
+                required
+                error={errors.registrationState?.message}
+                placeholder="Select state"
+            />
+            <TextInput
+                label="Color"
+                name="color"
+                register={register}
+                required
+                error={errors.color?.message}
+                placeholder="e.g. White"
             />
         </SubFormGrid>
     );
@@ -327,20 +682,21 @@ export function MotorcyclesForm({ control, register, errors }: SubFormProps) {
                 placeholder="Select Brand"
             />
             <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. Classic 350"
+            />
+            <TextInput
                 label="Year"
                 name="year"
                 register={register}
                 required
                 error={errors.year?.message}
                 placeholder="e.g. 2020"
-            />
-            <ChoiceChips
-                label="Fuel"
-                name="fuel"
-                control={control}
-                required
-                options={["Electric", "Others", "CNG", "Hybrid", "Petrol"]}
-                error={errors.fuel?.message}
+                type="number"
             />
             <TextInput
                 label="KM driven"
@@ -350,6 +706,15 @@ export function MotorcyclesForm({ control, register, errors }: SubFormProps) {
                 maxLength={6}
                 error={errors.kmDriven?.message}
                 placeholder="e.g. 12000"
+                type="number"
+            />
+            <ChoiceChips
+                label="No. of Owners"
+                name="owners"
+                control={control}
+                required
+                options={ownerTypeOptions}
+                error={errors.owners?.message}
             />
         </SubFormGrid>
     );
@@ -368,20 +733,21 @@ export function ScootersForm({ control, register, errors }: SubFormProps) {
                 placeholder="Select Brand"
             />
             <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. Activa 6G"
+            />
+            <TextInput
                 label="Year"
                 name="year"
                 register={register}
                 required
                 error={errors.year?.message}
                 placeholder="e.g. 2020"
-            />
-            <ChoiceChips
-                label="Fuel"
-                name="fuel"
-                control={control}
-                required
-                options={["Hybrid", "CNG", "Others", "Petrol", "Electric"]}
-                error={errors.fuel?.message}
+                type="number"
             />
             <TextInput
                 label="KM driven"
@@ -391,12 +757,21 @@ export function ScootersForm({ control, register, errors }: SubFormProps) {
                 maxLength={6}
                 error={errors.kmDriven?.message}
                 placeholder="e.g. 8000"
+                type="number"
+            />
+            <ChoiceChips
+                label="No. of Owners"
+                name="owners"
+                control={control}
+                required
+                options={ownerTypeOptions}
+                error={errors.owners?.message}
             />
         </SubFormGrid>
     );
 }
 
-export function BicyclesForm({ control, errors }: SubFormProps) {
+export function BicyclesForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
             <EmptySelect
@@ -408,11 +783,55 @@ export function BicyclesForm({ control, errors }: SubFormProps) {
                 error={errors.brand?.message}
                 placeholder="Select Brand"
             />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                error={errors.model?.message}
+                placeholder="e.g. MTB 26"
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
         </SubFormGrid>
     );
 }
 
-export const SparePartsForm = EmptySubForm;
+export function SparePartsForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
+                required
+                error={errors.brand?.message}
+                placeholder="e.g. Bosch"
+            />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="Part / model name"
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
 
 export function CommercialOtherVehiclesForm({ control, register, errors }: SubFormProps) {
     return (
@@ -427,12 +846,29 @@ export function CommercialOtherVehiclesForm({ control, register, errors }: SubFo
                 placeholder="Select Type"
             />
             <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
+                required
+                error={errors.brand?.message}
+                placeholder="e.g. Tata"
+            />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="e.g. Ace"
+            />
+            <TextInput
                 label="Year"
                 name="year"
                 register={register}
                 required
                 error={errors.year?.message}
                 placeholder="e.g. 2018"
+                type="number"
             />
             <TextInput
                 label="KM driven"
@@ -442,6 +878,15 @@ export function CommercialOtherVehiclesForm({ control, register, errors }: SubFo
                 maxLength={6}
                 error={errors.kmDriven?.message}
                 placeholder="e.g. 45000"
+                type="number"
+            />
+            <ChoiceChips
+                label="No. of Owners"
+                name="owners"
+                control={control}
+                required
+                options={ownerTypeOptions}
+                error={errors.owners?.message}
             />
         </SubFormGrid>
     );
@@ -449,33 +894,60 @@ export function CommercialOtherVehiclesForm({ control, register, errors }: SubFo
 
 // ─── Books & Hobbies ─────────────────────────────────────────────────────────
 
-export const BooksForm = EmptySubForm;
-export const MusicalInstrumentsForm = EmptySubForm;
-export const OtherHobbiesForm = EmptySubForm;
+function BooksSportsBaseForm({ control, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
+
+export const BooksForm = BooksSportsBaseForm;
+export const MusicalInstrumentsForm = BooksSportsBaseForm;
+export const OtherHobbiesForm = BooksSportsBaseForm;
 
 // ─── Home & Living ───────────────────────────────────────────────────────────
 
-export const KitchenwareForm = EmptySubForm;
-export const LightingForm = EmptySubForm;
+export const KitchenwareForm = FurnitureBaseForm;
+export const LightingForm = FurnitureBaseForm;
 
 // ─── Sports & Fitness ────────────────────────────────────────────────────────
 
-export const GymFitnessForm = EmptySubForm;
-export const SportsEquipmentForm = EmptySubForm;
-export const CyclingForm = EmptySubForm;
-export const OtherSportsForm = EmptySubForm;
+export const GymFitnessForm = BooksSportsBaseForm;
+export const SportsEquipmentForm = BooksSportsBaseForm;
+export const CyclingForm = BooksSportsBaseForm;
+export const OtherSportsForm = BooksSportsBaseForm;
 
 // ─── Kids & Baby ─────────────────────────────────────────────────────────────
 
-export const ToysForm = EmptySubForm;
-export const PramsWalkersForm = EmptySubForm;
-export const KidsClothingForm = EmptySubForm;
+export function ToysForm(props: SubFormProps) {
+    return <BooksSportsBaseForm {...props} />;
+}
+export const PramsWalkersForm = BooksSportsBaseForm;
+export function KidsClothingForm(props: SubFormProps) {
+    return <FashionBaseForm {...props} defaultGender="Kids" />;
+}
 
 // ─── Real Estate ─────────────────────────────────────────────────────────────
 
 export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
+            <ChoiceChips
+                label="Listing Type"
+                name="listingType"
+                control={control}
+                required
+                options={listingTypeOptions}
+                error={errors.listingType?.message}
+            />
             <ChoiceChips
                 label="Type"
                 name="type"
@@ -494,6 +966,7 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
                 label="BHK"
                 name="bhk"
                 control={control}
+                required
                 options={["1", "2", "3", "4", "4+"]}
                 error={errors.bhk?.message}
             />
@@ -501,6 +974,7 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
                 label="Bathrooms"
                 name="bathrooms"
                 control={control}
+                required
                 options={["1", "2", "3", "4", "4+"]}
                 error={errors.bathrooms?.message}
             />
@@ -508,7 +982,8 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
                 label="Furnishing"
                 name="furnishing"
                 control={control}
-                options={["Furnished", "Semi-Furnished", "Unfurnished"]}
+                required
+                options={furnishingApiOptions}
                 error={errors.furnishing?.message}
             />
             <ChoiceChips
@@ -564,10 +1039,10 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
             />
             <ChoiceChips
                 label="Car Parking"
-                name="carParking"
+                name="parking"
                 control={control}
                 options={["0", "1", "2", "3+"]}
-                error={errors.carParking?.message}
+                error={errors.parking?.message}
             />
             <EmptySelect
                 data={facingOptions}
@@ -593,6 +1068,14 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
     return (
         <SubFormGrid>
             <ChoiceChips
+                label="Listing Type"
+                name="listingType"
+                control={control}
+                required
+                options={listingTypeOptions}
+                error={errors.listingType?.message}
+            />
+            <ChoiceChips
                 label="Type"
                 name="type"
                 control={control}
@@ -609,6 +1092,7 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
                 label="BHK"
                 name="bhk"
                 control={control}
+                required
                 options={["1", "2", "3", "4", "4+"]}
                 error={errors.bhk?.message}
             />
@@ -616,6 +1100,7 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
                 label="Bathrooms"
                 name="bathrooms"
                 control={control}
+                required
                 options={["1", "2", "3", "4", "4+"]}
                 error={errors.bathrooms?.message}
             />
@@ -623,7 +1108,8 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
                 label="Furnishing"
                 name="furnishing"
                 control={control}
-                options={["Furnished", "Semi-Furnished", "Unfurnished"]}
+                required
+                options={furnishingApiOptions}
                 error={errors.furnishing?.message}
             />
             <ChoiceChips
@@ -679,10 +1165,10 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
             />
             <ChoiceChips
                 label="Car Parking"
-                name="carParking"
+                name="parking"
                 control={control}
                 options={["0", "1", "2", "3+"]}
-                error={errors.carParking?.message}
+                error={errors.parking?.message}
             />
             <EmptySelect
                 data={facingOptions}
@@ -938,7 +1424,7 @@ export function ForRentShopsOfficesForm({ control, register, errors }: SubFormPr
                 label="Furnishing"
                 name="furnishing"
                 control={control}
-                options={["Furnished", "Semi-Furnished", "Unfurnished"]}
+                options={furnishingApiOptions}
                 error={errors.furnishing?.message}
             />
             <ChoiceChips
@@ -973,10 +1459,10 @@ export function ForRentShopsOfficesForm({ control, register, errors }: SubFormPr
             />
             <ChoiceChips
                 label="Car Parking"
-                name="carParking"
+                name="parking"
                 control={control}
                 options={["0", "1", "2", "3+"]}
-                error={errors.carParking?.message}
+                error={errors.parking?.message}
             />
             <TextInput
                 label="Washrooms"
@@ -1004,7 +1490,7 @@ export function ForSaleShopsOfficesForm({ control, register, errors }: SubFormPr
                 label="Furnishing"
                 name="furnishing"
                 control={control}
-                options={["Furnished", "Semi-Furnished", "Unfurnished"]}
+                options={furnishingApiOptions}
                 error={errors.furnishing?.message}
             />
             <ChoiceChips
@@ -1046,10 +1532,10 @@ export function ForSaleShopsOfficesForm({ control, register, errors }: SubFormPr
             />
             <ChoiceChips
                 label="Car Parking"
-                name="carParking"
+                name="parking"
                 control={control}
                 options={["0", "1", "2", "3+"]}
-                error={errors.carParking?.message}
+                error={errors.parking?.message}
             />
             <TextInput
                 label="Washrooms"
@@ -1085,7 +1571,7 @@ export function PGGuestHousesForm({ control, errors }: SubFormProps) {
                 label="Furnishing"
                 name="furnishing"
                 control={control}
-                options={["Furnished", "Semi-Furnished", "Unfurnished"]}
+                options={furnishingApiOptions}
                 error={errors.furnishing?.message}
             />
             <ChoiceChips
@@ -1097,10 +1583,10 @@ export function PGGuestHousesForm({ control, errors }: SubFormProps) {
             />
             <ChoiceChips
                 label="Car Parking"
-                name="carParking"
+                name="parking"
                 control={control}
                 options={["0", "1", "2", "3+"]}
-                error={errors.carParking?.message}
+                error={errors.parking?.message}
             />
             <ChoiceChips
                 label="Meals Included"
@@ -1115,19 +1601,193 @@ export function PGGuestHousesForm({ control, errors }: SubFormProps) {
 
 // ─── Pet Supplies ────────────────────────────────────────────────────────────
 
-export const FishesAquariumForm = EmptySubForm;
-export const PetFoodAccessoriesForm = EmptySubForm;
-export const DogsForm = EmptySubForm;
-export const OtherPetsForm = EmptySubForm;
+function PetsBaseForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <EmptySelect
+                data={petTypeOptions}
+                label="Pet Type"
+                name="petType"
+                control={control}
+                required
+                error={errors.petType?.message}
+                placeholder="Select pet type"
+            />
+            <TextInput
+                label="Breed"
+                name="breed"
+                register={register}
+                required
+                error={errors.breed?.message}
+                placeholder="e.g. Labrador"
+            />
+            <TextInput
+                label="Age"
+                name="age"
+                register={register}
+                required
+                error={errors.age?.message}
+                placeholder="e.g. 2 years"
+            />
+            <ChoiceChips
+                label="Gender"
+                name="gender"
+                control={control}
+                required
+                options={petGenderOptions}
+                error={errors.gender?.message}
+            />
+            <ChoiceChips
+                label="Vaccinated"
+                name="vaccinated"
+                control={control}
+                required
+                options={yesNoOptions}
+                error={errors.vaccinated?.message}
+            />
+        </SubFormGrid>
+    );
+}
+
+export const FishesAquariumForm = PetsBaseForm;
+export const PetFoodAccessoriesForm = PetsBaseForm;
+export const DogsForm = PetsBaseForm;
+export const OtherPetsForm = PetsBaseForm;
 
 // ─── Services ────────────────────────────────────────────────────────────────
 
-export const EducationClassesForm = EmptySubForm;
-export const ToursTravelForm = EmptySubForm;
-export const ElectronicsRepairServicesForm = EmptySubForm;
-export const HealthBeautyForm = EmptySubForm;
-export const HomeRenovationRepairForm = EmptySubForm;
-export const CleaningPestControlForm = EmptySubForm;
-export const LegalDocumentationServicesForm = EmptySubForm;
-export const PackersMoversForm = EmptySubForm;
-export const OtherServicesForm = EmptySubForm;
+function ServicesBaseForm({
+    control,
+    register,
+    errors,
+    serviceOptions = serviceTypeOptions,
+}: SubFormProps & {
+    serviceOptions?: { value: string; label: string }[];
+}) {
+    return (
+        <SubFormGrid>
+            <EmptySelect
+                data={serviceOptions}
+                label="Service Type"
+                name="serviceType"
+                control={control}
+                required
+                error={errors.serviceType?.message}
+                placeholder="Select service type"
+            />
+            <TextInput
+                label="Experience"
+                name="experience"
+                register={register}
+                required
+                error={errors.experience?.message}
+                placeholder="e.g. 5 years"
+            />
+            <TextInput
+                label="Service Area"
+                name="serviceArea"
+                register={register}
+                required
+                error={errors.serviceArea?.message}
+                placeholder="e.g. Bengaluru"
+                className="sm:col-span-2"
+            />
+        </SubFormGrid>
+    );
+}
+
+export function EducationClassesForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} />;
+}
+export function ToursTravelForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} serviceOptions={serviceTypeOptions} />;
+}
+export function ElectronicsRepairServicesForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} serviceOptions={electronicsTypeOptions} />;
+}
+export function HealthBeautyForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} />;
+}
+export function HomeRenovationRepairForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} serviceOptions={homeServiceTypeOptions} />;
+}
+export function CleaningPestControlForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} />;
+}
+export function LegalDocumentationServicesForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} />;
+}
+export function PackersMoversForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} />;
+}
+export function OtherServicesForm(props: SubFormProps) {
+    return <ServicesBaseForm {...props} />;
+}
+
+// ─── Jobs ────────────────────────────────────────────────────────────────────
+
+export function JobsForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <EmptySelect
+                data={jobTypeOptions}
+                label="Job Type"
+                name="jobType"
+                control={control}
+                required
+                error={errors.jobType?.message}
+                placeholder="Select job type"
+            />
+            <TextInput
+                label="Company Name"
+                name="companyName"
+                register={register}
+                required
+                error={errors.companyName?.message}
+                placeholder="e.g. Acme Pvt Ltd"
+            />
+            <TextInput
+                label="Salary From"
+                name="salaryFrom"
+                register={register}
+                required
+                error={errors.salaryFrom?.message}
+                placeholder="e.g. 30000"
+                type="number"
+            />
+            <TextInput
+                label="Salary To"
+                name="salaryTo"
+                register={register}
+                required
+                error={errors.salaryTo?.message}
+                placeholder="e.g. 50000"
+                type="number"
+            />
+            <TextInput
+                label="Experience"
+                name="experience"
+                register={register}
+                required
+                error={errors.experience?.message}
+                placeholder="e.g. 2-4 years"
+            />
+            <TextInput
+                label="Qualification"
+                name="qualification"
+                register={register}
+                required
+                error={errors.qualification?.message}
+                placeholder="e.g. B.Tech"
+            />
+            <ChoiceChips
+                label="Work Mode"
+                name="workMode"
+                control={control}
+                required
+                options={workModeOptions}
+                error={errors.workMode?.message}
+            />
+        </SubFormGrid>
+    );
+}

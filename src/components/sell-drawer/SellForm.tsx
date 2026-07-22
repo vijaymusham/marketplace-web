@@ -9,22 +9,19 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import toast from "react-hot-toast";
-import { X, Camera, MapPin, Navigation, ImagePlus } from "lucide-react";
-import { categories } from "@/lib/categories";
-import {
-    getCitiesForState,
-    getNeighbourhoods,
-    locationTree,
-} from "@/lib/locations";
+import { X, Camera, MapPin, Navigation, ImagePlus, Send } from "lucide-react";
+import { normalizeApiCategories } from "@/lib/apiCategories";
+import { locationTree } from "@/lib/locations";
 import SelectDropdown from "./SelectDropdown";
-import type { SellFormValues } from "../types/AllTypes";
+import type { ApiCity, SellFormValues } from "../types/AllTypes";
+import { emptySellFormValues } from "../types/AllTypes";
 import { inputClassName } from "@/constant/helper/classesHelper";
 import { Field, formContainer, formItem } from "../../constant/helper/TextField";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { createSellForm, type ApiError } from "@/components/api/apis";
+import { createSellForm, getCategories, getCities, getStates, type ApiError } from "@/components/api/apis";
 import {
     AccessoriesForm,
     ACsForm,
@@ -86,7 +83,10 @@ import {
     TVsVideoAudioForm,
     WashingMachinesForm,
     WomenForm,
+    // JobsForm,
 } from "./FormBySubCategory";
+import { yesNoOptions } from "@/components/data/FormOptions";
+import { uploadToS3 } from "@/constant/helper/s3Upload";
 
 const MAX_PHOTOS = 12;
 
@@ -151,61 +151,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
         reset,
         formState: { errors },
     } = useForm<SellFormValues>({
-        defaultValues: {
-            title: "",
-            category: "",
-            subcategory: "",
-            condition: "",
-            price: "",
-            description: "",
-            state: "",
-            city: "",
-            neighbourhood: "",
-            sellerName: "",
-            mobile: "",
-            brand: "",
-            year: "",
-            fuel: "",
-            transmission: "",
-            kmDriven: "",
-            owners: "",
-            type: "",
-            bhk: "",
-            bathrooms: "",
-            furnishing: "",
-            listedBy: "",
-            superBuiltupArea: "",
-            carpetArea: "",
-            bachelorsAllowed: "",
-            maintenance: "",
-            totalFloors: "",
-            floorNo: "",
-            carParking: "",
-            facing: "",
-            projectName: "",
-            projectStatus: "",
-            plotArea: "",
-            length: "",
-            breadth: "",
-            subtype: "",
-            mealsIncluded: "",
-            washrooms: "",
-            projectType: "",
-            typeOfProperty: "",
-            developerName: "",
-            reraNo: "",
-            projectLaunchMonth: "",
-            projectLaunchYear: "",
-            expectedPossessionMonth: "",
-            expectedPossessionYear: "",
-            priceFrom: "",
-            priceTo: "",
-            pricingType: "",
-            keyAmenities: "",
-            noOfTowers: "",
-            noOfFloors: "",
-            totalUnits: "",
-        },
+        defaultValues: emptySellFormValues,
     });
 
     useEffect(() => {
@@ -225,6 +171,29 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
     const descriptionValue = useWatch({ control, name: "description" });
     const sellerNameValue = useWatch({ control, name: "sellerName" });
 
+
+    const { data: apiCategories } = useQuery({
+        queryKey: ["categories"],
+        queryFn: getCategories,
+    });
+
+
+    const { data: apiStates = [] } = useQuery({
+        queryKey: ["states"],
+        queryFn: getStates,
+    });
+
+    const { data: apiCities = [] } = useQuery({
+        queryKey: ["cities", selectedState],
+        queryFn: () => getCities(selectedState || undefined),
+        enabled: Boolean(selectedState),
+    });
+
+    const categories = useMemo(
+        () => normalizeApiCategories(apiCategories),
+        [apiCategories],
+    );
+
     const categoryOptions = useMemo(
         () =>
             categories.map((cat) => {
@@ -235,7 +204,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                     icon: <Icon className="h-5 w-5" />,
                 };
             }),
-        []
+        [categories],
     );
 
     const subcategoryOptions = useMemo(() => {
@@ -245,30 +214,34 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
             value: name,
             label: name,
         }));
-    }, [selectedCategory]);
+    }, [selectedCategory, categories]);
 
     const stateOptions = useMemo(
-        () => locationTree.map((s) => ({ value: s.name, label: s.name })),
-        []
+        () =>
+            apiStates.map((s) => ({
+                value: s.id,
+                label: s.name,
+            })),
+        [apiStates],
     );
-
     const cityOptions = useMemo(
         () =>
-            getCitiesForState(selectedState).map((c) => ({
-                value: c.name,
-                label: c.name,
-            })),
-        [selectedState]
+            apiCities
+                .filter((c) => c.type !== "neighbourhood")
+                .map((c: ApiCity) => ({
+                    value: String(c.id),
+                    label: c.name,
+                })),
+        [apiCities],
     );
-
-    const neighbourhoodOptions = useMemo(
-        () =>
-            getNeighbourhoods(selectedState, selectedCity).map((name) => ({
-                value: name,
-                label: name,
-            })),
-        [selectedState, selectedCity]
-    );
+    // const neighbourhoodOptions = useMemo(
+    //     () =>
+    //         getNeighbourhoods(selectedState, selectedCity).map((name) => ({
+    //             value: name,
+    //             label: name,
+    //         })),
+    //     [selectedState, selectedCity]
+    // );
 
     const addPhotos = (files: FileList | null) => {
         if (!files?.length) return;
@@ -320,10 +293,16 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
         }
         setDetecting(true);
         navigator.geolocation.getCurrentPosition(
-            () => {
+            (position) => {
                 const fallback = locationTree[0];
                 const city = fallback?.cities[0];
                 const neighbourhood = city?.neighbourhoods[0] ?? "";
+                setValue("latitude", String(position.coords.latitude), {
+                    shouldValidate: true,
+                });
+                setValue("longitude", String(position.coords.longitude), {
+                    shouldValidate: true,
+                });
                 if (fallback && city) {
                     setValue("state", fallback.name, { shouldValidate: true });
                     setValue("city", city.name, { shouldValidate: true });
@@ -356,15 +335,23 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
         },
     });
 
-    const onSubmit = (data: SellFormValues) => {
+    const uploadMultipleToS3 = async (
+        files: File[],
+        folder: string = "uploads"
+    ): Promise<{ success: boolean; key?: string; url?: string; error?: unknown }[]> => {
+        return Promise.all(files.map((file) => uploadToS3(file, folder)));
+    };
+
+    const onSubmit = async (data: SellFormValues) => {
+        console.log(data);
         if (photos.length === 0) {
             setPhotoError("Add at least one photo");
             return;
         }
         if (createSellFormMutation.isPending) return;
         createSellFormMutation.mutate({
-            data,
-            images: photos.map((photo) => photo.file),
+            ...data,
+            images: (await uploadMultipleToS3(photos.map((photo) => photo.file))).map((response) => response.url || ""),
         });
     };
 
@@ -518,6 +505,13 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
             case "Other Services":
                 return <OtherServicesForm {...subFormProps} />;
 
+            // Jobs
+            // case "Full-time":
+            // case "Part-time":
+            // case "Internships":
+            // case "Work from Home":
+            //     return <JobsForm {...subFormProps} />;
+
             default:
                 return null;
         }
@@ -592,7 +586,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
 
                 <form
                     id="sell-form"
-                    className="flex min-h-0 flex-1 flex-col"
+                    className="flex min-h-0 flex-1 flex-col bg-slate-50/50"
                     onSubmit={handleSubmit(onSubmit)}
                 >
                     <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7">
@@ -621,8 +615,8 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         {...register("title", {
                                             required: "Title is required",
                                             minLength: {
-                                                value: 3,
-                                                message: "At least 3 characters",
+                                                value: 5,
+                                                message: "At least 5 characters",
                                             },
                                         })}
                                     />
@@ -646,8 +640,8 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         {...register("description", {
                                             required: "Description is required",
                                             minLength: {
-                                                value: 10,
-                                                message: "At least 10 characters",
+                                                value: 20,
+                                                message: "At least 20 characters",
                                             },
                                         })}
                                     />
@@ -718,22 +712,65 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                 "Legal & Documentation Services",
                                 "Packers & Movers",
                                 "Other Services",
-                            ].includes(selectedSubcategory) && (<Field label="Price (₹)" error={errors.price?.message} required>
-                                <input
-                                    type="number"
-                                    inputMode="numeric"
-                                    placeholder="e.g. ₹15000"
-                                    className={inputClassName}
-                                    aria-invalid={!!errors.price}
-                                    {...register("price", {
-                                        required: "Price is Required",
-                                        pattern: {
-                                            value: /^\d+$/,
-                                            message: "Enter a Valid Amount",
-                                        },
-                                    })}
-                                />
-                            </Field>)}
+                                "Full-time",
+                                "Part-time",
+                                "Internships",
+                                "Work from Home",
+                            ].includes(selectedSubcategory) && (
+                                    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
+                                        <Field label="Price (₹)" error={errors.price?.message} required>
+                                            <input
+                                                type="number"
+                                                inputMode="numeric"
+                                                placeholder="e.g. ₹15000"
+                                                className={inputClassName}
+                                                aria-invalid={!!errors.price}
+                                                {...register("price", {
+                                                    required: "Price is Required",
+                                                    pattern: {
+                                                        value: /^\d+$/,
+                                                        message: "Enter a Valid Amount",
+                                                    },
+                                                })}
+                                            />
+                                        </Field>
+                                        <motion.div variants={formItem} className="flex flex-col gap-1.5">
+                                            <label className="text-[15px] font-semibold text-black">
+                                                Negotiable*
+                                            </label>
+                                            <Controller
+                                                name="isNegotiable"
+                                                control={control}
+                                                rules={{ required: "Select negotiable option" }}
+                                                render={({ field }) => (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {yesNoOptions.map((option) => {
+                                                            const active = field.value === option.value;
+                                                            return (
+                                                                <button
+                                                                    key={option.value}
+                                                                    type="button"
+                                                                    onClick={() => field.onChange(option.value)}
+                                                                    className={`cursor-pointer rounded-xl border px-3.5 py-2 text-sm font-semibold transition-colors ${active
+                                                                        ? "border-primary bg-primary/10 text-primary"
+                                                                        : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300"
+                                                                        }`}
+                                                                >
+                                                                    {option.label}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            />
+                                            {errors.isNegotiable?.message ? (
+                                                <p className="text-xs font-semibold text-red-500">
+                                                    {errors.isNegotiable.message}
+                                                </p>
+                                            ) : null}
+                                        </motion.div>
+                                    </div>
+                                )}
 
                             {/* Photos */}
                             <div className="">
@@ -892,14 +929,14 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         {selectedState ? (
                                             <motion.div
                                                 key="city-field"
-                                                initial={{ opacity: 0, y: 10, height: 0 }}
-                                                animate={{ opacity: 1, y: 0, height: "auto" }}
-                                                exit={{ opacity: 0, y: -6, height: 0 }}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -6 }}
                                                 transition={{
                                                     duration: 0.22,
                                                     ease: [0.22, 1, 0.36, 1],
                                                 }}
-                                                className="overflow-hidden"
+                                                className="relative z-20"
                                             >
                                                 <Controller
                                                     name="city"
@@ -924,7 +961,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         ) : null}
                                     </AnimatePresence>
 
-                                    <AnimatePresence initial={false}>
+                                    {/* <AnimatePresence initial={false}>
                                         {selectedState && selectedCity ? (
                                             <motion.div
                                                 key="neighbourhood-field"
@@ -959,7 +996,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                                 />
                                             </motion.div>
                                         ) : null}
-                                    </AnimatePresence>
+                                    </AnimatePresence> */}
                                 </div>
                             ) : (
                                 <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-4">
@@ -1034,29 +1071,32 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                         transition={{ delay: 0.28, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                         className="shrink-0 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-7"
                     >
-                        <div className="flex items-center justify-end gap-3">
-                            <motion.button
+                        <div className="flex items-center justify-end gap-1">
+                            <button
                                 type="button"
                                 onClick={onClose}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="rounded-2xl px-5 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                                className="flex cursor-pointer items-center gap-2 rounded-full border-2 border-white bg-slate-200 py-2.5 px-6 text-sm font-semibold text-slate-600  transition-all duration-200 hover:border-white hover:text-white"
                             >
-                                Cancel
-                            </motion.button>
-                            <motion.button
+                                <span className="hidden max-w-24 truncate font-semibold md:block">
+                                    Cancel
+                                </span>
+                            </button>
+                            <button
                                 type="submit"
                                 disabled={isPosting}
-                                whileHover={isPosting ? undefined : { scale: 1.03, y: -1 }}
-                                whileTap={isPosting ? undefined : { scale: 0.97 }}
-                                className="rounded-2xl bg-primary px-6 py-3 text-sm font-bold tracking-wide text-white shadow-lg shadow-primary/25 transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                                className="flex cursor-pointer items-center gap-2 rounded-full border-2 border-white bg-[#ff5a1f] py-1.5 pr-4 pl-1.5 text-sm font-semibold text-white transition-all duration-200 hover:border-white hover:text-white"
                             >
-                                {isPosting ? "Posting…" : "Post Now"}
-                            </motion.button>
+                                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#ff5a1f]">
+                                    <Send className="h-4 w-4" strokeWidth={3} />
+                                </span>
+                                <span className="hidden max-w-24 truncate font-semibold md:block">
+                                    {isPosting ? "Posting…" : "Post Now"}
+                                </span>
+                            </button>
                         </div>
                     </motion.footer>
                 </form>
             </motion.div>
-        </div>
+        </div >
     );
 }
