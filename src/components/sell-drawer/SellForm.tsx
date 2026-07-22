@@ -227,7 +227,6 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
     const cityOptions = useMemo(
         () =>
             apiCities
-                .filter((c) => c.type !== "neighbourhood")
                 .map((c: ApiCity) => ({
                     value: String(c.id),
                     label: c.name,
