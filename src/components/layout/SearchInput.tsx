@@ -13,7 +13,7 @@ const SUGGESTIONS = [
     "more",
 ];
 
-const INTERVAL_MS = 2200;
+const INTERVAL_MS = 3000;
 
 export default function SearchInput() {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -71,9 +71,9 @@ export default function SearchInput() {
                                 <AnimatePresence mode="wait" initial={false}>
                                     <motion.span
                                         key={SUGGESTIONS[index]}
-                                        initial={{ y: 28, opacity: 0 }}
+                                        initial={{ y: 10, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
-                                        exit={{ y: -28, opacity: 0 }}
+                                        exit={{ y: -10, opacity: 0 }}
                                         transition={{
                                             y: { type: "spring", stiffness: 140, damping: 20 },
                                             opacity: { duration: 0.45, ease: [0.4, 0.0, 0.2, 1] }

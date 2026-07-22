@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "picsum.photos",
+      },
+      {
+        protocol: "https",
+        hostname: "marketplace27.s3.ap-south-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
         hostname: "media-assets.swiggy.com",
       },
     ],

@@ -28,7 +28,7 @@ function toListingCard(listing: ApiFreshRecommendation) {
 export default function FreshRecommendations() {
     const { data = [] } = useQuery({
         queryKey: ["freshRecommendations"],
-        queryFn: () => getFreshAds({ latitude: 12.9716, longitude: 77.5946 }),
+        queryFn: () => getFreshAds({ latitude: 19.2183, longitude: 72.9781 }),
     });
 
     return (

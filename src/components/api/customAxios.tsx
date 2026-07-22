@@ -7,6 +7,8 @@ import axios, {
 import { signOut } from "firebase/auth";
 import toast from "react-hot-toast";
 import { auth } from "@/constant/firebase/firebase";
+import { clearuser } from "@/components/redux/slices/authSlice";
+import { persistor, store } from "@/components/redux/store";
 
 export type ApiError = {
     message: string;
@@ -38,6 +40,12 @@ function isPublicPath(url = "") {
     return PUBLIC_API_PATHS.some((path) => url.includes(path));
 }
 
+function isUnauthorizedPayload(data: unknown): boolean {
+    if (!data || typeof data !== "object") return false;
+    const message = (data as { message?: unknown }).message;
+    return typeof message === "string" && message.toLowerCase() === "unauthorized";
+}
+
 async function getAccessToken(): Promise<string | null> {
     if (typeof window === "undefined") return null;
 
@@ -60,17 +68,25 @@ async function getAccessToken(): Promise<string | null> {
     }
 }
 
+async function clearAuthData() {
+    localStorage.removeItem("token");
+    store.dispatch(clearuser());
+    await persistor.purge();
+    await signOut(auth);
+}
+
 async function handleAutoLogout() {
     if (typeof window === "undefined" || isLoggingOut) return;
 
     isLoggingOut = true;
 
     try {
-        localStorage.removeItem("token");
-        await signOut(auth);
+        await clearAuthData();
         toast.error("Session expired. Please sign in again.");
     } catch {
         // Ignore logout failures — session is already invalid
+        localStorage.removeItem("token");
+        store.dispatch(clearuser());
     } finally {
         window.setTimeout(() => {
             isLoggingOut = false;
@@ -126,8 +142,7 @@ const customAxios = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-    withCredentials: false,
-    timeout: 30_000,
+    withCredentials: false
 });
 
 customAxios.interceptors.request.use(
@@ -163,9 +178,13 @@ customAxios.interceptors.response.use(
         }
 
         const status = error.response?.status;
+        const requestUrl = error.config?.url ?? "";
 
-        // Auto-logout only on unauthorized (invalid/expired session)
-        if (status === 401) {
+        // Auto-logout on unauthorized (invalid/expired session) — clear token, Redux, persist
+        if (
+            !isPublicPath(requestUrl) &&
+            (status === 401 || isUnauthorizedPayload(error.response?.data))
+        ) {
             await handleAutoLogout();
         }
 

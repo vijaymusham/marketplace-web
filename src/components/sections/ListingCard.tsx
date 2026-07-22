@@ -24,7 +24,7 @@ export default function ListingCard({
     return (
         <Link
             href={`/listing/${listing.id}`}
-            className="group flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform hover:-translate-y-1.5"
+            className="group flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform "
         >
             <div className="relative aspect-12/11 w-full overflow-hidden rounded-2xl bg-slate-100 shadow-none transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.28)]">
                 <Image

@@ -11,7 +11,7 @@ export default function CityExplorer() {
 
     const { data } = useQuery({
         queryKey: ["popularCities"],
-        queryFn: () => getPopularCities({ latitude: 12.9716, longitude: 77.5946 }),
+        queryFn: () => getPopularCities({ latitude: 19.2183, longitude: 72.9781 }),
     });
 
     return (
@@ -39,7 +39,7 @@ export default function CityExplorer() {
                                 >
                                     <div className="relative aspect-square w-full overflow-hidden rounded-full bg-slate-100">
                                         <Image
-                                            src={city.imageUrl || "/images/city-placeholder.png"}
+                                            src={city.image || "/images/city-placeholder.png"}
                                             alt={`Deals in ${city.name || "No name"}`}
                                             fill
                                             sizes="116px"

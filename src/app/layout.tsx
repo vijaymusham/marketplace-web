@@ -49,7 +49,7 @@ export default function RootLayout({
                                     position="top-right"
                                     reverseOrder={false}
                                     gutter={8}
-                                    containerStyle={{ zIndex: 100000 }}
+                                    containerStyle={{ zIndex: 100000, fontFamily: "var(--font-display)", fontWeight: "600" }}
                                     toasterId="default"
                                 />
                                 <SiteChrome />

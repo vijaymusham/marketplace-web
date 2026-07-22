@@ -7,6 +7,7 @@ import { ChevronDown, X, LocateFixed, Search } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import { setLocation } from "../redux/slices/authSlice";
+import { toast } from "react-hot-toast";
 
 export default function LocationPicker() {
     const dispatch = useDispatch<AppDispatch>();
@@ -129,6 +130,7 @@ export default function LocationPicker() {
                                                         longitude: position.coords.longitude,
                                                     }));
                                                     setOpen(false);
+                                                    toast.success("Location detected successfully");
                                                 });
                                             }}
                                             className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"

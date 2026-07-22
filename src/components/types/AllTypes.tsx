@@ -251,7 +251,7 @@ export type ApiCity = {
     id: string;
     stateId: string;
     name: string;
-    imageUrl: string;
+    image: string;
     latitude: number;
     longitude: number;
     distanceKm: number;

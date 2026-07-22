@@ -30,7 +30,7 @@ function toListing(ad: ApiAdsBySectionAd): Listing {
 export default function Home() {
     const { data } = useQuery({
         queryKey: ["adsBySection"],
-        queryFn: () => getAdsBySection({ latitude: 12.9716, longitude: 77.5946 }),
+        queryFn: () => getAdsBySection({ latitude: 19.2183, longitude: 72.9781 }),
     });
 
     return (

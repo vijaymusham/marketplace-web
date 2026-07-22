@@ -1,0 +1,167 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import { CalendarDays, CheckCircle2, Eye, Heart } from "lucide-react";
+
+export type MyAdStatus =
+  | "active"
+  | "inactive"
+  | "pending"
+  | "moderated"
+  | "expired"
+  | "sold";
+
+export type MyAd = {
+  id: string;
+  title: string;
+  price: string;
+  image: string;
+  status: MyAdStatus;
+  fromDate: string;
+  toDate: string;
+  views: number;
+  likes: number;
+  message?: string;
+};
+
+const STATUS: Record<
+  MyAdStatus,
+  { label: string; tone: string; dot: string }
+> = {
+  active: {
+    label: "Active",
+    tone: "bg-emerald-50 text-emerald-700",
+    dot: "bg-emerald-500",
+  },
+  pending: {
+    label: "Pending",
+    tone: "bg-amber-50 text-amber-700",
+    dot: "bg-amber-500",
+  },
+  moderated: {
+    label: "Moderated",
+    tone: "bg-slate-100 text-slate-600",
+    dot: "bg-slate-400",
+  },
+  sold: {
+    label: "Sold",
+    tone: "bg-primary/10 text-primary",
+    dot: "bg-primary",
+  },
+  inactive: {
+    label: "Inactive",
+    tone: "bg-rose-50 text-rose-600",
+    dot: "bg-rose-500",
+  },
+  expired: {
+    label: "Expired",
+    tone: "bg-rose-50 text-rose-600",
+    dot: "bg-rose-500",
+  },
+};
+
+const easeSmooth = [0.22, 1, 0.36, 1] as const;
+
+export default function MyAdsCard({
+  ad,
+  onMarkSold,
+  index = 0,
+}: {
+  ad: MyAd;
+  onMarkSold: (id: string) => void;
+  index?: number;
+}) {
+  const style = STATUS[ad.status];
+  const reduce = useReducedMotion();
+  const delay = Math.min(index, 8) * 0.06;
+
+  return (
+    <motion.article
+      initial={reduce ? false : { opacity: 0, y: 20, scale: 0.985 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: easeSmooth, delay }}
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition-colors hover:border-primary/30 hover:bg-slate-50/40"
+    >
+      <div className="grid grid-cols-1 md:grid-cols-[9.5rem_1fr]">
+        <Link
+          href={`/listing/${ad.id}`}
+          className="relative aspect-4/3 bg-slate-100 md:aspect-auto md:min-h-full"
+        >
+          <Image
+            src={ad.image}
+            alt={ad.title}
+            fill
+            sizes="(min-width: 768px) 152px, 100vw"
+            className="object-cover"
+          />
+        </Link>
+
+        <div className="flex min-w-0 flex-col p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-bold ${style.tone}`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+                  {style.label}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400">
+                  <CalendarDays className="h-3 w-3" />
+                  {ad.fromDate} → {ad.toDate}
+                </span>
+              </div>
+
+              <Link
+                href={`/listing/${ad.id}`}
+                className="line-clamp-2 text-[15px] leading-snug font-bold text-slate-900 hover:text-primary"
+              >
+                {ad.title}
+              </Link>
+              <p className="mt-1.5 text-xl font-extrabold tracking-tight text-slate-900">
+                {ad.price}
+              </p>
+            </div>
+          </div>
+
+          {ad.message && (
+            <p className="mt-3 border-l-2 border-primary/50 bg-primary/5 px-3 py-2 text-xs leading-relaxed font-medium text-slate-600">
+              {ad.message}
+            </p>
+          )}
+
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
+            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
+              <span className="inline-flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5 text-slate-400" />
+                {ad.views} views
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Heart className="h-3.5 w-3.5 text-slate-400" />
+                {ad.likes} likes
+              </span>
+            </div>
+
+            {ad.status !== "sold" ? (
+              <button
+                type="button"
+                onClick={() => onMarkSold(ad.id)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-primary-hover"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Mark as sold
+              </button>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Sold
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
