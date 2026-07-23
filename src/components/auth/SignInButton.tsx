@@ -97,13 +97,13 @@ export default function SignInButton() {
                             className="fixed inset-0 z-40 cursor-default"
                             onClick={() => setMenuOpen(false)}
                         />
-                        <div className="absolute top-full right-0 z-50 mt-2.5 w-78 overflow-hidden rounded-3xl border-4 border-white bg-slate-100">
+                        <div className="absolute top-full right-0 z-50 mt-2.5 w-78 overflow-hidden rounded-4xl border-4 border-white bg-white shadow-lg shadow-black/5">
                             {/* Header */}
                             <div className="relative overflow-hidden bg-slate-50 px-4 pt-5 pb-4">
 
                                 <div className="relative flex items-center gap-3.5">
                                     <div className="relative shrink-0">
-                                        <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white text-primary shadow-md shadow-primary/10 ring-2 ring-white">
+                                        <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white text-primary ">
                                             {profile.profilePhoto ? (
                                                 <Image
                                                     src={profile.profilePhoto}
@@ -196,7 +196,7 @@ export default function SignInButton() {
                             </div>
 
                             {/* Footer actions */}
-                            <div className="border-t border-slate-100/90 bg-slate-50/60 px-2.5 py-2">
+                            <div className="border-t border-slate-100/90 bg-white px-2.5 py-2">
                                 <Link
                                     href="/help"
                                     onClick={() => setMenuOpen(false)}
