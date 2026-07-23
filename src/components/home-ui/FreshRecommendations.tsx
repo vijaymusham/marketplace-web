@@ -4,25 +4,20 @@ import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
 import { useQuery } from "@tanstack/react-query";
 import { getFreshAds } from "../api/apis";
 import ListingCard from "../sections/ListingCard";
-import type { ApiFreshRecommendation } from "../types/AllTypes";
+import type { ApiAd, ApiFreshRecommendation } from "../types/AllTypes";
 
-function formatPrice(price: number, currency?: string) {
-    const amount = Number.isFinite(price) ? price.toLocaleString("en-IN") : "0";
-    if (!currency || currency === "INR" || currency === "₹") return `₹${amount}`;
-    return `${currency} ${amount}`;
-}
-
-function toListingCard(listing: ApiFreshRecommendation) {
+function toListingCard(listing: ApiFreshRecommendation): ApiAd {
     return {
         id: listing.id,
         title: listing.title,
-        price: formatPrice(listing.price, listing.currency),
-        meta: listing.metadata || listing.category?.name,
-        location: listing.location,
-        date: listing.postedAtLabel || listing.postedAt,
-        featured: listing.isFeatured,
+        imageUrl: listing.imageUrl,
         isFavorite: listing.isFavorite,
-        image: listing.imageUrl,
+        price: listing.price,
+        currency: listing.currency,
+        location: listing.location,
+        metadata: listing.metadata || listing.category?.name || "",
+        postedAt: listing.postedAt,
+        postedAtLabel: listing.postedAtLabel || listing.postedAt,
     };
 }
 

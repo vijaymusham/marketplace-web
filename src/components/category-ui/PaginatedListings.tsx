@@ -1,14 +1,13 @@
-"use client";
-
+"use client";;
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ListingCard from "@/components/sections/ListingCard";
-import type { Listing } from "@/lib/listings";
 import { Stagger, StaggerItem } from "@/components/animations/Motion";
+import { ApiAd } from "../types/AllTypes";
 
 const PAGE_SIZE = 20;
 
-export default function PaginatedListings({ listings }: { listings: Listing[] }) {
+export default function PaginatedListings({ listings }: { listings: ApiAd[] }) {
     const [page, setPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
 

@@ -36,8 +36,6 @@ export default function CategoryTabs() {
         const onScroll = () => {
             cancelAnimationFrame(raf);
             raf = requestAnimationFrame(() => {
-                // wide hysteresis gap (larger than the bar's height change)
-                // so the state can never oscillate around the threshold
                 const collapseAt = window.innerHeight * 0.28;
                 const expandAt = Math.max(collapseAt - 140, 40);
                 const next = collapsedRef.current
@@ -67,15 +65,12 @@ export default function CategoryTabs() {
         if (!container || !category) return;
 
         const containerRect = container.getBoundingClientRect();
-        // never let the panel exceed the container (8px inset on each side)
         const width = Math.min(
             category.subcategories.length > 6 ? PANEL_WIDE : PANEL_NARROW,
             containerRect.width - PANEL_MARGIN * 2,
         );
         const tabRect = target.getBoundingClientRect();
         const tabCenter = tabRect.left - containerRect.left + tabRect.width / 2;
-
-        // center the panel under the hovered tab, clamped inside the container
         const left = Math.min(
             Math.max(tabCenter - width / 2, PANEL_MARGIN),
             Math.max(containerRect.width - width - PANEL_MARGIN, PANEL_MARGIN),
@@ -92,7 +87,6 @@ export default function CategoryTabs() {
 
     return (
         <>
-            {/* fixed (out of flow) so the height animation never reflows the page */}
             <nav
                 onMouseLeave={() => setOpenIndex(null)}
                 className={`fixed inset-x-0 top-18 z-20 border-b transition-[background-color,box-shadow,border-color] duration-300 ${collapsed
@@ -120,12 +114,12 @@ export default function CategoryTabs() {
                                 className="h-full overflow-x-auto scroll-smooth scrollbar-hide"
                             >
                                 <ul className="mx-auto flex h-full w-max items-stretch gap-1 sm:gap-2">
-                                    {categories.map(({ name, icon: Icon }, index) => {
+                                    {categories.map(({ id, name, icon: Icon }, index) => {
                                         const highlighted = openIndex === index || active === index;
                                         return (
                                             <li key={name} className="flex shrink-0">
                                                 <Link
-                                                    href={`/category/${slugify(name)}`}
+                                                    href={`/category/${slugify(name)}?categoryId=${id}`}
                                                     onMouseEnter={(e) => openTab(index, e.currentTarget)}
                                                     onFocus={(e) => openTab(index, e.currentTarget)}
                                                     onClick={() => setActive(index)}

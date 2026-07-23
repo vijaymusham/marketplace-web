@@ -3,7 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import ListingCard from "../sections/ListingCard";
 import { Reveal, Stagger, StaggerItem } from "@/components/animations/Motion";
-import type { Listing } from "@/lib/listings";
+import type { ApiAd } from "../types/AllTypes";
 
 const HorizontalList = ({
     className,
@@ -14,7 +14,7 @@ const HorizontalList = ({
     className?: string;
     title: string;
     description?: string;
-    data: Listing[];
+    data: ApiAd[];
 }) => {
     return (
         <section className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 rounded-2xl ${className}`}>

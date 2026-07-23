@@ -1,19 +1,23 @@
-"use client";
-
+"use client";;
 import { startTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Listing } from "@/lib/listings";
 import { addToWishlist, getWishlist, removeFromWishlist } from "../api/apis";
-import { ApiWishlist } from "../types/AllTypes";
+import { ApiAd, ApiWishlist } from "../types/AllTypes";
+
+function formatPrice(price: number, currency?: string) {
+    const amount = Number.isFinite(price) ? price.toLocaleString("en-IN") : "0";
+    if (!currency || currency === "INR" || currency === "₹") return `₹${amount}`;
+    return `${currency} ${amount}`;
+}
 
 export default function ListingCard({
     listing
 }: {
-    listing: Listing;
+    listing: ApiAd;
     liked?: boolean;
 }) {
     const queryClient = useQueryClient();
@@ -55,15 +59,17 @@ export default function ListingCard({
             className="group flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform "
         >
             <div className="relative aspect-12/11 w-full overflow-hidden rounded-2xl bg-slate-100 shadow-none transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.28)]">
-                <Image
-                    src={listing.image}
-                    alt={listing.title}
-                    fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
-                />
+                {listing.imageUrl ? (
+                    <Image
+                        src={listing.imageUrl}
+                        alt={listing.title}
+                        fill
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                        className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
+                    />
+                ) : null}
 
-                {listing.featured && (
+                {listing.isFavorite && (
                     <span className="absolute top-3 left-3 rounded-full bg-black/30 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-lg">
                         Featured
                     </span>
@@ -88,7 +94,7 @@ export default function ListingCard({
             </div>
 
             <div className="flex flex-1 flex-col pt-3">
-                <p className="min-h-4 text-xs text-slate-500">{listing.meta}</p>
+                <p className="min-h-4 text-xs text-slate-500">{listing.metadata}</p>
                 <h3 className="mt-1 truncate text-[15px] font-bold text-slate-900">
                     {listing.title}
                 </h3>
@@ -99,9 +105,11 @@ export default function ListingCard({
 
                 <div className="mt-3 flex items-center justify-between">
                     <p className="text-[15px] font-extrabold text-slate-900">
-                        {listing.price}
+                        {formatPrice(listing.price, listing.currency)}
                     </p>
-                    <p className="text-xs text-slate-500">{listing.date}</p>
+                    <p className="text-xs text-slate-500">
+                        {listing.postedAtLabel || listing.postedAt}
+                    </p>
                 </div>
             </div>
         </Link>

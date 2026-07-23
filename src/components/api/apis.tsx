@@ -8,6 +8,7 @@ import type {
     ApiState,
     CreateAdPayload,
     ApiWishlist,
+    ApiCategoryAds,
 } from "@/components/types/AllTypes";
 
 
@@ -212,6 +213,16 @@ export const getSearchSuggestions = async (query: string): Promise<ApiSearchSugg
     }
 };
 
+
+export const getCategoriesAds = async ({ latitude, longitude, page, sort, categoryId }: { latitude: number, longitude: number, page: number, sort: string, categoryId: string }): Promise<ApiCategoryAds | null> => {
+    try {
+        const { data } = await customAxios.get(`/ads?categoryId=${categoryId}&latitude=${latitude}&longitude=${longitude}&sort=${sort}&page=${page}&limit=20`);
+        return unwrapData<ApiCategoryAds>(data);
+    } catch (error) {
+        console.log("====== Error getCategoriesAds ===> ", error);
+        return null;
+    }
+};
 
 
 

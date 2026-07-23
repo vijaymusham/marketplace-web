@@ -251,7 +251,7 @@ export type ApiCity = {
     id: string;
     stateId: string;
     name: string;
-    image: string;
+    imageUrl: string;
     latitude: number;
     longitude: number;
     distanceKm: number;
@@ -345,4 +345,30 @@ export type ApiSearchSuggestionsResponse = {
     success: boolean;
     message: string;
     data: ApiSearchSuggestionsData;
+};
+
+
+export type ApiCategoryAds = {
+    success: boolean;
+    message: string;
+    data: {
+        items: ApiAd[];
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+};
+
+export type ApiAd = {
+    id: string;
+    title: string;
+    imageUrl: string;
+    isFavorite: boolean;
+    price: number;
+    currency: string;
+    location: string;
+    metadata: string;
+    postedAt: string;
+    postedAtLabel: string;
 };

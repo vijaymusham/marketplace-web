@@ -3,28 +3,24 @@
 import CategoryTabs from "@/components/layout/CategoryTabs";
 import CityExplorer from "@/components/home-ui/CityExplorer";
 import FreshRecommendations from "@/components/home-ui/FreshRecommendations";
-import type { Listing } from "@/lib/listings";
 import HorizontalList from "@/components/home-ui/HorizontalList";
 import BannerSection from "@/components/home-ui/BannerSection";
 import { useQuery } from "@tanstack/react-query";
 import { getAdsBySection } from "@/components/api/apis";
-import type { ApiAdsBySectionAd, ApiAdsSection } from "@/components/types/AllTypes";
+import type { ApiAd, ApiAdsBySectionAd, ApiAdsSection } from "@/components/types/AllTypes";
 
-function formatPrice(price: number, currency?: string) {
-    const amount = Number.isFinite(price) ? price.toLocaleString("en-IN") : "0";
-    if (!currency || currency === "INR" || currency === "₹") return `₹${amount}`;
-    return `${currency} ${amount}`;
-}
-
-function toListing(ad: ApiAdsBySectionAd): Listing {
+function toListing(ad: ApiAdsBySectionAd): ApiAd {
     return {
         id: ad.id,
         title: ad.title,
-        price: formatPrice(ad.price, ad.currency),
-        location: ad.location,
-        date: ad.postedAtLabel || ad.postedAt,
+        imageUrl: ad.imageUrl,
         isFavorite: ad.isFavorite,
-        image: ad.imageUrl,
+        price: ad.price,
+        currency: ad.currency,
+        location: ad.location,
+        metadata: "",
+        postedAt: ad.postedAt,
+        postedAtLabel: ad.postedAtLabel || ad.postedAt,
     };
 }
 

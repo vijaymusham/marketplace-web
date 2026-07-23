@@ -11,6 +11,7 @@ export type SelectOption = {
 };
 
 type SelectDropdownProps = {
+    className?: string;
     label: string;
     options: SelectOption[];
     value: string;
@@ -22,6 +23,7 @@ type SelectDropdownProps = {
 };
 
 export default function SelectDropdown({
+    className,
     label,
     options,
     value,
@@ -67,7 +69,7 @@ export default function SelectDropdown({
                 aria-invalid={!!error}
                 whileTap={disabled ? undefined : { scale: 0.985 }}
                 onClick={() => !disabled && setOpen((v) => !v)}
-                className={`flex py-3 w-full items-center gap-2 rounded-xl text-[15px] font-semibold border bg-slate-100 px-3 text-left outline-none transition-[border-color,box-shadow,background-color] duration-200 cursor-pointer disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60 ${error
+                className={`flex py-3 w-full items-center gap-2 rounded-xl text-[15px] font-semibold border bg-slate-100 px-3 text-left outline-none transition-[border-color,box-shadow,background-color] duration-200 cursor-pointer disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60 ${className} ${error
                     ? "border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-400/15"
                     : open
                         ? "border-slate-300"

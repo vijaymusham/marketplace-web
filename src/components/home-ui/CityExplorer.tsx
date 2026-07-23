@@ -39,7 +39,7 @@ export default function CityExplorer() {
                                 >
                                     <div className="relative aspect-square w-full overflow-hidden rounded-full bg-slate-100">
                                         <Image
-                                            src={city.image || "/images/city-placeholder.png"}
+                                            src={city.imageUrl || "/images/city-placeholder.png"}
                                             alt={`Deals in ${city.name || "No name"}`}
                                             fill
                                             sizes="116px"
