@@ -20,7 +20,7 @@ import type { ApiCity, CreateAdPayload, SellFormValues } from "../types/AllTypes
 import { emptySellFormValues, SELL_FORM_COMMON_KEYS } from "../types/AllTypes";
 import { inputClassName } from "@/constant/helper/classesHelper";
 import { Field, formContainer, formItem } from "../../constant/helper/TextField";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { type RootState } from "@/components/redux/store";
 import { createSellForm, getCategories, getCities, getStates, type ApiError } from "@/components/api/apis";
 import {
     AccessoriesForm,
@@ -87,6 +87,7 @@ import {
 } from "./FormBySubCategory";
 import { yesNoOptions } from "@/components/data/FormOptions";
 import { uploadToS3 } from "@/constant/helper/s3Upload";
+import { useSelector } from "react-redux";
 
 const MAX_PHOTOS = 12;
 
@@ -133,7 +134,7 @@ export default function SellForm({
 }
 
 function SellFormSession({ onClose }: { onClose: () => void }) {
-    const { user } = useAuth();
+    const user = useSelector((state: RootState) => state.user.user);
     const queryClient = useQueryClient();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [photos, setPhotos] = useState<PhotoItem[]>([]);
@@ -158,15 +159,14 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
         if (!user) return;
         reset((prev) => ({
             ...prev,
-            sellerName: user.displayName ?? prev.sellerName,
-            mobile: user.phoneNumber ?? prev.mobile,
+            sellerName: user.user.firstName + " " + user.user.lastName,
+            mobile: user.user.phone ?? prev.mobile,
         }));
     }, [user, reset]);
 
     const selectedCategory = useWatch({ control, name: "category" });
     const selectedSubcategory = useWatch({ control, name: "subcategory" });
     const selectedState = useWatch({ control, name: "state" });
-    const selectedCity = useWatch({ control, name: "city" });
     const titleValue = useWatch({ control, name: "title" });
     const descriptionValue = useWatch({ control, name: "description" });
     const sellerNameValue = useWatch({ control, name: "sellerName" });
@@ -325,8 +325,10 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
     const createSellFormMutation = useMutation({
         mutationFn: createSellForm,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["sell-form"] });
             toast.success("Post is live now! 🥳");
+            void queryClient.invalidateQueries({ queryKey: ["freshRecommendations"] });
+            void queryClient.invalidateQueries({ queryKey: ["adsBySection"] });
+            void queryClient.invalidateQueries({ queryKey: ["myAds"] });
             onClose();
         },
         onError: (error: ApiError) => {

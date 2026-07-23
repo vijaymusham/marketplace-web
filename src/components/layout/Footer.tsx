@@ -69,7 +69,7 @@ const menuColumns = [
 const socials = [
     { icon: FacebookLogo, label: "Facebook" },
     { icon: InstagramLogo, label: "Instagram" },
-    { icon: TikTokLogo, label: "TikTok" },
+    // { icon: TikTokLogo, label: "TikTok" },
     { icon: YouTubeLogo, label: "YouTube" },
 ];
 

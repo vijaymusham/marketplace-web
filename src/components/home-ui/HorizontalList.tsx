@@ -1,9 +1,9 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import { Listing } from "@/lib/listings";
 import ListingCard from "../sections/ListingCard";
 import { Reveal, Stagger, StaggerItem } from "@/components/animations/Motion";
+import type { Listing } from "@/lib/listings";
 
 const HorizontalList = ({
     className,
@@ -41,7 +41,7 @@ const HorizontalList = ({
             </Reveal>
 
             <Stagger className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-5!" stagger={0.08}>
-                {data?.slice(10).map((item) => (
+                {data?.map((item) => (
                     <StaggerItem key={item.id} y={40}>
                         <ListingCard listing={item} />
                     </StaggerItem>

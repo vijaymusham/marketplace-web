@@ -42,13 +42,14 @@ export default function Home() {
                 <BannerSection />
                 {
                     data && Object.values(data).map((item: ApiAdsSection) => {
+                        if (!item.ads?.length) return null;
                         return (
                             <HorizontalList
                                 key={item?.title}
                                 className={`${item?.bgClass} my-8 `}
                                 title={item?.title}
                                 description={item?.subtitle}
-                                data={item?.ads.map(toListing)}
+                                data={item?.ads?.map(toListing)}
                             />
                         )
                     })
