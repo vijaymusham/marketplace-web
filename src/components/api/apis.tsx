@@ -1,5 +1,14 @@
 import customAxios, { type ApiError } from "./customAxios";
-import type { ApiAdsBySection, ApiCity, ApiFreshRecommendation, ApiState, CreateAdPayload, ApiWishlist } from "@/components/types/AllTypes";
+import type {
+    ApiAdsBySection,
+    ApiCity,
+    ApiFreshRecommendation,
+    ApiSearchSuggestion,
+    ApiSearchSuggestionsResponse,
+    ApiState,
+    CreateAdPayload,
+    ApiWishlist,
+} from "@/components/types/AllTypes";
 
 
 
@@ -190,7 +199,18 @@ export const removeFromWishlist = async (listingId: string) => {
 };
 
 
-
+export const getSearchSuggestions = async (query: string): Promise<ApiSearchSuggestion[]> => {
+    try {
+        const { data } = await customAxios.get<ApiSearchSuggestionsResponse>(
+            `/ads/search/suggest?q=${query}&limit=8`
+        );
+        const items = data?.data?.items;
+        return Array.isArray(items) ? items : [];
+    } catch (error) {
+        console.log("====== Error getSearchSuggestions ===> ", error);
+        return [];
+    }
+};
 
 
 

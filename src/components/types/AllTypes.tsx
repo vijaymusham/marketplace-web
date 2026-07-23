@@ -330,3 +330,19 @@ export type ApiWishlist = {
     favoritedAt: string;
     category: ApiCategory;
 };
+
+export type ApiSearchSuggestion = {
+    text: string;
+    category: string;
+    subcategory: string;
+};
+
+export type ApiSearchSuggestionsData = {
+    items: ApiSearchSuggestion[];
+};
+
+export type ApiSearchSuggestionsResponse = {
+    success: boolean;
+    message: string;
+    data: ApiSearchSuggestionsData;
+};

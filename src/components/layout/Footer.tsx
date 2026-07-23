@@ -1,6 +1,7 @@
 import type { SVGProps } from "react";
 import { ArrowRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 function FacebookLogo(props: SVGProps<SVGSVGElement>) {
     return (
@@ -48,28 +49,37 @@ function YouTubeLogo(props: SVGProps<SVGSVGElement>) {
 const menuColumns = [
     {
         heading: "Company",
-        links: ["About Us", "Careers", "Press", "Blog", "Sitemap"],
+        links: [
+            { label: "About Us", href: "#" },
+            { label: "Safety Tips", href: "/safety" },
+            { label: "Contact Us", href: "/contact" },
+            // { label: "Careers", href: "#" },
+            // { label: "Press", href: "#" },
+            // { label: "Blog", href: "#" },
+            // { label: "Sitemap", href: "#" },
+        ],
     },
     {
         heading: "Support",
         links: [
-            "Help & Support",
-            "Safety Tips",
-            "Contact Us",
-            "Terms & Conditions",
-            "Privacy Policy",
+            { label: "Help & Support", href: "/help" },
+            { label: "Terms & Conditions", href: "/terms" },
+            { label: "Privacy Policy", href: "/privacy" },
         ],
     },
     {
         heading: "Available in",
-        links: ["Mumbai", "Delhi", "Bengaluru", "Hyderabad", "Pune", "+ 680 more cities"],
+        links: [
+            { label: "Mumbai", href: "#" },
+            { label: "Pune", href: "#" },
+            { label: "+ 680 more cities", href: "#" },
+        ],
     },
 ];
 
 const socials = [
     { icon: FacebookLogo, label: "Facebook" },
     { icon: InstagramLogo, label: "Instagram" },
-    // { icon: TikTokLogo, label: "TikTok" },
     { icon: YouTubeLogo, label: "YouTube" },
 ];
 
@@ -107,6 +117,7 @@ function StoreBadge({
     return (
         <Link
             href="#"
+            onClick={() => { toast.success('Coming soon 🥳') }}
             className="flex items-center gap-3 rounded-xl border border-white/15 bg-black px-4 py-2 transition-colors hover:border-white/40"
         >
             {logo}
@@ -128,7 +139,7 @@ export default function Footer() {
                 <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
                     {/* brand */}
                     <div>
-                        <Link href="/" className="flex items-center gap-2.5">
+                        <Link href="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5">
                             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-indigo-500 text-white">
                                 <ShoppingBag className="h-4.5 w-4.5" strokeWidth={2} />
                             </span>
@@ -139,14 +150,14 @@ export default function Footer() {
                         </Link>
 
                         <h3 className="mt-6 font-heading text-lg font-extrabold text-white">
-                            Great deals should feel effortless.
+                            Buy and sell anything.
                         </h3>
                         <p className="mt-3 max-w-xs text-sm leading-relaxed">
                             Buy and sell anything near you — from phones and furniture to
                             cars and homes. Trusted by your community.
                         </p>
 
-                        <button className="mt-6 flex items-center gap-3 rounded-full bg-white/10 py-1.5 pr-1.5 pl-5 text-sm font-semibold text-white transition-colors hover:bg-white/15">
+                        {/* <button className="mt-6 flex items-center gap-3 rounded-full bg-white/10 py-1.5 pr-1.5 pl-5 text-sm font-semibold text-white transition-colors hover:bg-white/15">
                             Start selling
                             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
                                 <ArrowRight className="h-4 w-4" />
@@ -155,7 +166,7 @@ export default function Footer() {
 
                         <p className="mt-8 text-xs text-slate-500">
                             © 2026 Deal Market Limited
-                        </p>
+                        </p> */}
                     </div>
 
                     {/* menu columns */}
@@ -163,13 +174,14 @@ export default function Footer() {
                         <div key={heading}>
                             <h4 className="text-sm font-bold text-indigo-400">{heading}</h4>
                             <ul className="mt-5 space-y-3.5">
-                                {links.map((link) => (
-                                    <li key={link}>
+                                {links.map(({ label, href }) => (
+                                    <li key={label}>
                                         <Link
-                                            href="#"
+                                            href={href}
+                                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                                             className="text-sm transition-colors hover:text-white"
                                         >
-                                            {link}
+                                            {label}
                                         </Link>
                                     </li>
                                 ))}
@@ -185,6 +197,7 @@ export default function Footer() {
                                 <li key={label}>
                                     <Link
                                         href="#"
+                                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                                         className="flex items-center gap-2.5 text-sm transition-colors hover:text-white"
                                     >
                                         <Icon className="h-4 w-4" />
@@ -197,7 +210,11 @@ export default function Footer() {
                 </div>
 
                 {/* app download bar */}
-                <div className="mt-14 flex flex-col items-center justify-center gap-5 border-t border-white/10 py-8 sm:flex-row sm:gap-8">
+
+                <p className="mt-14 mb-5 text-center text-sm text-slate-500">
+                    © {new Date().getFullYear()} Deal Market Limited  |  All rights reserved.
+                </p>
+                <div className=" flex flex-col items-center justify-center gap-5 border-t border-white/10 py-8 sm:flex-row sm:gap-8">
                     <p className="text-sm font-semibold text-white sm:text-base">
                         For better experience, download the Deal Market app now
                     </p>

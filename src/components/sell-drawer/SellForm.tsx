@@ -19,7 +19,7 @@ import SelectDropdown from "./SelectDropdown";
 import type { ApiCity, CreateAdPayload, SellFormValues } from "../types/AllTypes";
 import { emptySellFormValues, SELL_FORM_COMMON_KEYS } from "../types/AllTypes";
 import { inputClassName } from "@/constant/helper/classesHelper";
-import { Field, formContainer, formItem } from "../../constant/helper/TextField";
+import { Field, formContainer, formItem, numberToWords } from "../../constant/helper/TextField";
 import { type RootState } from "@/components/redux/store";
 import { createSellForm, getCategories, getCities, getStates, type ApiError } from "@/components/api/apis";
 import {
@@ -170,6 +170,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
     const titleValue = useWatch({ control, name: "title" });
     const descriptionValue = useWatch({ control, name: "description" });
     const sellerNameValue = useWatch({ control, name: "sellerName" });
+    const priceValue = useWatch({ control, name: "price" });
 
 
     const { data: apiCategories } = useQuery({
@@ -798,9 +799,10 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                     <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
                                         <Field label="Price (₹)" error={errors.price?.message} required>
                                             <input
-                                                type="number"
+                                                type="tel"
                                                 inputMode="numeric"
                                                 placeholder="e.g. ₹15000"
+                                                maxLength={7}
                                                 className={inputClassName}
                                                 aria-invalid={!!errors.price}
                                                 {...register("price", {
@@ -811,6 +813,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                                     },
                                                 })}
                                             />
+                                            <span className="text-xs font-semibold text-slate-500">{numberToWords(Number(priceValue))}</span>
                                         </Field>
                                         <motion.div variants={formItem} className="flex flex-col gap-1.5">
                                             <label className="text-[15px] font-semibold text-black">
@@ -1138,9 +1141,8 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                 </Field>
 
                                 <Field
-                                    label="Mobile Number (Disabled)"
+                                    label="Mobile Number"
                                     error={errors.mobile?.message}
-                                    required
                                 >
                                     <input
                                         type="tel"
@@ -1150,7 +1152,6 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         className={inputClassName}
                                         aria-invalid={!!errors.mobile}
                                         {...register("mobile", {
-                                            required: "Mobile number is required",
                                             minLength: {
                                                 value: 10,
                                                 message: "Enter a valid number",

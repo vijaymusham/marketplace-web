@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search } from "lucide-react";
+import { getSearchSuggestions } from "../api/apis";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { itemVariants, panelVariants } from "../animations/AnimationsHelper";
 
 const SUGGESTIONS = [
     "products",
@@ -15,13 +19,35 @@ const SUGGESTIONS = [
 
 const INTERVAL_MS = 3000;
 
+
+function useDebounce(value: string, delay: number) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const setTimer = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => clearTimeout(setTimer);
+    }, [value, delay]);
+    return debouncedValue;
+}
+
 export default function SearchInput() {
     const inputRef = useRef<HTMLInputElement>(null);
+    const blurTimeoutRef = useRef<number | null>(null);
     const [query, setQuery] = useState("");
     const [focused, setFocused] = useState(false);
     const [index, setIndex] = useState(0);
 
     const showCarousel = !focused && query.length === 0;
+    const debouncedQuery = useDebounce(query, 1000);
+
+    const { data: searchSuggestions = [] } = useQuery({
+        queryKey: ["searchSuggestions", debouncedQuery],
+        queryFn: () => getSearchSuggestions(debouncedQuery),
+        enabled: debouncedQuery.trim().length > 0,
+    });
+
+    const showSuggestions = focused && searchSuggestions.length > 0;
 
     useEffect(() => {
         if (!showCarousel) return;
@@ -33,8 +59,32 @@ export default function SearchInput() {
         return () => window.clearInterval(id);
     }, [showCarousel]);
 
+    useEffect(() => {
+        return () => {
+            if (blurTimeoutRef.current != null) {
+                window.clearTimeout(blurTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleFocus = () => {
+        if (blurTimeoutRef.current != null) {
+            window.clearTimeout(blurTimeoutRef.current);
+            blurTimeoutRef.current = null;
+        }
+        setFocused(true);
+    };
+
+    const handleBlur = () => {
+        blurTimeoutRef.current = window.setTimeout(() => {
+            setFocused(false);
+            setQuery("");
+            blurTimeoutRef.current = null;
+        }, 280);
+    };
+
     return (
-        <div className="group relative flex flex-1 items-center">
+        <div className="group relative z-40 flex flex-1 items-center">
             <Search className="pointer-events-none absolute left-4 z-10 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-primary" />
 
             <div className="relative w-full">
@@ -43,12 +93,48 @@ export default function SearchInput() {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     placeholder={focused ? "Search for products, brands and more..." : ""}
                     aria-label="Search for products, brands and more"
                     className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-base font-medium text-slate-700 shadow-inner shadow-slate-100 transition-all duration-300 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/25"
                 />
+
+                <AnimatePresence mode="sync">
+                    {showSuggestions && (
+                        <motion.div
+                            key="search-suggestions"
+                            variants={panelVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            className="absolute z-50 mt-3 w-full origin-top rounded-2xl bg-white p-4 text-left shadow-lg will-change-transform"
+                        >
+                            {searchSuggestions.map((suggestion, i) => (
+                                <motion.div
+                                    key={`${suggestion.text}-${i}`}
+                                    variants={itemVariants}
+                                >
+                                    <Link
+                                        href={`/category/${suggestion.subcategory}`}
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        className="block"
+                                    >
+                                        <div className="my-2 truncate text-base font-bold text-slate-700 capitalize transition-colors hover:text-primary">
+                                            {suggestion.text}
+                                            {suggestion.category && (
+                                                <h4 className="text-xs font-semibold text-slate-400">
+                                                    {" "}
+                                                    in {suggestion.subcategory}
+                                                </h4>
+                                            )}
+                                        </div>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <AnimatePresence mode="wait">
                     {showCarousel && (
@@ -76,13 +162,12 @@ export default function SearchInput() {
                                         exit={{ y: -10, opacity: 0 }}
                                         transition={{
                                             y: { type: "spring", stiffness: 140, damping: 20 },
-                                            opacity: { duration: 0.45, ease: [0.4, 0.0, 0.2, 1] }
+                                            opacity: { duration: 0.45, ease: [0.4, 0.0, 0.2, 1] },
                                         }}
                                         className="absolute inset-0 truncate text-base font-semibold text-slate-500 capitalize"
                                     >
                                         &quot;{SUGGESTIONS[index]}&quot;
                                     </motion.span>
-
                                 </AnimatePresence>
                             </span>
                         </motion.button>

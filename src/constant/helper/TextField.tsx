@@ -108,3 +108,34 @@ export function FormSection({
         </motion.section>
     );
 }
+
+
+const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+const convert = (n: number): string =>
+    n < 20
+        ? ones[n]
+        : n < 100
+            ? `${tens[Math.floor(n / 10)]} ${ones[n % 10]}`.trim()
+            : `${ones[Math.floor(n / 100)]} Hundred ${convert(n % 100)}`.trim();
+
+export const numberToWords = (n: number): string => {
+    if (!n) return "Zero";
+
+    const units = [
+        ["Crore", 10000000],
+        ["Lakh", 100000],
+        ["Thousand", 1000],
+        ["", 1],
+    ];
+
+    return units
+        .map(([name, value]) => {
+            const part = Math.floor(n / Number(value));
+            n %= Number(value);
+            return part ? `${convert(part)} ${name}`.trim() : "";
+        })
+        .filter(Boolean)
+        .join(" ");
+};

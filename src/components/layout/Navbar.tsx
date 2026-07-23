@@ -1,3 +1,4 @@
+"use client";
 import { MessageCircleMore } from "lucide-react";
 import LocationPicker from "./LocationPicker";
 import SearchInput from "./SearchInput";
@@ -11,7 +12,7 @@ export default function Navbar() {
     return (
         <header className="sticky top-0 z-30  bg-white/85 bg-linear-to-b from-primary/20 via-primary/10 to-white backdrop-blur-xl">
             <div className="mx-auto flex  items-center gap-3 px-4 py-4 sm:gap-5 sm:px-6 lg:px-8">
-                <Link href="/" className="group flex shrink-0 items-center gap-2.5">
+                <Link href="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="group flex shrink-0 items-center gap-2.5">
                     <span className="hidden font-heading text-3xl font-extrabold tracking-tight text-slate-900 lg:block">
                         Deal<span className="text-primary">Market</span>
                     </span>
