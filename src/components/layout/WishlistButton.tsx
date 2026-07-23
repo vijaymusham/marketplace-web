@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { Heart } from "lucide-react";
-import { useHasMounted, useWishlist } from "@/hooks/useWishlist";
+import { useQuery } from "@tanstack/react-query";
+import { useHasMounted } from "@/hooks/useWishlist";
+import { getWishlist } from "@/components/api/apis";
 
 export default function WishlistButton() {
     const mounted = useHasMounted();
-    const { count } = useWishlist();
-    const displayCount = mounted ? count : 0;
+    const { data: wishlist = [] } = useQuery({
+        queryKey: ["wishlist"],
+        queryFn: () => getWishlist(),
+    });
+    const displayCount = mounted ? wishlist.length : 0;
 
     return (
         <Link

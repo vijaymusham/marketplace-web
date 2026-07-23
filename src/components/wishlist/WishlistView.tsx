@@ -1,16 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import WishlistCard from "@/components/wishlist/WishlistCard";
 import WishlistEmpty from "@/components/wishlist/WishlistEmpty";
-import { useWishlist } from "@/hooks/useWishlist";
 import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getWishlist, removeFromWishlist } from "../api/apis";
+import type { ApiWishlist } from "../types/AllTypes";
 
 export default function WishlistView() {
-    const { items, count, remove, clear } = useWishlist();
+    const queryClient = useQueryClient();
 
-    if (count === 0) {
+    const { data: wishlist = [], isLoading } = useQuery({
+        queryKey: ["wishlist"],
+        queryFn: () => getWishlist(),
+    });
+
+    const removeMutation = useMutation({
+        mutationFn: (listingId: string) => removeFromWishlist(listingId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+        },
+    });
+
+    const clearMutation = useMutation({
+        mutationFn: async () => {
+            await Promise.all(wishlist.map((item) => removeFromWishlist(item.id)));
+        },
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+        },
+    });
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (wishlist.length === 0) {
         return <WishlistEmpty />;
     }
 
@@ -20,7 +51,7 @@ export default function WishlistView() {
                 <header className="mb-8 flex flex-col gap-5 border-b border-slate-100 pb-8 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold text-primary">
-                            {count} saved {count === 1 ? "deal" : "deals"}
+                            {wishlist.length} saved {wishlist.length === 1 ? "deal" : "deals"}
                         </p>
                         <h1 className="mt-1.5 flex items-center gap-2 font-heading text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
                             <Heart className="h-7 w-7 fill-red-500 text-red-500 md:h-8 md:w-8" /> Wishlist
@@ -40,8 +71,9 @@ export default function WishlistView() {
                         </Link>
                         <button
                             type="button"
-                            onClick={clear}
-                            className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                            onClick={() => clearMutation.mutate()}
+                            disabled={clearMutation.isPending}
+                            className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
                         >
                             Clear all
                         </button>
@@ -50,11 +82,11 @@ export default function WishlistView() {
             </Enter>
 
             <Stagger className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2" stagger={0.09}>
-                {items.map((listing) => (
+                {wishlist.map((listing: ApiWishlist) => (
                     <StaggerItem key={listing.id} y={32}>
                         <WishlistCard
                             listing={listing}
-                            onRemove={() => remove(listing.id)}
+                            onRemove={() => removeMutation.mutate(listing.id)}
                         />
                     </StaggerItem>
                 ))}

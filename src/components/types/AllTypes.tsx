@@ -314,3 +314,19 @@ export type ApiAdsBySection = {
     tvAudio: ApiAdsSection;
     homeKitchen: ApiAdsSection;
 };
+
+
+export type ApiWishlist = {
+    id: string;
+    title: string;
+    imageUrl: string;
+    isFavorite: boolean;
+    price: number;
+    currency: string;
+    location: string;
+    metadata: string;
+    postedAt: string;
+    postedAtLabel: string;
+    favoritedAt: string;
+    category: ApiCategory;
+};

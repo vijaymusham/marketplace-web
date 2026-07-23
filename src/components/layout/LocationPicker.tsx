@@ -1,21 +1,77 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, X, LocateFixed, Search } from "lucide-react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
-import { setLocation } from "../redux/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
+import { setAddress, setLocation } from "../redux/slices/authSlice";
 import { toast } from "react-hot-toast";
 
 export default function LocationPicker() {
-    const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useDispatch<AppDispatch>();;
+    const address = useSelector((state: RootState) => state.user.address);
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0 });
     const triggerRef = useRef<HTMLButtonElement>(null);
 
+
+    const getAddress = async (lat: number, lng: number) => {
+        const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+        );
+
+        const data = await res.json();
+        return data.display_name;
+    };
+
+    const getLocation = useCallback(async () => {
+        try {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    console.log(position);
+
+                    dispatch(
+                        setLocation({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        })
+                    );
+                    const address = await getAddress(position.coords.latitude, position.coords.longitude);
+                    dispatch(setAddress(address));
+                    toast.success("Location detected successfully");
+                    setOpen(false);
+                },
+                (error) => {
+                    console.error(error);
+
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            toast.error("Please allow location access.");
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            toast.error("Location unavailable.");
+                            break;
+                        case error.TIMEOUT:
+                            toast.error("Location request timed out.");
+                            break;
+                        default:
+                            toast.error("Unable to get location.");
+                    }
+                },
+                {
+                    enableHighAccuracy: true, // Use GPS when available
+                    timeout: 15000,
+                    maximumAge: 0, // Don't use cached location
+                }
+            );
+        } catch (error) {
+            console.error(error);
+            toast.error("Unable to get location.");
+        }
+    }, [dispatch]);
 
     useEffect(() => {
         setTimeout(() => {
@@ -65,7 +121,7 @@ export default function LocationPicker() {
                     Location
                 </span>
                 <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 hover:text-primary">
-                    <span className="max-w-40 truncate font-semibold ">Select location</span>
+                    <span className="max-w-40 truncate font-semibold ">{address ? address : "Select location"}</span>
                     <ChevronDown
                         className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                     />
@@ -123,16 +179,7 @@ export default function LocationPicker() {
                                     <div className="mt-6 flex flex-col gap-4">
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                navigator.geolocation.getCurrentPosition((position) => {
-                                                    dispatch(setLocation({
-                                                        latitude: position.coords.latitude,
-                                                        longitude: position.coords.longitude,
-                                                    }));
-                                                    setOpen(false);
-                                                    toast.success("Location detected successfully");
-                                                });
-                                            }}
+                                            onClick={() => getLocation()}
                                             className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
                                         >
                                             <LocateFixed className="h-4 w-4" />

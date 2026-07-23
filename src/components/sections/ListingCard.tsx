@@ -1,25 +1,53 @@
 "use client";
 
+import { startTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, MapPin } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { Listing } from "@/lib/listings";
-import { useWishlist } from "@/hooks/useWishlist";
+import { addToWishlist, getWishlist, removeFromWishlist } from "../api/apis";
+import { ApiWishlist } from "../types/AllTypes";
 
 export default function ListingCard({
-    listing,
-    liked,
-    onToggleLike,
+    listing
 }: {
     listing: Listing;
     liked?: boolean;
-    onToggleLike?: () => void;
 }) {
-    const wishlist = useWishlist();
-    const isControlled = liked !== undefined && onToggleLike !== undefined;
-    const isLiked = isControlled ? liked : wishlist.isLiked(listing.id);
-    const handleToggleLike =
-        onToggleLike ?? (() => wishlist.toggle(listing.id));
+    const queryClient = useQueryClient();
+
+
+    const { data: wishlist = [] } = useQuery({
+        queryKey: ["wishlist"],
+        queryFn: () => getWishlist(),
+    });
+
+    const inWishlist = wishlist.some((item: ApiWishlist) => item.id === listing.id);
+
+
+    const handleToggleLike = () => {
+        const next = !inWishlist;
+        startTransition(async () => {
+
+            try {
+                const id = String(listing.id);
+                if (next) {
+                    await addToWishlist(id);
+                } else {
+                    await removeFromWishlist(id);
+                }
+                await Promise.all([
+                    queryClient.invalidateQueries({ queryKey: ["wishlist"] }),
+                    queryClient.invalidateQueries({ queryKey: ["freshRecommendations"] }),
+                    queryClient.invalidateQueries({ queryKey: ["adsBySection"] }),
+                ]);
+            } catch {
+                toast.error("Couldn’t update wishlist");
+            }
+        });
+    };
 
     return (
         <Link
@@ -48,12 +76,12 @@ export default function ListingCard({
                         e.stopPropagation();
                         handleToggleLike();
                     }}
-                    aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
-                    className={`absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-lg transition-colors ${isLiked ? "bg-white" : "bg-black/30 hover:bg-black/40"
+                    aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                    className={`absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-lg transition-colors ${inWishlist ? "bg-white" : "bg-black/30 hover:bg-black/40"
                         }`}
                 >
                     <Heart
-                        className={`h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : "text-white"}`}
+                        className={`h-4 w-4 ${inWishlist ? "fill-red-500 text-red-500" : "text-white"}`}
                         strokeWidth={2}
                     />
                 </button>

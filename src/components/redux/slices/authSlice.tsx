@@ -26,11 +26,13 @@ export interface userState {
         latitude: number
         longitude: number
     } | null
+    address: string | null
 }
 
 const initialState: userState = {
     user: null,
     location: null,
+    address: null,
 }
 
 export const userSlice = createSlice({
@@ -46,12 +48,15 @@ export const userSlice = createSlice({
         setLocation: (state, action: PayloadAction<userState['location']>) => {
             state.location = action.payload
         },
+        setAddress: (state, action: PayloadAction<userState['address']>) => {
+            state.address = action.payload
+        },
         clearLocation: (state) => {
             state.location = null
         },
     },
 })
 
-export const { setUser, clearuser, setLocation, clearLocation } = userSlice.actions
+export const { setUser, clearuser, setLocation, clearLocation, setAddress } = userSlice.actions
 
 export default userSlice.reducer

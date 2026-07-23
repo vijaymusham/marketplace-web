@@ -1138,13 +1138,14 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                 </Field>
 
                                 <Field
-                                    label="Mobile Number"
+                                    label="Mobile Number (Disabled)"
                                     error={errors.mobile?.message}
                                     required
                                 >
                                     <input
                                         type="tel"
                                         inputMode="tel"
+                                        disabled
                                         placeholder="+91 XXXXX XXXXX"
                                         className={inputClassName}
                                         aria-invalid={!!errors.mobile}

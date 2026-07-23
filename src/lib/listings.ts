@@ -6,6 +6,7 @@ export type Listing = {
   location: string;
   date: string;
   featured?: boolean;
+  isFavorite?: boolean;
   image: string;
 };
 

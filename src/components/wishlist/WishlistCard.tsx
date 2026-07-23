@@ -1,22 +1,16 @@
-"use client";
-
+"use client";;
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, MapPin, X } from "lucide-react";
-import type { Listing } from "@/lib/listings";
+import { ApiWishlist } from "../types/AllTypes";
 
-function descriptionFor(listing: Listing) {
-    if (listing.meta) {
-        return `${listing.meta}. Available near ${listing.location} — saved so you can revisit this deal anytime.`;
-    }
-    return `Listed in ${listing.location}. Keep this deal handy and check back when you're ready to make a move.`;
-}
+
 
 export default function WishlistCard({
     listing,
     onRemove,
 }: {
-    listing: Listing;
+    listing: ApiWishlist;
     onRemove: () => void;
 }) {
     return (
@@ -26,7 +20,7 @@ export default function WishlistCard({
                 className="relative aspect-4/3 sm:aspect-auto sm:min-h-full"
             >
                 <Image
-                    src={listing.image}
+                    src={listing.imageUrl}
                     alt={listing.title}
                     fill
                     sizes="(min-width: 640px) 176px, 100vw"
@@ -49,11 +43,6 @@ export default function WishlistCard({
                         <Heart className="h-3 w-3 fill-primary" />
                         Saved
                     </span>
-                    {listing.featured && (
-                        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200/80">
-                            Featured
-                        </span>
-                    )}
                 </div>
 
                 <Link href={`/listing/${listing.id}`}>
@@ -61,7 +50,7 @@ export default function WishlistCard({
                         {listing.title}
                     </h3>
                     <p className="mt-2 line-clamp-2 text-sm leading-relaxed font-medium text-slate-500">
-                        {descriptionFor(listing)}
+                        {listing.metadata}
                     </p>
                 </Link>
 
@@ -69,12 +58,12 @@ export default function WishlistCard({
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">{listing.location}</span>
                     <span className="text-slate-300">·</span>
-                    <span>{listing.date}</span>
+                    <span>{listing.favoritedAt}</span>
                 </p>
 
                 <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-200/70 pt-4">
                     <p className="text-lg font-extrabold tracking-tight text-slate-900">
-                        {listing.price}
+                        {listing.price.toString()}
                     </p>
                     <Link
                         href={`/listing/${listing.id}`}

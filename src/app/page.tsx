@@ -23,6 +23,7 @@ function toListing(ad: ApiAdsBySectionAd): Listing {
         price: formatPrice(ad.price, ad.currency),
         location: ad.location,
         date: ad.postedAtLabel || ad.postedAt,
+        isFavorite: ad.isFavorite,
         image: ad.imageUrl,
     };
 }

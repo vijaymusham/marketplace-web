@@ -1,5 +1,5 @@
 import customAxios, { type ApiError } from "./customAxios";
-import type { ApiAdsBySection, ApiCity, ApiFreshRecommendation, ApiState, CreateAdPayload } from "@/components/types/AllTypes";
+import type { ApiAdsBySection, ApiCity, ApiFreshRecommendation, ApiState, CreateAdPayload, ApiWishlist } from "@/components/types/AllTypes";
 
 
 
@@ -159,7 +159,35 @@ export const getAdsBySection = async ({ latitude, longitude }: { latitude: numbe
 };
 
 
+export const getWishlist = async (): Promise<ApiWishlist[]> => {
+    try {
+        const { data } = await customAxios.get("/favorites");
+        return unwrapList<ApiWishlist>(data);
+    } catch (error) {
+        console.log("====== Error getWishlist ===> ", error);
+        return [];
+    }
+};
 
+export const addToWishlist = async (listingId: string) => {
+    try {
+        const { data } = await customAxios.post(`/favorites/${listingId}`);
+        return unwrapData<ApiWishlist>(data);
+    } catch (error) {
+        console.log("====== Error addToWishlist ===> ", error);
+        throw error;
+    }
+};
+
+export const removeFromWishlist = async (listingId: string) => {
+    try {
+        const { data } = await customAxios.delete(`/favorites/${listingId}`);
+        return unwrapData<ApiWishlist>(data);
+    } catch (error) {
+        console.log("====== Error removeFromWishlist ===> ", error);
+        throw error;
+    }
+};
 
 
 

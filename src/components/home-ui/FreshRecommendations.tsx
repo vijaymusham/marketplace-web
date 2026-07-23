@@ -21,6 +21,7 @@ function toListingCard(listing: ApiFreshRecommendation) {
         location: listing.location,
         date: listing.postedAtLabel || listing.postedAt,
         featured: listing.isFeatured,
+        isFavorite: listing.isFavorite,
         image: listing.imageUrl,
     };
 }
