@@ -19,6 +19,8 @@ export default function Preloader() {
     const [display, setDisplay] = useState(0);
     const progress = useMotionValue(0);
     const progressWidth = useTransform(progress, (v) => `${v}%`);
+    /** White fill climbs up through the letterforms */
+    const textClip = useTransform(progress, [0, 100], ["inset(100% 0 0 0)", "inset(0% 0 0 0)"]);
     const markIntroReady = useMarkIntroReady();
 
     useIsomorphicLayoutEffect(() => {
@@ -69,7 +71,6 @@ export default function Preloader() {
             onComplete: () => {
                 exitTimer = setTimeout(() => {
                     setExiting(true);
-                    // Overlap: home slides in as the curtain lifts
                     homeReadyTimer = setTimeout(markHome, HOME_READY_AT * 1000);
                     finishTimer = setTimeout(finish, (COL_DURATION + 0.04) * 1000);
                 }, EXIT_DELAY * 1000);
@@ -105,14 +106,29 @@ export default function Preloader() {
                         </div>
 
                         <div className="relative z-20 flex w-full flex-col items-center gap-5">
+                            {/* Brand: outline shell + white fill clipped by progress */}
                             <motion.div
                                 initial={{ opacity: 0, y: 14, filter: "blur(10px)" }}
                                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                                 transition={{ duration: 0.5, ease }}
-                                className="font-heading text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl"
+                                className="relative font-heading text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
                             >
-                                Deal<span className="text-white/90"> Market</span>
+                                <span
+                                    className="select-none text-transparent"
+                                    style={{
+                                        WebkitTextStroke: "1.5px rgba(255,255,255,0.38)",
+                                    }}
+                                >
+                                    Deal<span className="tracking-tight"> Market</span>
+                                </span>
+                                <motion.span
+                                    className="pointer-events-none absolute inset-0 select-none text-white"
+                                    style={{ clipPath: textClip }}
+                                >
+                                    Deal<span className="text-white/95"> Market</span>
+                                </motion.span>
                             </motion.div>
+
                             <div className="h-0.5 w-28 overflow-hidden rounded-full bg-white/20 md:w-40">
                                 <motion.div
                                     className="h-full rounded-full bg-white"
