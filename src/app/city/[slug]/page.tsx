@@ -7,6 +7,7 @@ import PaginatedListings from "@/components/category-ui/PaginatedListings";
 import { allCitySlugs, findCityBySlug, getCityImage } from "@/lib/cities";
 import { listings, type Listing } from "@/lib/listings";
 import { slugify } from "@/lib/slug";
+import { ApiAd } from "@/components/types/AllTypes";
 
 export function generateStaticParams() {
     return allCitySlugs().map((slug) => ({ slug }));
@@ -99,7 +100,7 @@ export default async function CityPage({
                     </p>
                 </header>
 
-                <PaginatedListings listings={data} />
+                <PaginatedListings listings={data as unknown as ApiAd[]} />
             </div>
         </main>
     );
