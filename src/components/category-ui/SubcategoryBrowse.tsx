@@ -2,36 +2,187 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import CategorySidebar from "@/components/category-ui/CategorySidebar";
+import CategorySidebar, {
+    EMPTY_SIDEBAR_FILTERS,
+    KMS_MAX,
+    KMS_MIN,
+    PRICE_MAX,
+    PRICE_MIN,
+    YEAR_MAX,
+    YEAR_MIN,
+    type CategorySidebarFilterState,
+} from "@/components/category-ui/CategorySidebar";
 import ListCard from "@/components/category-ui/ListCard";
 import SubcategoryTabs from "@/components/category-ui/SubcategoryTabs";
 import type { Listing } from "@/lib/listings";
 import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
+import { getCategoriesAds, getCities } from "../api/apis";
+import { useQuery } from "@tanstack/react-query";
+import type { ApiAd, ApiCategoryAds } from "../types/AllTypes";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
+const DEFAULT_COORDS = { latitude: 19.076, longitude: 72.8777 };
+
+function formatPrice(price: number, currency?: string) {
+    const amount = Number.isFinite(price) ? price.toLocaleString("en-IN") : "0";
+    if (!currency || currency === "INR" || currency === "₹") return `₹${amount}`;
+    return `${currency} ${amount}`;
+}
+
+function adsFromResponse(
+    payload: ApiCategoryAds | { items?: ApiAd[] } | null | undefined,
+): ApiAd[] {
+    if (!payload) return [];
+    if ("items" in payload && Array.isArray(payload.items)) return payload.items;
+    if ("data" in payload && Array.isArray(payload.data?.items)) return payload.data.items;
+    return [];
+}
+
+function paginationFromResponse(
+    payload:
+        | ApiCategoryAds
+        | { items?: ApiAd[]; total?: number; totalPages?: number }
+        | null
+        | undefined,
+) {
+    if (!payload) return { total: 0, totalPages: 1 };
+    if ("data" in payload && payload.data) {
+        return {
+            total: payload.data.total ?? payload.data.items?.length ?? 0,
+            totalPages: Math.max(1, payload.data.totalPages ?? 1),
+        };
+    }
+    const total = "total" in payload ? (payload.total ?? 0) : 0;
+    const totalPages =
+        "totalPages" in payload ? Math.max(1, payload.totalPages ?? 1) : 1;
+    return { total, totalPages };
+}
+
+function apiAdToListing(ad: ApiAd): Listing {
+    return {
+        id: ad.id,
+        title: ad.title,
+        price: formatPrice(ad.price, ad.currency),
+        meta: ad.metadata,
+        location: ad.location,
+        date: ad.postedAtLabel,
+        image: ad.imageUrl,
+        isFavorite: ad.isFavorite,
+    };
+}
+
+function sameFilters(
+    a: CategorySidebarFilterState,
+    b: CategorySidebarFilterState,
+) {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function buildAdsQueryParams(
+    filters: CategorySidebarFilterState,
+    coords: { latitude: number; longitude: number },
+) {
+    const { selected, priceRange, kmsRange, yearRange, stateId, cityId, locality, type } =
+        filters;
+
+    return {
+        type: type.trim() || undefined,
+        cityId: cityId || undefined,
+        stateId: stateId || undefined,
+        locality: locality.trim() || undefined,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        minPrice: priceRange.min > PRICE_MIN ? priceRange.min : undefined,
+        maxPrice: priceRange.max < PRICE_MAX ? priceRange.max : undefined,
+        minKmsDriven: kmsRange.min > KMS_MIN ? kmsRange.min : undefined,
+        maxKmsDriven: kmsRange.max < KMS_MAX ? kmsRange.max : undefined,
+        minYear: yearRange.min > YEAR_MIN ? yearRange.min : undefined,
+        maxYear: yearRange.max < YEAR_MAX ? yearRange.max : undefined,
+        sort: selected.sort?.[0] || "date",
+        filters: Object.fromEntries(
+            Object.entries(selected).filter(([, values]) => values.length > 0),
+        ),
+    };
+}
 
 export default function SubcategoryBrowse({
     categoryName,
+    categoryId,
+    subCategoryId,
     subcategories,
     activeSubcategory,
     listings,
 }: {
     categoryName: string;
-    subcategories: string[];
+    categoryId: string;
+    subCategoryId?: string;
+    subcategories?: string[];
     activeSubcategory: string;
     listings: Listing[];
 }) {
     const [page, setPage] = useState(1);
-    const totalPages = Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
+    const [filters, setFilters] =
+        useState<CategorySidebarFilterState>(EMPTY_SIDEBAR_FILTERS);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPage(1);
-    }, [activeSubcategory]);
+        setFilters(EMPTY_SIDEBAR_FILTERS);
+    }, [activeSubcategory, categoryId, subCategoryId]);
 
-    const visible = useMemo(
-        () => listings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-        [listings, page],
+    const { data: cities = [] } = useQuery({
+        queryKey: ["cities", filters.stateId],
+        queryFn: () => getCities(filters.stateId || undefined),
+        enabled: Boolean(filters.stateId),
+    });
+
+    const selectedCity = cities.find((city) => city.id === filters.cityId);
+    const coords = useMemo(
+        () => ({
+            latitude: selectedCity?.latitude ?? DEFAULT_COORDS.latitude,
+            longitude: selectedCity?.longitude ?? DEFAULT_COORDS.longitude,
+        }),
+        [selectedCity?.latitude, selectedCity?.longitude],
     );
+
+    const adsQuery = useMemo(
+        () => buildAdsQueryParams(filters, coords),
+        [filters, coords],
+    );
+
+    const { data: ads, isLoading: isLoadingAds } = useQuery({
+        queryKey: [
+            "category-ads",
+            categoryId,
+            subCategoryId,
+            page,
+            adsQuery,
+        ],
+        queryFn: () =>
+            getCategoriesAds({
+                categoryId,
+                subCategoryId,
+                page,
+                limit: PAGE_SIZE,
+                ...adsQuery,
+            }),
+        enabled: Boolean(categoryId && subCategoryId),
+    });
+
+    const apiListings = useMemo(
+        () => adsFromResponse(ads).map(apiAdToListing),
+        [ads],
+    );
+    const { total, totalPages: apiTotalPages } = paginationFromResponse(ads);
+
+    const usingApi = Boolean(categoryId && subCategoryId);
+    const visible = usingApi
+        ? apiListings
+        : listings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    const totalCount = usingApi ? total : listings.length;
+    const totalPages = usingApi
+        ? apiTotalPages
+        : Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
 
     const goTo = (next: number) => {
         const clamped = Math.min(Math.max(next, 1), totalPages);
@@ -40,7 +191,16 @@ export default function SubcategoryBrowse({
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const pageNumbers = useMemo(() => buildPageNumbers(page, totalPages), [page, totalPages]);
+    const pageNumbers = useMemo(
+        () => buildPageNumbers(page, totalPages),
+        [page, totalPages],
+    );
+
+    const handleFiltersChange = (next: CategorySidebarFilterState) => {
+        if (sameFilters(filters, next)) return;
+        setFilters(next);
+        setPage(1);
+    };
 
     return (
         <>
@@ -53,9 +213,12 @@ export default function SubcategoryBrowse({
                 <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
                     <CategorySidebar
                         categoryName={categoryName}
-                        subcategories={subcategories}
+                        categoryId={categoryId}
+                        subCategoryId={subCategoryId || ""}
+                        subcategories={subcategories || []}
                         activeSubcategory={activeSubcategory}
-                        totalCount={listings.length}
+                        totalCount={totalCount}
+                        onFiltersChange={handleFiltersChange}
                     />
 
                     <div className="min-w-0 flex-1">
@@ -65,25 +228,37 @@ export default function SubcategoryBrowse({
                                     {activeSubcategory}
                                 </h1>
                                 <p className="mt-1.5 text-sm font-medium text-slate-500">
-                                    {listings.length} products in {categoryName}
+                                    {isLoadingAds && usingApi
+                                        ? "Loading products…"
+                                        : `${totalCount} products in ${categoryName}`}
                                 </p>
                             </header>
                         </Enter>
 
-                        <Stagger
-                            key={`${activeSubcategory}-${page}`}
-                            className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-8"
-                            stagger={0.07}
-                        >
-                            {visible.map((listing) => (
-                                <StaggerItem key={listing.id} y={38}>
-                                    <ListCard
-                                        listing={listing}
-                                        badge={activeSubcategory.split(" ")[0]}
-                                    />
-                                </StaggerItem>
-                            ))}
-                        </Stagger>
+                        {isLoadingAds && usingApi && visible.length === 0 ? (
+                            <p className="py-16 text-center text-sm text-slate-400">
+                                Loading listings…
+                            </p>
+                        ) : visible.length === 0 ? (
+                            <p className="py-16 text-center text-sm text-slate-400">
+                                No products match the selected filters.
+                            </p>
+                        ) : (
+                            <Stagger
+                                key={`${activeSubcategory}-${page}-${JSON.stringify(adsQuery)}`}
+                                className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-8"
+                                stagger={0.07}
+                            >
+                                {visible.map((listing) => (
+                                    <StaggerItem key={listing.id} y={38}>
+                                        <ListCard
+                                            listing={listing}
+                                            badge={activeSubcategory.split(" ")[0]}
+                                        />
+                                    </StaggerItem>
+                                ))}
+                            </Stagger>
+                        )}
 
                         {totalPages > 1 && (
                             <nav

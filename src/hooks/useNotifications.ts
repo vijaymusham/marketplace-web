@@ -16,7 +16,7 @@ const STORAGE_KEY = "dealmarket-notifications";
 const DEFAULT_NOTIFICATIONS: AppNotification[] = [
   {
     id: "n1",
-    title: "Price drop on iPhone 13",
+    title: "Price drop on Apple iPhone 17 Pro Max",
     body: "A listing you viewed is now ₹500 cheaper. Check it before it’s gone.",
     time: "2 min ago",
     read: false,

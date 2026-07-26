@@ -7,8 +7,15 @@ import WishlistButton from "./WishlistButton";
 import NotificationButton from "./NotificationButton";
 import Link from "next/link";
 import SellFab from "./SellFab";
+import { getChats } from "../api/apis";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Navbar() {
+    const { data: conversations } = useQuery({
+        queryKey: ["chats"],
+        queryFn: () => getChats("all", 1),
+    });
+
     return (
         <header className="sticky top-0 z-30  bg-white/85 bg-linear-to-b from-primary/20 via-primary/10 to-white backdrop-blur-xl">
             <div className="mx-auto flex  items-center gap-3 px-4 py-4 sm:gap-5 sm:px-6 lg:px-8">
@@ -37,7 +44,7 @@ export default function Navbar() {
                             strokeWidth={1.75}
                         />
                         <span className="absolute top-0 right-0 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-linear-to-br from-primary to-indigo-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
-                            5
+                            {conversations?.unreadCount ?? 0}
                         </span>
                     </Link>
 

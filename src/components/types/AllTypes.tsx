@@ -372,3 +372,162 @@ export type ApiAd = {
     postedAt: string;
     postedAtLabel: string;
 };
+
+export type ApiAdDetailImage = {
+    id: string;
+    url: string;
+    displayOrder: number;
+    isCover: boolean;
+};
+
+export type ApiAdDetailCategory = {
+    id: string;
+    name: string;
+    slug: string;
+};
+
+export type ApiAdDetailCity = {
+    id: string;
+    name: string;
+    type?: string;
+    latitude?: number;
+    longitude?: number;
+};
+
+/** Full `/ads/:id` detail payload. */
+export type ApiAdDetail = {
+    id: string;
+    sellerId: string;
+    categoryId: string;
+    subCategoryId: string;
+    category: ApiAdDetailCategory;
+    subCategory: ApiAdDetailCategory;
+    title: string;
+    description: string;
+    price: number;
+    isNegotiable: boolean;
+    stateId: string;
+    cityId: string;
+    city: ApiAdDetailCity | null;
+    locality: string | null;
+    latitude: number;
+    longitude: number;
+    sellerName: string;
+    mobileNumber: string;
+    categoryAttributes: Record<string, string>;
+    status: string;
+    soldAt: string | null;
+    images: ApiAdDetailImage[];
+    createdAt: string;
+    updatedAt: string;
+};
+
+
+/** Unwrapped `/ads/filters` payload (after `{ success, message, data }` unwrap). */
+export type ApiCategoryFilters = {
+    sections: ApiCategoryFilterSection[];
+};
+
+export type ApiCategoryFilterSection = {
+    key: string;
+    title: string;
+    icon: string;
+    selectionType: string;
+    queryKey: string;
+    items: ApiCategoryFilterOption[];
+};
+
+export type ApiCategoryFilterOption = {
+    label: string;
+    value: string;
+    queryKey: string;
+    slug?: string;
+    iconUrl?: string | null;
+    children?: ApiCategoryFilterOption[];
+};
+
+
+export type ApiChatPeer = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    displayName: string;
+    profilePhoto: string;
+    identityVerified: boolean;
+    isOnline: boolean;
+    lastActiveAt: string;
+    lastActiveLabel: string;
+};
+
+export type ApiChatOffer = {
+    id: string;
+    amount: number;
+    currency: string;
+    status: "pending" | "accepted" | "declined" | "withdrawn";
+    statusLabel: string;
+    listing: {
+        id: string;
+        title: string;
+        price: number;
+        currency: string;
+        imageUrl: string;
+    };
+};
+
+export type ApiChatMessage = {
+    id: string;
+    conversationId?: string;
+    senderId: string;
+    messageType: "text" | "images" | "offer" | "voice";
+    content: string;
+    mediaUrl?: string;
+    deliveryStatus?: "sent" | "delivered" | "read";
+    isRead?: boolean;
+    readAt?: string;
+    createdAt: string;
+    updatedAt?: string;
+    isMine: boolean;
+    reactions?: {
+        type: string;
+        count: number;
+        reactedByMe: boolean;
+    }[];
+    myReaction?: string | null;
+    offer?: ApiChatOffer | null;
+};
+
+export type ApiChatMessageText = {
+    messageType: "text" | "images" | "offer" | "voice";
+    content: string;
+    mediaUrl?: string;
+};
+
+
+
+export type ApiChats = {
+    items: ApiChat[];
+    allCount: number;
+    unreadCount: number;
+    onlineCount: number;
+};
+
+export type ApiChatLastMessagePreview = {
+    id?: string;
+    content: string;
+    messageType?: "text" | "images" | "offer" | "voice";
+    createdAt?: string;
+};
+
+export type ApiChat = {
+    id: string;
+    isPinned: boolean;
+    listingId: string;
+    myRole: string;
+    peer: ApiChatPeer;
+    listing: ApiAd;
+    lastMessagePreview: ApiChatLastMessagePreview;
+    lastMessageAt: string;
+    unreadCount: number;
+    createdAt: string;
+    updatedAt: string;
+};

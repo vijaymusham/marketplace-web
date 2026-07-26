@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
-import { getAds } from "@/components/api/apis";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatSoldAtTimestamp, getMyAds, updateAds } from "@/components/api/apis";
 import MyAdsCard, { type MyAd, type MyAdStatus } from "@/components/my-ads/MyAdsCard";
 
 type Filter = "all" | "active" | "inactive" | "pending" | "moderated";
@@ -15,33 +15,6 @@ const TABS: { key: Filter; label: string }[] = [
     { key: "inactive", label: "Inactive" },
     { key: "pending", label: "Pending" },
     { key: "moderated", label: "Moderated" },
-];
-
-const DEMO_ADS: MyAd[] = [
-    {
-        id: "demo-1",
-        title: "New condition 2017 Macbook Pro Touchbar 16/512",
-        price: "₹ 25,000",
-        image: "https://loremflickr.com/480/440/macbook,laptop/all?lock=2017",
-        status: "expired",
-        fromDate: "JAN 25, 26",
-        toDate: "FEB 24, 26",
-        views: 178,
-        likes: 0,
-        message: "This ad was expired. If you sold it, please mark it as sold.",
-    },
-    {
-        id: "demo-2",
-        title: "New condition 2017 Macbook Pro Touchbar 16/512",
-        price: "₹ 25,000",
-        image: "https://loremflickr.com/480/440/macbook,apple/all?lock=2018",
-        status: "expired",
-        fromDate: "JAN 25, 26",
-        toDate: "FEB 24, 26",
-        views: 178,
-        likes: 0,
-        message: "This ad was expired. If you sold it, please mark it as sold.",
-    },
 ];
 
 function formatPrice(price: number, currency?: string) {
@@ -96,13 +69,18 @@ function mapApiAds(payload: unknown): MyAd[] {
                 "https://loremflickr.com/480/440/product/all?lock=1";
 
             const priceNum = typeof ad.price === "number" ? ad.price : Number(ad.price);
-            const status = normalizeStatus(
-                typeof ad.status === "string"
-                    ? ad.status
-                    : typeof ad.adStatus === "string"
-                        ? ad.adStatus
-                        : undefined
-            );
+            const hasSoldAt =
+                (typeof ad.soldAt === "string" && ad.soldAt.length > 0) ||
+                ad.soldAt instanceof Date;
+            const status = hasSoldAt
+                ? "sold"
+                : normalizeStatus(
+                      typeof ad.status === "string"
+                          ? ad.status
+                          : typeof ad.adStatus === "string"
+                            ? ad.adStatus
+                            : undefined,
+                  );
 
             const created =
                 (typeof ad.createdAt === "string" && ad.createdAt) ||
@@ -131,7 +109,9 @@ function mapApiAds(payload: unknown): MyAd[] {
                 likes: typeof ad.likes === "number" ? ad.likes : typeof ad.likeCount === "number" ? ad.likeCount : 0,
             };
 
-            if (status === "expired") {
+            if (status === "sold") {
+                mapped.message = "Marked as sold. Buyers can no longer contact you on this ad.";
+            } else if (status === "expired") {
                 mapped.message = "This ad was expired. If you sold it, please mark it as sold.";
             } else if (status === "pending") {
                 mapped.message = "Your ad is under review and will go live once approved.";
@@ -152,48 +132,33 @@ function matchesFilter(ad: MyAd, filter: Filter) {
 
 export default function MyAdsPage() {
     const [filter, setFilter] = useState<Filter>("all");
-    const [localAds, setLocalAds] = useState<MyAd[] | null>(null);
+    const [markingSoldId, setMarkingSoldId] = useState<string | null>(null);
+    const queryClient = useQueryClient();
 
-    const { data: apiPayload, isLoading } = useQuery({
-        queryKey: ["myAds"],
-        queryFn: getAds,
+    const { data: ads, isLoading } = useQuery({
+        queryKey: ["my-ads"],
+        queryFn: getMyAds,
     });
 
-    const sourceAds = useMemo(() => {
-        if (localAds) return localAds;
-        const mapped = mapApiAds(apiPayload);
-        return mapped.length > 0 ? mapped : DEMO_ADS;
-    }, [apiPayload, localAds]);
-
-    const counts = useMemo(() => {
-        const base = { all: sourceAds.length, active: 0, inactive: 0, pending: 0, moderated: 0 };
-        for (const ad of sourceAds) {
-            if (ad.status === "active") base.active += 1;
-            else if (ad.status === "pending") base.pending += 1;
-            else if (ad.status === "moderated") base.moderated += 1;
-            else base.inactive += 1;
-        }
-        return base;
-    }, [sourceAds]);
+    const sourceAds = useMemo(() => mapApiAds(ads), [ads]);
 
     const visibleAds = useMemo(
         () => sourceAds.filter((ad) => matchesFilter(ad, filter)),
-        [sourceAds, filter]
+        [sourceAds, filter],
     );
 
-    const handleMarkSold = (id: string) => {
-        setLocalAds(
-            sourceAds.map((ad) =>
-                ad.id === id
-                    ? {
-                        ...ad,
-                        status: "sold",
-                        message: "Marked as sold. Buyers can no longer contact you on this ad.",
-                    }
-                    : ad
-            )
-        );
-        toast.success("Marked as sold");
+    const handleMarkSold = async (id: string) => {
+        if (markingSoldId) return;
+        setMarkingSoldId(id);
+        try {
+            await updateAds(id, { soldAt: formatSoldAtTimestamp() });
+            await queryClient.invalidateQueries({ queryKey: ["my-ads"] });
+            toast.success("Marked as sold");
+        } catch {
+            toast.error("Failed to mark as sold");
+        } finally {
+            setMarkingSoldId(null);
+        }
     };
 
     return (
@@ -206,7 +171,7 @@ export default function MyAdsPage() {
                             My Ads
                         </h1>
                         <p className="mt-1.5 text-sm font-medium text-slate-500">
-                            {counts.all} listing{counts.all === 1 ? "" : "s"} total
+                            {sourceAds.length} listing{sourceAds.length === 1 ? "" : "s"} total
                         </p>
                     </div>
 
@@ -222,17 +187,11 @@ export default function MyAdsPage() {
                                     type="button"
                                     onClick={() => setFilter(key)}
                                     className={`relative shrink-0 px-3.5 py-3 text-sm font-semibold transition-colors ${active
-                                            ? "text-primary"
-                                            : "text-slate-400 hover:text-slate-700"
+                                        ? "text-primary"
+                                        : "text-slate-400 hover:text-slate-700"
                                         }`}
                                 >
                                     {label}
-                                    <span
-                                        className={`ml-1.5 text-xs font-bold ${active ? "text-primary/70" : "text-slate-300"
-                                            }`}
-                                    >
-                                        {counts[key]}
-                                    </span>
                                     {active && (
                                         <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-primary" />
                                     )}
@@ -242,7 +201,7 @@ export default function MyAdsPage() {
                     </nav>
                 </header>
 
-                {isLoading && !localAds ? (
+                {isLoading ? (
                     <div className="space-y-3">
                         <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
                         <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
@@ -274,6 +233,7 @@ export default function MyAdsPage() {
                                 ad={ad}
                                 index={index}
                                 onMarkSold={handleMarkSold}
+                                isMarkingSold={markingSoldId === ad.id}
                             />
                         ))}
                     </div>

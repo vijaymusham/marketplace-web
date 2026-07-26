@@ -27,7 +27,6 @@ const PUBLIC_API_PATHS = [
     "/ads/section",
 ];
 
-/** Browser → same-origin `/backend/*` (Next rewrite). Avoids CORS so requests show in Network. */
 function getBaseURL() {
     const envUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
     if (typeof window !== "undefined") return "/backend";

@@ -1,61 +1,138 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import {
     CheckCheck,
+    ChevronDown,
     Image as ImageIcon,
-    Mic,
-    Pencil,
-    PhoneOff,
+    Pin,
+    PinOff,
     Plus,
     Search,
-    SquarePen,
     Tag,
 } from "lucide-react";
+import {
+    keepPreviousData,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import ChatAvatar from "./ChatAvatar";
-import type { Conversation } from "./chatTypes";
-
-type ChatSidebarProps = {
-    conversations: Conversation[];
-    activeId: string;
-    onSelect: (id: string) => void;
-    unreadTotal: number;
-};
+import { getChats, markChatRead, updateConversation } from "../api/apis";
+import type { ApiChat } from "../types/AllTypes";
+import { chatKeys, patchChatInLists } from "./chatCache";
 
 export default function ChatSidebar({
-    conversations,
-    activeId,
+    activeChat,
     onSelect,
-    unreadTotal,
-}: ChatSidebarProps) {
+}: {
+    activeChat: string | null;
+    onSelect: (id: string) => void;
+}) {
+    const queryClient = useQueryClient();
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState<"all" | "unread" | "online">("all");
+    const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
-    const filtered = conversations.filter((c) => {
-        const matchesQuery = c.name
-            .toLowerCase()
-            .includes(query.trim().toLowerCase());
-        if (!matchesQuery) return false;
-        if (filter === "unread") return c.unread > 0;
-        if (filter === "online") return c.online;
-        return true;
+    const {
+        data: conversations,
+        isLoading: isLoadingChats,
+        isError: isErrorChats,
+    } = useQuery({
+        queryKey: chatKeys.list(filter),
+        queryFn: () => getChats(filter, 1),
+        staleTime: 60_000,
+        placeholderData: keepPreviousData,
     });
-    const pinned = filtered.filter((c) => c.pinned);
-    const rest = filtered.filter((c) => !c.pinned);
-    const unreadCount = conversations.filter((c) => c.unread > 0).length;
-    const onlineCount = conversations.filter((c) => c.online).length;
-    const displayCount = Math.max(unreadTotal, 12);
+
+    const filteredItems = useMemo(() => {
+        const items = conversations?.items ?? [];
+        const q = query.trim().toLowerCase();
+        if (!q) return items;
+        return items.filter((c) => {
+            const name = c.peer?.displayName?.toLowerCase() ?? "";
+            const preview = c.lastMessagePreview?.content?.toLowerCase() ?? "";
+            return name.includes(q) || preview.includes(q);
+        });
+    }, [conversations?.items, query]);
+
+    const pinnedItems = useMemo(
+        () => filteredItems.filter((c) => c.isPinned),
+        [filteredItems],
+    );
+    const unpinnedItems = useMemo(
+        () => filteredItems.filter((c) => !c.isPinned),
+        [filteredItems],
+    );
+
+    const pinMutation = useMutation({
+        mutationFn: ({ id, isPinned }: { id: string; isPinned: boolean }) =>
+            updateConversation(id, { pinned: isPinned }),
+        onSuccess: (_data, vars) => {
+            patchChatInLists(queryClient, vars.id, (c) => ({
+                ...c,
+                isPinned: vars.isPinned,
+            }));
+            void queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+            toast.success(vars.isPinned ? "Chat pinned" : "Chat unpinned");
+        },
+        onError: (error: { message?: string }) => {
+            toast.error(error.message ?? "Couldn’t update chat");
+        },
+    });
+
+    const markReadMutation = useMutation({
+        mutationFn: (id: string) => markChatRead(id),
+        onSuccess: (_data, id) => {
+            patchChatInLists(queryClient, id, (c) =>
+                c.unreadCount ? { ...c, unreadCount: 0 } : c,
+            );
+            toast.success("Marked as read");
+        },
+        onError: (error: { message?: string }) => {
+            toast.error(error.message ?? "Couldn’t mark as read");
+        },
+    });
+
+    useEffect(() => {
+        if (!menuOpenId) return;
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") setMenuOpenId(null);
+        }
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [menuOpenId]);
+
+    if (isLoadingChats) {
+        return (
+            <div className="flex h-full w-full flex-col bg-white p-4 pt-5 sm:rounded-3xl">
+                <div className="flex h-full w-full items-center justify-center">
+                    <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
+                </div>
+            </div>
+        );
+    }
+
+    if (isErrorChats) {
+        return (
+            <div className="flex h-full w-full flex-col bg-white p-4 pt-5 sm:rounded-3xl">
+                <div className="flex h-full w-full items-center justify-center">
+                    <div className="text-sm font-bold text-[#0F172A]">Error loading chats</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <aside className="flex h-full w-full flex-col bg-white p-4 pt-5  sm:rounded-3xl">
-            {/* Header */}
+        <aside className="flex h-full w-full flex-col bg-white p-4 pt-5 sm:rounded-3xl">
             <div className="mb-3 flex items-center justify-between px-1">
                 <h2 className="text-[20px] font-bold tracking-tight text-[#0F172A] sm:text-[22px]">
                     Message
                 </h2>
             </div>
 
-            <div className="mb-3 flex items-center gap-2 rounded-[18px] border border-slate-200/90 bg-slate-100 px-3.5 py-3 ">
+            <div className="mb-3 flex items-center gap-2 rounded-[18px] border border-slate-200/90 bg-slate-100 px-3.5 py-3">
                 <Search className="h-4 w-4 shrink-0 text-[#8B95A8]" strokeWidth={2} />
                 <input
                     value={query}
@@ -75,13 +152,20 @@ export default function ChatSidebar({
                 )}
             </div>
 
-            {/* Quick filters */}
             <div className="mb-4 flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide sm:mb-5">
                 {(
                     [
-                        { id: "all" as const, label: "All", count: conversations.length },
-                        { id: "unread" as const, label: "Unread", count: unreadCount },
-                        { id: "online" as const, label: "Online", count: onlineCount },
+                        { id: "all" as const, label: "All", count: conversations?.allCount ?? 0 },
+                        {
+                            id: "unread" as const,
+                            label: "Unread",
+                            count: conversations?.unreadCount ?? 0,
+                        },
+                        {
+                            id: "online" as const,
+                            label: "Online",
+                            count: conversations?.onlineCount ?? 0,
+                        },
                     ] as const
                 ).map((tab) => (
                     <button
@@ -89,8 +173,8 @@ export default function ChatSidebar({
                         type="button"
                         onClick={() => setFilter(tab.id)}
                         className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold transition active:scale-95 ${filter === tab.id
-                            ? "bg-primary text-white "
-                            : "bg-white text-[#64748B] border border-slate-200/90 hover:text-primary"
+                            ? "bg-primary text-white"
+                            : "border border-slate-200/90 bg-white text-[#64748B] hover:text-primary"
                             }`}
                     >
                         {tab.label}
@@ -106,22 +190,35 @@ export default function ChatSidebar({
                 ))}
             </div>
 
-            {/* Lists */}
             <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain pr-0.5 scrollbar-hide">
-                {pinned.length > 0 && (
+                {pinnedItems.length > 0 && (
                     <section>
                         <p className="mb-2.5 px-1 text-[11px] font-bold tracking-[0.08em] text-[#94A3B8] uppercase">
                             Pinned
                         </p>
                         <div className="space-y-1.5">
-                            {pinned.map((c) =>
+                            {pinnedItems.map((c) => (
                                 <ConversationRow
                                     key={c.id}
                                     conversation={c}
-                                    active={c.id === activeId}
+                                    active={activeChat === c.id}
+                                    menuOpen={menuOpenId === c.id}
                                     onSelect={onSelect}
+                                    onMenuToggle={(id) =>
+                                        setMenuOpenId((prev) => (prev === id ? null : id))
+                                    }
+                                    onMenuClose={() => setMenuOpenId(null)}
+                                    onPin={() =>
+                                        pinMutation.mutate({
+                                            id: c.id,
+                                            isPinned: !c.isPinned,
+                                        })
+                                    }
+                                    onMarkRead={() => markReadMutation.mutate(c.id)}
+                                    pinPending={pinMutation.isPending}
+                                    markReadPending={markReadMutation.isPending}
                                 />
-                            )}
+                            ))}
                         </div>
                     </section>
                 )}
@@ -131,15 +228,29 @@ export default function ChatSidebar({
                         All Message
                     </p>
                     <div className="space-y-1.5">
-                        {rest.map((c) => (
+                        {unpinnedItems.map((c) => (
                             <ConversationRow
                                 key={c.id}
                                 conversation={c}
-                                active={c.id === activeId}
+                                active={activeChat === c.id}
+                                menuOpen={menuOpenId === c.id}
                                 onSelect={onSelect}
+                                onMenuToggle={(id) =>
+                                    setMenuOpenId((prev) => (prev === id ? null : id))
+                                }
+                                onMenuClose={() => setMenuOpenId(null)}
+                                onPin={() =>
+                                    pinMutation.mutate({
+                                        id: c.id,
+                                        isPinned: !c.isPinned,
+                                    })
+                                }
+                                onMarkRead={() => markReadMutation.mutate(c.id)}
+                                pinPending={pinMutation.isPending}
+                                markReadPending={markReadMutation.isPending}
                             />
                         ))}
-                        {filtered.length === 0 && (
+                        {filteredItems.length === 0 && (
                             <div className="px-3 py-10 text-center">
                                 <p className="text-sm font-bold text-[#0F172A]">No chats found</p>
                                 <p className="mt-1 text-[12px] font-medium text-[#94A3B8]">
@@ -147,7 +258,9 @@ export default function ChatSidebar({
                                         ? `Nothing matches “${query}”`
                                         : filter === "unread"
                                             ? "You're all caught up"
-                                            : "No one is online right now"}
+                                            : filter === "online"
+                                                ? "No one is online right now"
+                                                : "Start a chat from a listing"}
                                 </p>
                                 {(query || filter !== "all") && (
                                     <button
@@ -170,68 +283,182 @@ export default function ChatSidebar({
     );
 }
 
-
 function ConversationRow({
-    conversation: c,
+    conversation,
     active,
+    menuOpen,
     onSelect,
+    onMenuToggle,
+    onMenuClose,
+    onPin,
+    onMarkRead,
+    pinPending,
+    markReadPending,
 }: {
-    conversation: Conversation;
+    conversation: ApiChat;
     active: boolean;
+    menuOpen: boolean;
     onSelect: (id: string) => void;
+    onMenuToggle: (id: string) => void;
+    onMenuClose: () => void;
+    onPin: () => void;
+    onMarkRead: () => void;
+    pinPending: boolean;
+    markReadPending: boolean;
 }) {
+    const preview = conversation.lastMessagePreview?.content ?? conversation.lastMessagePreview;
+    const previewType = conversation.lastMessagePreview?.messageType;
+    const name = conversation.peer?.displayName ?? "";
+    const photo =
+        conversation.peer?.profilePhoto ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "User")}`;
+
+    function runMenuAction(e: MouseEvent, action: () => void) {
+        e.preventDefault();
+        e.stopPropagation();
+        action();
+        onMenuClose();
+    }
+
     return (
-        <button
-            type="button"
-            onClick={() => onSelect(c.id)}
-            className={`flex min-h-16 w-full items-center gap-3 rounded-[20px] px-3 py-2.5 text-left transition active:scale-[0.99] cursor-pointer ${active
-                ? "border border-transparent bg-primary/5 "
-                : "bg-white/55 hover:bg-slate-50 border border-slate-100/80"
+        <div
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+                if (menuOpen) return;
+                onSelect(conversation.id);
+            }}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelect(conversation.id);
+                }
+            }}
+            className={`group relative flex min-h-16 w-full cursor-pointer items-center gap-3 rounded-[20px] px-3 py-2.5 text-left transition active:scale-[0.99] ${active
+                ? "border border-transparent bg-primary/5"
+                : "border border-slate-100/80 bg-white/55 hover:bg-slate-50"
                 }`}
         >
             <ChatAvatar
-                label={c.avatar}
-                color={c.avatarColor}
-                photo={c.photo}
+                label={name}
+                color={name}
+                photo={photo}
                 size="md"
-                online={c.online}
+                online={conversation.peer?.isOnline}
             />
             <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-[14px] font-bold text-[#0F172A]">{c.name}</p>
+                    <p className="truncate text-[14px] font-bold text-[#0F172A]">{name}</p>
                     <span className="shrink-0 text-[11px] font-medium text-[#8B95A8]">
-                        {c.time}
+                        {conversation.lastMessageAt
+                            ? new Date(conversation.lastMessageAt).toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })
+                            : ""}
                     </span>
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
                     <p className="flex min-w-0 items-center gap-1 truncate text-[12px] font-medium text-[#8B95A8]">
-                        {c.typing || c.lastMessageIcon === "pen" ? (
+                        {previewType === "images" && (
+                            <ImageIcon className="h-3 w-3 shrink-0" />
+                        )}
+                        {previewType === "offer" && (
+                            <Tag className="h-3 w-3 shrink-0 text-primary" />
+                        )}
+                        <span className="truncate">{preview}</span>
+                    </p>
+
+                    <div
+                        className="relative flex h-6 w-6 shrink-0 items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div
+                            className={`absolute inset-0 flex items-center justify-center transition ${menuOpen
+                                ? "pointer-events-none opacity-0"
+                                : "opacity-100 group-hover:pointer-events-none group-hover:opacity-0"
+                                }`}
+                        >
+                            {conversation.unreadCount > 0 ? (
+                                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[linear-gradient(145deg,#FB923C,#F97316)] px-1.5 text-[10px] font-bold text-white">
+                                    {conversation.unreadCount}
+                                </span>
+                            ) : (
+                                <CheckCheck className="h-3.5 w-3.5 text-primary" />
+                            )}
+                        </div>
+
+                        <button
+                            type="button"
+                            aria-label="Chat options"
+                            aria-expanded={menuOpen}
+                            aria-haspopup="menu"
+                            className={`absolute inset-0 z-10 flex items-center justify-center rounded-full text-[#8B95A8] transition hover:bg-[#F1F5F9] hover:text-[#475569] ${menuOpen
+                                ? "opacity-100"
+                                : "opacity-0 group-hover:opacity-100"
+                                }`}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onMenuToggle(conversation.id);
+                            }}
+                        >
+                            <ChevronDown
+                                className={`h-4 w-4 transition ${menuOpen ? "rotate-180" : ""}`}
+                            />
+                        </button>
+
+                        {menuOpen && (
                             <>
-                                <Pencil className="h-3 w-3 shrink-0 text-primary" />
-                                <span className="text-primary">typing...</span>
-                            </>
-                        ) : (
-                            <>
-                                {c.lastMessageIcon === "mic" && <Mic className="h-3 w-3 shrink-0" />}
-                                {c.lastMessageIcon === "image" && (
-                                    <ImageIcon className="h-3 w-3 shrink-0" />
-                                )}
-                                {c.lastMessageIcon === "offer" && (
-                                    <Tag className="h-3 w-3 shrink-0 text-primary" />
-                                )}
-                                <span className="truncate">{c.lastMessage}</span>
+                                {/* Backdrop closes menu without racing menu item clicks */}
+                                <button
+                                    type="button"
+                                    aria-label="Close menu"
+                                    className="fixed inset-0 z-20 cursor-default bg-transparent"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        onMenuClose();
+                                    }}
+                                />
+                                <div
+                                    role="menu"
+                                    className="absolute top-full right-0 z-30 mt-1.5 min-w-40 overflow-hidden rounded-xl bg-white py-1 shadow-[0_8px_28px_rgba(15,23,42,0.14)] ring-1 ring-black/5"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        disabled={pinPending}
+                                        className="flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-[13px] font-medium text-[#334155] transition hover:bg-[#F8FAFC] disabled:opacity-50"
+                                        onMouseDown={(e) => runMenuAction(e, onPin)}
+                                    >
+                                        {conversation.isPinned ? (
+                                            <PinOff className="h-3.5 w-3.5 text-[#8B95A8]" />
+                                        ) : (
+                                            <Pin className="h-3.5 w-3.5 text-[#8B95A8]" />
+                                        )}
+                                        {conversation.isPinned ? "Unpin" : "Pin"}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        disabled={
+                                            markReadPending || conversation.unreadCount <= 0
+                                        }
+                                        className="flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-[13px] font-medium text-[#334155] transition hover:bg-[#F8FAFC] disabled:opacity-50"
+                                        onMouseDown={(e) => runMenuAction(e, onMarkRead)}
+                                    >
+                                        <CheckCheck className="h-3.5 w-3.5 text-[#8B95A8]" />
+                                        Mark as read
+                                    </button>
+                                </div>
                             </>
                         )}
-                    </p>
-                    {c.unread > 0 ? (
-                        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(145deg,#FB923C,#F97316)] px-1.5 text-[10px] font-bold text-white ">
-                            {c.unread}
-                        </span>
-                    ) : (
-                        <CheckCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
-                    )}
+                    </div>
                 </div>
             </div>
-        </button>
+        </div>
     );
 }

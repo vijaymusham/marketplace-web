@@ -158,7 +158,7 @@ export function getListingSpecs(listing: Listing): { label: string; value: strin
 
   if (kind === "mobile") {
     return [
-      { label: "Brand", value: /iphone|apple/i.test(listing.title) ? "Apple" : /vivo/i.test(listing.title) ? "Vivo" : "Smartphone" },
+      { label: "Brand", value: /Apple/i.test(listing.title) ? "Apple" : /vivo/i.test(listing.title) ? "Vivo" : "Smartphone" },
       { label: "Storage", value: seed % 2 ? "256 GB" : "128 GB" },
       { label: "RAM", value: seed % 2 ? "8 GB" : "6 GB" },
       { label: "Battery health", value: `${88 + (seed % 10)}%` },

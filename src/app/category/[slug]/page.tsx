@@ -47,6 +47,7 @@ export default function CategoryPage() {
     const searchParams = useSearchParams();
     const slug = String(params.slug ?? "");
     const categoryIdParam = searchParams.get("categoryId") ?? "";
+    const subcategoryIdParam = searchParams.get("subcategoryId") ?? "";
     const match = findRouteBySlug(slug);
     const [sort, setSort] = useState<SortValue>("date");
 
@@ -56,12 +57,35 @@ export default function CategoryPage() {
     });
 
     const normalized = normalizeApiCategories(apiCategories);
-    const resolvedCategoryId =
-        categoryIdParam ||
-        (match?.type === "category"
-            ? normalized.find((c) => slugify(c.name) === slug || c.slug === slug)?.id
-            : undefined) ||
-        "";
+
+    const apiCategory = match
+        ? normalized.find((c) => {
+              const nameSlug = slugify(c.name);
+              const routeCategorySlug = slugify(match.category.name);
+              return (
+                  c.name === match.category.name ||
+                  nameSlug === routeCategorySlug ||
+                  c.slug === routeCategorySlug ||
+                  (match.type === "category" && (nameSlug === slug || c.slug === slug))
+              );
+          })
+        : undefined;
+
+    const apiSubcategory =
+        match?.type === "subcategory"
+            ? apiCategory?.subcategoryItems.find((sub) => {
+                  const nameSlug = slugify(sub.name);
+                  return (
+                      sub.name === match.subcategory ||
+                      nameSlug === slug ||
+                      sub.slug === slug ||
+                      nameSlug === slugify(match.subcategory)
+                  );
+              })
+            : undefined;
+
+    const resolvedCategoryId = categoryIdParam || apiCategory?.id || "";
+    const resolvedSubCategoryId = subcategoryIdParam || apiSubcategory?.id || "";
 
     const { data: categoryAds, isLoading } = useQuery({
         queryKey: ["categoryAds", resolvedCategoryId, sort],
@@ -126,7 +150,9 @@ export default function CategoryPage() {
         <main className="flex-1 bg-white">
             <SubcategoryBrowse
                 categoryName={category.name}
+                categoryId={resolvedCategoryId}
                 subcategories={category.subcategories}
+                subCategoryId={resolvedSubCategoryId}
                 activeSubcategory={subcategory}
                 listings={data}
             />

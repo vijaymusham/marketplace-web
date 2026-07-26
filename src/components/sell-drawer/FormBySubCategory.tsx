@@ -221,7 +221,7 @@ export function MobilePhonesForm({ control, register, errors }: SubFormProps) {
                 register={register}
                 required
                 error={errors.model?.message}
-                placeholder="e.g. iPhone 14"
+                placeholder="e.g. iPhone 17 Pro Max"
             />
             <ChoiceChips
                 label="RAM"

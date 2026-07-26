@@ -101,7 +101,7 @@ export const projectLaunchMonthOptions = [
 
 
 export const mobileBrandOptions = [
-    { value: "iPhone", label: "iPhone" },
+    { value: "Apple", label: "Apple" },
     { value: "Samsung", label: "Samsung" },
     { value: "Mi", label: "Mi" },
     { value: "Vivo", label: "Vivo" },
