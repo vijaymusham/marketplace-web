@@ -9,6 +9,7 @@ import { IntroProvider } from "@/components/layout/IntroContext";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import TanstackProvider from "@/components/providers/TanstackProvider";
 import SiteChrome from "@/components/layout/SiteChrome";
+import { SocketProvider } from "@/components/socket/SocketProvider";
 
 export const display = localFont({
     src: [
@@ -39,23 +40,25 @@ export default function RootLayout({
         >
             <body className="min-h-full flex flex-col bg-white font-display text-slate-900" suppressHydrationWarning>
                 <TanstackProvider>
-                    <AuthProvider>
-                        <IntroProvider>
-                            <SmoothScroll>
-                                <Preloader />
-                                <Navbar />
-                                {children}
-                                <Toaster
-                                    position="top-right"
-                                    reverseOrder={false}
-                                    gutter={8}
-                                    containerStyle={{ zIndex: 100000, fontFamily: "var(--font-display)", fontWeight: "600" }}
-                                    toasterId="default"
-                                />
-                                <SiteChrome />
-                            </SmoothScroll>
-                        </IntroProvider>
-                    </AuthProvider>
+                    <SocketProvider>
+                        <AuthProvider>
+                            <IntroProvider>
+                                <SmoothScroll>
+                                    <Preloader />
+                                    <Navbar />
+                                    {children}
+                                    <Toaster
+                                        position="top-right"
+                                        reverseOrder={false}
+                                        gutter={8}
+                                        containerStyle={{ zIndex: 100000, fontFamily: "var(--font-display)", fontWeight: "600" }}
+                                        toasterId="default"
+                                    />
+                                    <SiteChrome />
+                                </SmoothScroll>
+                            </IntroProvider>
+                        </AuthProvider>
+                    </SocketProvider>
                 </TanstackProvider>
             </body>
         </html>

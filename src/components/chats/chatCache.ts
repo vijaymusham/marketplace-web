@@ -1,12 +1,61 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { ApiChat, ApiChatMessage, ApiChats } from "../types/AllTypes";
+import type {
+    ApiChat,
+    ApiChatMessage,
+    ApiChats,
+    ApiUserPresence,
+} from "../types/AllTypes";
+import { store } from "@/components/redux/store";
 
 export const chatKeys = {
     lists: ["chats"] as const,
     list: (filter: string) => ["chats", filter] as const,
     detail: (id: string) => ["chat", id] as const,
     messages: (id: string) => ["chat-messages", id] as const,
+    typing: (id: string) => ["chat-typing", id] as const,
 };
+
+export function getMyUserId(): string | null {
+    return store.getState().user.user?.user?.id ?? null;
+}
+
+/** WS/REST sometimes send isMine from the sender's POV — derive from senderId. */
+export function normalizeChatMessage(
+    message: ApiChatMessage,
+    myUserId: string | null = getMyUserId(),
+    peerId?: string | null,
+): ApiChatMessage {
+    let isMine = Boolean(message.isMine);
+    if (myUserId && message.senderId) {
+        isMine = message.senderId === myUserId;
+    } else if (peerId && message.senderId) {
+        isMine = message.senderId !== peerId;
+    }
+    return { ...message, isMine };
+}
+
+const typingClearTimers = new Map<string, number>();
+
+export function setConversationTyping(
+    queryClient: QueryClient,
+    conversationId: string,
+    isTyping: boolean,
+) {
+    queryClient.setQueryData<boolean>(chatKeys.typing(conversationId), isTyping);
+
+    const prev = typingClearTimers.get(conversationId);
+    if (prev != null) window.clearTimeout(prev);
+
+    if (isTyping) {
+        const timer = window.setTimeout(() => {
+            queryClient.setQueryData<boolean>(chatKeys.typing(conversationId), false);
+            typingClearTimers.delete(conversationId);
+        }, 4000);
+        typingClearTimers.set(conversationId, timer);
+    } else {
+        typingClearTimers.delete(conversationId);
+    }
+}
 
 /** Find a conversation already loaded in any chats list cache. */
 export function findChatInCache(
@@ -64,27 +113,94 @@ export function removeChatFromLists(queryClient: QueryClient, chatId: string) {
     queryClient.removeQueries({ queryKey: chatKeys.messages(chatId) });
 }
 
+/** Apply a live presence update to presence query + any cached chat peers. */
+export function applyPresenceToCache(
+    queryClient: QueryClient,
+    presence: ApiUserPresence,
+) {
+    queryClient.setQueryData<ApiUserPresence>(
+        ["presence", presence.userId],
+        presence,
+    );
+
+    queryClient.setQueriesData<ApiChats>({ queryKey: chatKeys.lists }, (old) => {
+        if (!old?.items) return old;
+        let changed = false;
+        const items = old.items.map((c) => {
+            if (c.peer?.id !== presence.userId) return c;
+            changed = true;
+            return {
+                ...c,
+                peer: {
+                    ...c.peer,
+                    isOnline: presence.isOnline,
+                    lastActiveAt: presence.lastActiveAt,
+                    lastActiveLabel: presence.lastActiveLabel,
+                },
+            };
+        });
+        return changed ? { ...old, items } : old;
+    });
+
+    queryClient.setQueriesData<ApiChat>({ queryKey: ["chat"] }, (old) => {
+        if (!old?.peer || old.peer.id !== presence.userId) return old;
+        return {
+            ...old,
+            peer: {
+                ...old.peer,
+                isOnline: presence.isOnline,
+                lastActiveAt: presence.lastActiveAt,
+                lastActiveLabel: presence.lastActiveLabel,
+            },
+        };
+    });
+}
+
 export function appendMessageToCache(
     queryClient: QueryClient,
     chatId: string,
     message: ApiChatMessage,
+    options?: { clearUnread?: boolean; peerId?: string | null },
 ) {
+    const normalized = normalizeChatMessage(
+        message,
+        getMyUserId(),
+        options?.peerId,
+    );
+
+    let added = false;
     queryClient.setQueryData<ApiChatMessage[]>(chatKeys.messages(chatId), (old = []) => {
-        if (old.some((m) => m.id === message.id)) return old;
-        return [...old, message];
+        if (old.some((m) => m.id === normalized.id)) return old;
+        added = true;
+        return [...old, normalized];
     });
 
-    patchChatInLists(queryClient, chatId, (c) => ({
-        ...c,
-        lastMessageAt: message.createdAt || c.lastMessageAt,
-        lastMessagePreview: {
-            id: message.id,
-            content: message.content,
-            messageType: message.messageType,
-            createdAt: message.createdAt,
-        },
-        unreadCount: 0,
-    }));
+    if (!normalized.isMine) {
+        setConversationTyping(queryClient, chatId, false);
+    }
+
+    if (!added && !options?.clearUnread) return;
+
+    patchChatInLists(queryClient, chatId, (c) => {
+        let unreadCount = c.unreadCount || 0;
+        if (options?.clearUnread || normalized.isMine) {
+            unreadCount = 0;
+        } else if (added) {
+            unreadCount += 1;
+        }
+
+        return {
+            ...c,
+            lastMessageAt: normalized.createdAt || c.lastMessageAt,
+            lastMessagePreview: {
+                id: normalized.id,
+                content: normalized.content,
+                messageType: normalized.messageType,
+                createdAt: normalized.createdAt,
+            },
+            unreadCount,
+        };
+    });
 }
 
 const markReadInFlight = new Set<string>();

@@ -22,6 +22,7 @@ import ChatAvatar from "./ChatAvatar";
 import { getChats, markChatRead, updateConversation } from "../api/apis";
 import type { ApiChat } from "../types/AllTypes";
 import { chatKeys, patchChatInLists } from "./chatCache";
+import { useSocket } from "@/components/socket/SocketProvider";
 
 export default function ChatSidebar({
     activeChat,
@@ -31,6 +32,7 @@ export default function ChatSidebar({
     onSelect: (id: string) => void;
 }) {
     const queryClient = useQueryClient();
+    const socket = useSocket();
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState<"all" | "unread" | "online">("all");
     const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
@@ -65,6 +67,24 @@ export default function ChatSidebar({
         () => filteredItems.filter((c) => !c.isPinned),
         [filteredItems],
     );
+
+    const conversationIds = useMemo(
+        () => (conversations?.items ?? []).map((c) => c.id),
+        [conversations?.items],
+    );
+
+    // Typing events are room-scoped — join inbox conversations so sidebar previews update.
+    useEffect(() => {
+        if (!socket?.connected || conversationIds.length === 0) return;
+        for (const id of conversationIds) {
+            socket.emit("conversation.join", { conversationId: id });
+        }
+        return () => {
+            for (const id of conversationIds) {
+                socket.emit("conversation.leave", { conversationId: id });
+            }
+        };
+    }, [socket, conversationIds]);
 
     const pinMutation = useMutation({
         mutationFn: ({ id, isPinned }: { id: string; isPinned: boolean }) =>
@@ -306,6 +326,13 @@ function ConversationRow({
     pinPending: boolean;
     markReadPending: boolean;
 }) {
+    const { data: isTyping = false } = useQuery({
+        queryKey: chatKeys.typing(conversation.id),
+        queryFn: () => false,
+        staleTime: Infinity,
+        initialData: false,
+    });
+
     const preview = conversation.lastMessagePreview?.content ?? conversation.lastMessagePreview;
     const previewType = conversation.lastMessagePreview?.messageType;
     const name = conversation.peer?.displayName ?? "";
@@ -359,14 +386,24 @@ function ConversationRow({
                     </span>
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
-                    <p className="flex min-w-0 items-center gap-1 truncate text-[12px] font-medium text-[#8B95A8]">
-                        {previewType === "images" && (
-                            <ImageIcon className="h-3 w-3 shrink-0" />
+                    <p
+                        className={`flex min-w-0 items-center gap-1 truncate text-[12px] font-medium ${
+                            isTyping ? "text-primary" : "text-[#8B95A8]"
+                        }`}
+                    >
+                        {isTyping ? (
+                            <span className="truncate font-semibold">typing...</span>
+                        ) : (
+                            <>
+                                {previewType === "images" && (
+                                    <ImageIcon className="h-3 w-3 shrink-0" />
+                                )}
+                                {previewType === "offer" && (
+                                    <Tag className="h-3 w-3 shrink-0 text-primary" />
+                                )}
+                                <span className="truncate">{preview}</span>
+                            </>
                         )}
-                        {previewType === "offer" && (
-                            <Tag className="h-3 w-3 shrink-0 text-primary" />
-                        )}
-                        <span className="truncate">{preview}</span>
                     </p>
 
                     <div

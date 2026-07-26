@@ -531,3 +531,10 @@ export type ApiChat = {
     createdAt: string;
     updatedAt: string;
 };
+
+export type ApiUserPresence = {
+    userId: string;
+    isOnline: boolean;
+    lastActiveAt: string;
+    lastActiveLabel: string;
+};

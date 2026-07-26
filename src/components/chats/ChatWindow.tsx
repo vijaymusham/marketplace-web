@@ -2,6 +2,7 @@
 
 import {
     useEffect,
+    useMemo,
     useRef,
     useState,
     type FormEvent,
@@ -9,6 +10,8 @@ import {
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
 } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/components/redux/store";
 import {
     ArrowDown,
     ArrowLeft,
@@ -19,6 +22,7 @@ import {
     Paperclip,
     Phone,
     Pin,
+    Plus,
     Reply,
     SendHorizontal,
     Smile,
@@ -36,6 +40,7 @@ import {
     deleteMessage,
     getChatById,
     getChatMessages,
+    getUserPresence,
     markChatRead,
     reactToMessage,
     removeReaction,
@@ -51,8 +56,10 @@ import {
     chatKeys,
     findChatInCache,
     markChatReadOnce,
+    normalizeChatMessage,
     removeChatFromLists,
 } from "./chatCache";
+import { useSocket } from "@/components/socket/SocketProvider";
 
 const QUICK_REPLIES = [
     "Is this still available?",
@@ -89,7 +96,11 @@ export default function ChatWindow({
     onChatRemoved,
 }: ChatWindowProps) {
     const { user } = useAuth();
+    const socket = useSocket();
     const queryClient = useQueryClient();
+    const myUserId = useSelector(
+        (state: RootState) => state.user.user?.user?.id ?? null,
+    );
     const [text, setText] = useState("");
     const [replyTo, setReplyTo] = useState<ApiChatMessage | null>(null);
     const [offerOpen, setOfferOpen] = useState(false);
@@ -99,6 +110,8 @@ export default function ChatWindow({
     const listRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const typingActiveRef = useRef(false);
+    const stopTypingTimerRef = useRef<number | null>(null);
 
     const meName = user?.displayName || "You";
     const mePhoto = user?.photoURL ?? null;
@@ -113,7 +126,7 @@ export default function ChatWindow({
     });
 
     const {
-        data: messages = [],
+        data: rawMessages = [],
         isLoading: messagesLoading,
     } = useQuery({
         queryKey: chatKeys.messages(activeChat),
@@ -121,6 +134,90 @@ export default function ChatWindow({
         enabled: !!activeChat,
         staleTime: 30_000,
     });
+
+    const { data: presence } = useQuery({
+        queryKey: ["presence", conversation?.peer.id],
+        queryFn: () => getUserPresence(conversation?.peer.id ?? ""),
+        enabled: !!conversation?.peer.id,
+    });
+
+    const { data: peerTyping = false } = useQuery({
+        queryKey: chatKeys.typing(activeChat),
+        queryFn: () => false,
+        enabled: !!activeChat,
+        staleTime: Infinity,
+        initialData: false,
+    });
+
+    const peerId = conversation?.peer?.id;
+
+    const messages = useMemo(
+        () =>
+            rawMessages.map((m) =>
+                normalizeChatMessage(m, myUserId, peerId),
+            ),
+        [rawMessages, myUserId, peerId],
+    );
+
+    function clearStopTypingTimer() {
+        if (stopTypingTimerRef.current != null) {
+            window.clearTimeout(stopTypingTimerRef.current);
+            stopTypingTimerRef.current = null;
+        }
+    }
+
+    function emitTypingStop() {
+        clearStopTypingTimer();
+        if (!typingActiveRef.current) return;
+        typingActiveRef.current = false;
+        if (socket?.connected && activeChat) {
+            socket.emit("typing.stop", { conversationId: activeChat });
+        }
+    }
+
+    function emitTypingStart() {
+        if (!socket?.connected || !activeChat) return;
+        if (!typingActiveRef.current) {
+            typingActiveRef.current = true;
+            socket.emit("typing.start", { conversationId: activeChat });
+        }
+        clearStopTypingTimer();
+        stopTypingTimerRef.current = window.setTimeout(() => {
+            emitTypingStop();
+        }, 2000);
+    }
+
+    // Doc §5.2: join room for live messages/typing while this thread is open.
+    useEffect(() => {
+        if (!socket?.connected || !activeChat) return;
+
+        socket.emit("conversation.join", { conversationId: activeChat });
+
+        const onMessageNew = (message: ApiChatMessage) => {
+            if (message.conversationId !== activeChat) return;
+            const normalized = normalizeChatMessage(message, myUserId, peerId);
+            appendMessageToCache(queryClient, activeChat, normalized, {
+                clearUnread: true,
+                peerId,
+            });
+            if (!normalized.isMine) {
+                markChatReadOnce(queryClient, activeChat, 1, markChatRead);
+            }
+        };
+
+        socket.on("message.new", onMessageNew);
+
+        return () => {
+            clearStopTypingTimer();
+            if (typingActiveRef.current) {
+                typingActiveRef.current = false;
+                socket.emit("typing.stop", { conversationId: activeChat });
+            }
+            socket.off("message.new", onMessageNew);
+            // Keep the conversation room joined so the sidebar still gets typing
+            // while the user stays on /chats (ChatSidebar owns leave).
+        };
+    }, [socket, activeChat, peerId, myUserId, queryClient]);
 
     const deleteChatMutation = useMutation({
         mutationFn: () => deleteChat(activeChat),
@@ -138,7 +235,10 @@ export default function ChatWindow({
         mutationFn: (payload: ApiChatMessageText) =>
             sendMessage(activeChat, payload),
         onSuccess: (message) => {
-            appendMessageToCache(queryClient, activeChat, message);
+            appendMessageToCache(queryClient, activeChat, message, {
+                clearUnread: true,
+                peerId,
+            });
         },
         onError: (error: { message?: string }) => {
             toast.error(error.message ?? "Couldn’t send message");
@@ -154,6 +254,7 @@ export default function ChatWindow({
                     queryClient,
                     activeChat,
                     offer as ApiChatMessage,
+                    { clearUnread: true, peerId },
                 );
             } else {
                 void queryClient.invalidateQueries({
@@ -183,7 +284,7 @@ export default function ChatWindow({
 
     useEffect(() => {
         scrollToBottom(false);
-    }, [messages, activeChat]);
+    }, [messages, peerTyping, activeChat]);
 
     useEffect(() => {
         const t = window.setTimeout(() => inputRef.current?.focus(), 180);
@@ -229,6 +330,7 @@ export default function ChatWindow({
     function sendText(value: string) {
         const trimmed = value.trim();
         if (!trimmed || sending) return;
+        emitTypingStop();
         setText("");
         setReplyTo(null);
         if (inputRef.current) inputRef.current.style.height = "auto";
@@ -299,7 +401,7 @@ export default function ChatWindow({
                             color={peerName}
                             photo={avatarUrl(peerName, peerPhoto)}
                             size="md"
-                            online={conversation?.peer.isOnline}
+                            online={presence?.isOnline ?? conversation?.peer.isOnline}
                         />
                         <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
@@ -308,14 +410,24 @@ export default function ChatWindow({
                                 </h1>
                             </div>
                             <p className="truncate text-[9px] font-medium lowercase text-slate-500 sm:text-[12px]">
-                                {conversation?.peer.isOnline ? (
-                                    <span className="inline-flex items-center gap-1.5">
-                                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                                {peerTyping ? (
+                                    <span className="inline-flex items-center gap-1.5 font-semibold text-primary normal-case">
+                                        typing
+                                        <span className="inline-flex gap-0.5">
+                                            <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
+                                            <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:150ms]" />
+                                            <span className="h-1 w-1 animate-bounce rounded-full bg-primary [animation-delay:300ms]" />
+                                        </span>
+                                    </span>
+                                ) : (presence?.isOnline ?? conversation?.peer.isOnline) ? (
+                                    <span className="inline-flex items-center gap-1.5 font-semibold capitalize">
                                         Active now
                                     </span>
-                                ) : conversation?.peer.lastActiveLabel ? (
+                                ) : presence?.lastActiveLabel ||
+                                    conversation?.peer.lastActiveLabel ? (
                                     <span className="text-slate-500">
-                                        {conversation.peer.lastActiveLabel}
+                                        {presence?.lastActiveLabel ||
+                                            conversation?.peer.lastActiveLabel}
                                     </span>
                                 ) : (
                                     <span className="text-slate-500">Last seen recently</span>
@@ -443,11 +555,20 @@ export default function ChatWindow({
                                 key={msg.id}
                                 message={msg}
                                 conversationId={activeChat}
+                                myUserId={myUserId}
+                                peerId={peerId}
                                 peerName={peerName}
                                 peerPhoto={peerPhoto}
                                 onReply={handleReply}
                             />
                         ))}
+
+                    {peerTyping && (
+                        <TypingBubble
+                            peerName={peerName}
+                            peerPhoto={peerPhoto}
+                        />
+                    )}
 
                     <div ref={bottomRef} />
                 </div>
@@ -515,28 +636,33 @@ export default function ChatWindow({
 
                 <form
                     onSubmit={handleSubmit}
-                    className="flex items-end gap-1.5 rounded-[22px] border border-slate-200/95 bg-[linear-gradient(180deg,#FFFFFF,#F4F6FB)] px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_30px_rgba(55,75,140,0.08)] sm:gap-2 sm:rounded-3xl sm:px-2.5 sm:py-2"
+                    className="flex items-center gap-1.5 rounded-full border border-slate-200/95 bg-[linear-gradient(180deg,#FFFFFF,#F4F6FB)] px-2 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_30px_rgba(55,75,140,0.08)] sm:gap-2  sm:px-2.5 "
                 >
-                    <div className="mb-1 hidden sm:block">
-                        <ChatAvatar
-                            label={peerName}
-                            color="#2f3adf"
-                            photo={avatarUrl(peerName, peerPhoto)}
-                            size="md"
-                        />
-                    </div>
+                    <button
+                        type="button"
+                        aria-label="Attach"
+                        className="hidden h-9 w-9 items-center justify-center cursor-pointer rounded-full text-[#8B95A8] transition bg-slate-200/95 hover:text-black md:flex"
+                    >
+                        <Plus className="h-4.5 w-4.5" strokeWidth={2.5} />
+                    </button>
 
                     <textarea
                         ref={inputRef}
                         value={text}
                         rows={1}
                         onChange={(e) => {
-                            setText(e.target.value);
+                            const next = e.target.value;
+                            setText(next);
                             autoGrow(e.target);
+                            if (next.trim()) emitTypingStart();
+                            else emitTypingStop();
+                        }}
+                        onBlur={() => {
+                            emitTypingStop();
                         }}
                         onKeyDown={onKeyDown}
                         placeholder="Type a message..."
-                        className="max-h-30 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2.5 text-[15px] leading-5 font-medium text-[#334155] outline-none placeholder:text-[#94A3B8] sm:min-h-9 sm:py-2 sm:text-[14px]"
+                        className="max-h-30 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2.5 text-[15px] leading-5 font-semibold text-[#334155] outline-none placeholder:text-[#94A3B8] sm:min-h-9 sm:py-2 sm:text-[14px]"
                     />
 
                     <div className="mb-0.5 flex shrink-0 items-center gap-0.5 sm:gap-1">
@@ -545,21 +671,13 @@ export default function ChatWindow({
                             aria-label="Offer to sell"
                             title="Offer to Sell"
                             onClick={() => setOfferOpen((v) => !v)}
-                            className={`flex h-10 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-bold transition sm:h-9 sm:px-3 ${offerOpen
-                                ? "bg-primary text-white shadow-md shadow-primary/25"
-                                : "bg-white text-primary shadow-sm ring-1 ring-primary/15 hover:bg-primary/10"
+                            className={`flex h-10 items-center gap-1.5 border border-primary/15 rounded-full px-2.5 text-[12px] font-bold transition sm:h-8 sm:px-3 ${offerOpen
+                                ? "bg-primary text-whit"
+                                : "bg-white text-primary "
                                 }`}
                         >
                             <Tag className="h-3.5 w-3.5" />
                             <span className="hidden sm:inline">Offer</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            aria-label="Attach"
-                            className="hidden h-9 w-9 items-center justify-center rounded-full text-[#8B95A8] transition hover:bg-white hover:text-[#475569] md:flex"
-                        >
-                            <Paperclip className="h-4.5 w-4.5" strokeWidth={1.7} />
                         </button>
                         <button
                             type="submit"
@@ -576,21 +694,54 @@ export default function ChatWindow({
     );
 }
 
+function TypingBubble({
+    peerName,
+    peerPhoto,
+}: {
+    peerName: string;
+    peerPhoto?: string | null;
+}) {
+    return (
+        <div className="flex items-end gap-2">
+            <ChatAvatar
+                label={peerName}
+                color={peerName}
+                photo={avatarUrl(peerName, peerPhoto)}
+                size="sm"
+            />
+            <div
+                className="rounded-[20px] rounded-bl-md bg-[#F1F5F9] px-4 py-3 shadow-sm"
+                aria-label={`${peerName || "Peer"} is typing`}
+            >
+                <span className="inline-flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#94A3B8] [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#94A3B8] [animation-delay:150ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#94A3B8] [animation-delay:300ms]" />
+                </span>
+            </div>
+        </div>
+    );
+}
+
 function MessageBubble({
     message,
     conversationId,
+    myUserId,
+    peerId,
     peerName,
     peerPhoto,
     onReply,
 }: {
     message: ApiChatMessage;
     conversationId: string;
+    myUserId: string | null;
+    peerId?: string;
     peerName: string;
     peerPhoto?: string;
     onReply: (message: ApiChatMessage) => void;
 }) {
     const queryClient = useQueryClient();
-    const mine = message.isMine;
+    const mine = normalizeChatMessage(message, myUserId, peerId).isMine;
     const kind = message.messageType;
     const menuRef = useRef<HTMLDivElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);

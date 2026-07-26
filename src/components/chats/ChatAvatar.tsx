@@ -33,7 +33,6 @@ export default function ChatAvatar({
     return (
         <div className={`relative shrink-0 ${className}`}>
             {photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <Image
                     width={100}
                     height={100}
@@ -54,7 +53,7 @@ export default function ChatAvatar({
             )}
             {online != null && (
                 <span
-                    className={`absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full ring-[2.5px] ring-white ${online ? "animate-pulse bg-[#34D399]" : "bg-slate-300"
+                    className={`absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full ring-[2.5px] ring-white ${online ? " bg-green-500" : "bg-slate-300"
                         }`}
                 />
             )}

@@ -16,6 +16,7 @@ import type {
     ApiChatMessage,
     ApiChatMessageText,
     ApiChats,
+    ApiUserPresence,
 } from "@/components/types/AllTypes";
 
 /** States/cities APIs wrap the list in `{ success, message, data }`. */
@@ -582,10 +583,11 @@ export const updateOffer = async (
 //     }
 // };
 
-export const getUserPresence = async (userId: string) => {
+export const getUserPresence = async (userId: string): Promise<ApiUserPresence> => {
     try {
         const { data } = await customAxios.get(`/chat/users/${userId}/presence`);
-        const presence = unwrapData(data);
+        console.log("datas", data);
+        const presence = unwrapData<ApiUserPresence>(data);
         if (!presence) throw { message: "Presence not found" } satisfies ApiError;
         return presence;
     } catch (error) {
