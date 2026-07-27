@@ -91,18 +91,20 @@ function recomputeUnreadCount(items: ApiChat[]) {
     return items.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 }
 
-/** Patch one conversation across every cached chats list. */
+/** Patch one conversation across every cached chats list. Returns true if found in a list. */
 export function patchChatInLists(
     queryClient: QueryClient,
     chatId: string,
     patch: (chat: ApiChat) => ApiChat,
-) {
+): boolean {
+    let found = false;
     queryClient.setQueriesData<ApiChats>({ queryKey: chatKeys.lists }, (old) => {
         if (!old?.items) return old;
         let changed = false;
         const items = old.items.map((c) => {
             if (c.id !== chatId) return c;
             changed = true;
+            found = true;
             return patch(c);
         });
         if (!changed) return old;
@@ -112,6 +114,41 @@ export function patchChatInLists(
     queryClient.setQueryData<ApiChat>(chatKeys.detail(chatId), (old) =>
         old ? patch(old) : old,
     );
+    return found;
+}
+
+/** Apply WS `conversation.updated` (inbox preview / unread for that recipient). */
+export function applyConversationUpdatedToCache(
+    queryClient: QueryClient,
+    conversation: ApiChat,
+) {
+    if (!conversation?.id) return;
+
+    const found = patchChatInLists(queryClient, conversation.id, (c) => ({
+        ...c,
+        ...conversation,
+        peer: conversation.peer ?? c.peer,
+        listing: conversation.listing ?? c.listing,
+        lastMessagePreview:
+            conversation.lastMessagePreview ?? c.lastMessagePreview,
+        lastMessageAt: conversation.lastMessageAt ?? c.lastMessageAt,
+        unreadCount:
+            typeof conversation.unreadCount === "number"
+                ? conversation.unreadCount
+                : c.unreadCount,
+        isPinned:
+            typeof conversation.isPinned === "boolean"
+                ? conversation.isPinned
+                : c.isPinned,
+    }));
+
+    queryClient.setQueryData<ApiChat>(chatKeys.detail(conversation.id), (old) =>
+        old ? { ...old, ...conversation } : conversation,
+    );
+
+    if (!found) {
+        void queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+    }
 }
 
 export function removeChatFromLists(queryClient: QueryClient, chatId: string) {
@@ -198,7 +235,7 @@ export function appendMessageToCache(
 
     if (!added && !options?.clearUnread) return;
 
-    patchChatInLists(queryClient, chatId, (c) => {
+    const patched = patchChatInLists(queryClient, chatId, (c) => {
         let unreadCount = c.unreadCount || 0;
         if (options?.clearUnread || normalized.isMine) {
             unreadCount = 0;
@@ -218,6 +255,11 @@ export function appendMessageToCache(
             unreadCount,
         };
     });
+
+    // Message for a chat not yet in any list cache — refresh inbox.
+    if (!patched) {
+        void queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+    }
 }
 
 const markReadInFlight = new Set<string>();

@@ -238,24 +238,41 @@ export default function ChatWindow({
         }, 2000);
     }
 
-    // Doc §5.2: join room for live messages/typing while this thread is open.
+    // Join room + mark read; re-join after socket reconnect.
     useEffect(() => {
-        if (!socket?.connected || !activeChat) return;
+        if (!socket || !activeChat) return;
 
-        socket.emit("conversation.join", { conversationId: activeChat });
-        // Realtime mark-as-read so peer gets `messages.read` ticks.
-        socket.emit("messages.read", { conversationId: activeChat });
+        const joinAndRead = () => {
+            if (!socket.connected) return;
+            socket.emit("conversation.join", { conversationId: activeChat });
+            socket.emit("messages.read", { conversationId: activeChat });
+        };
 
-        const onMessageNew = (message: ApiChatMessage) => {
-            if (message.conversationId !== activeChat) return;
-            const normalized = normalizeChatMessage(message, myUserId, peerId);
+        joinAndRead();
+        socket.on("connect", joinAndRead);
+
+        const onMessageNew = (raw: unknown) => {
+            const message =
+                raw && typeof raw === "object" && "data" in raw && typeof (raw as { data: unknown }).data === "object"
+                    ? ((raw as { data: ApiChatMessage }).data)
+                    : (raw as ApiChatMessage);
+            if (!message?.id) return;
+            if (message.conversationId && message.conversationId !== activeChat) return;
+            // Some payloads omit conversationId when already room-scoped.
+            const normalized = normalizeChatMessage(
+                { ...message, conversationId: message.conversationId || activeChat },
+                myUserId,
+                peerId,
+            );
             appendMessageToCache(queryClient, activeChat, normalized, {
                 clearUnread: true,
                 peerId,
             });
             if (!normalized.isMine) {
                 markChatReadOnce(queryClient, activeChat, 1, markChatRead);
-                socket.emit("messages.read", { conversationId: activeChat });
+                if (socket.connected) {
+                    socket.emit("messages.read", { conversationId: activeChat });
+                }
             }
         };
 
@@ -267,9 +284,8 @@ export default function ChatWindow({
                 typingActiveRef.current = false;
                 socket.emit("typing.stop", { conversationId: activeChat });
             }
+            socket.off("connect", joinAndRead);
             socket.off("message.new", onMessageNew);
-            // Keep the conversation room joined so the sidebar still gets typing
-            // while the user stays on /chats (ChatSidebar owns leave).
         };
     }, [socket, activeChat, peerId, myUserId, queryClient]);
 

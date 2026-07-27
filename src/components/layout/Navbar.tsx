@@ -9,8 +9,12 @@ import Link from "next/link";
 import SellFab from "./SellFab";
 import { getChats } from "../api/apis";
 import { useQuery } from "@tanstack/react-query";
+import { RootState } from "../redux/store";
+import { useSelector } from "react-redux";
 
 export default function Navbar() {
+    const authData = useSelector((state: RootState) => state.user.user);
+    const isLoggedIn = Boolean(authData?.accessToken);
     const { data: conversations } = useQuery({
         queryKey: ["chats"],
         queryFn: () => getChats("all", 1),
@@ -34,7 +38,7 @@ export default function Navbar() {
                 <div className="flex shrink-0 items-center gap-1.5">
                     <WishlistButton />
 
-                    <Link
+                    {isLoggedIn && <Link
                         href="/chats"
                         aria-label="Chat"
                         className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-500 transition-colors duration-200 hover:bg-primary/10 hover:text-primary"
@@ -46,11 +50,11 @@ export default function Navbar() {
                         <span className="absolute top-0 right-0 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-linear-to-br from-primary to-indigo-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
                             {conversations?.unreadCount ?? 0}
                         </span>
-                    </Link>
+                    </Link>}
 
                     <NotificationButton />
 
-                    <SellFab />
+                    {isLoggedIn && <SellFab />}
 
                     <SignInButton />
                 </div>

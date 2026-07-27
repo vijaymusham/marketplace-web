@@ -94,13 +94,22 @@ export default function ChatSidebar({
         [conversations?.items],
     );
 
-    // Typing events are room-scoped — join inbox conversations so sidebar previews update.
+    // Typing + inbox events are room-scoped — join all loaded conversations; re-join on reconnect.
     useEffect(() => {
-        if (!socket?.connected || conversationIds.length === 0) return;
-        for (const id of conversationIds) {
-            socket.emit("conversation.join", { conversationId: id });
-        }
+        if (!socket || conversationIds.length === 0) return;
+
+        const joinAll = () => {
+            if (!socket.connected) return;
+            for (const id of conversationIds) {
+                socket.emit("conversation.join", { conversationId: id });
+            }
+        };
+
+        joinAll();
+        socket.on("connect", joinAll);
+
         return () => {
+            socket.off("connect", joinAll);
             for (const id of conversationIds) {
                 socket.emit("conversation.leave", { conversationId: id });
             }

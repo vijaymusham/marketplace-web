@@ -10,10 +10,15 @@ import {
 import { io, type Socket } from "socket.io-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import type { ApiChatMessage, ApiUserPresence } from "@/components/types/AllTypes";
+import type {
+    ApiChat,
+    ApiChatMessage,
+    ApiUserPresence,
+} from "@/components/types/AllTypes";
 import type { RootState } from "@/components/redux/store";
 import {
     appendMessageToCache,
+    applyConversationUpdatedToCache,
     applyMessageReactionToCache,
     applyMessagesReadToCache,
     applyPresenceToCache,
@@ -28,13 +33,19 @@ function getSocketUrl() {
     return base ? `${base}/chat` : "";
 }
 
-function normalizePresence(raw: unknown): ApiUserPresence | null {
+/** Socket payloads may be bare DTOs or `{ data: DTO }` envelopes. */
+function unwrapSocketPayload<T extends object>(raw: unknown): T | null {
     if (!raw || typeof raw !== "object") return null;
     const obj = raw as Record<string, unknown>;
-    const nested =
-        obj.data && typeof obj.data === "object"
-            ? (obj.data as Record<string, unknown>)
-            : obj;
+    if (obj.data && typeof obj.data === "object" && !Array.isArray(obj.data)) {
+        return obj.data as T;
+    }
+    return raw as T;
+}
+
+function normalizePresence(raw: unknown): ApiUserPresence | null {
+    const nested = unwrapSocketPayload<Record<string, unknown>>(raw);
+    if (!nested) return null;
     const userId = nested.userId ?? nested.user_id ?? nested.id;
     if (typeof userId !== "string" || !userId) return null;
     return {
@@ -68,7 +79,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             accessToken ||
             (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
-        // No session → ensure any previous socket is gone.
         if (!url || !token) {
             setSocket(null);
             return;
@@ -77,18 +87,16 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         const socketInstance = io(url, {
             transports: ["websocket", "polling"],
             auth: { token },
-            // Avoid zombie reconnects after logout / tab close.
             reconnection: true,
-            reconnectionAttempts: 8,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 8000,
         });
 
         const handleConnect = () => {
+            // Always publish the live instance so consumers re-join rooms on reconnect.
             setSocket(socketInstance);
             socketInstance.emit("presence.ping", {});
-        };
-
-        const handleDisconnect = () => {
-            setSocket((prev) => (prev === socketInstance ? null : prev));
         };
 
         const handleConnectError = (error: Error) => {
@@ -104,48 +112,61 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             applyPresenceToCache(queryClient, presence);
         };
 
-        const onMessageNew = (raw: ApiChatMessage) => {
-            const chatId = raw?.conversationId;
-            if (!chatId || !raw?.id) return;
-            appendMessageToCache(queryClient, chatId, raw);
+        const onMessageNew = (raw: unknown) => {
+            const message = unwrapSocketPayload<ApiChatMessage>(raw);
+            const chatId = message?.conversationId;
+            if (!chatId || !message?.id) {
+                console.warn("[socket:/chat] message.new missing ids", raw);
+                return;
+            }
+            appendMessageToCache(queryClient, chatId, message);
         };
 
-        const onMessagesRead = (raw: {
-            conversationId?: string;
-            readerId?: string;
-            readAt?: string;
-        }) => {
-            if (!raw?.conversationId) return;
+        const onConversationUpdated = (raw: unknown) => {
+            const conversation = unwrapSocketPayload<ApiChat>(raw);
+            if (!conversation?.id) return;
+            applyConversationUpdatedToCache(queryClient, conversation);
+        };
+
+        const onMessagesRead = (raw: unknown) => {
+            const data = unwrapSocketPayload<{
+                conversationId?: string;
+                readerId?: string;
+                readAt?: string;
+            }>(raw);
+            if (!data?.conversationId) return;
             applyMessagesReadToCache(queryClient, {
-                conversationId: raw.conversationId,
-                readerId: raw.readerId,
-                readAt: raw.readAt,
+                conversationId: data.conversationId,
+                readerId: data.readerId,
+                readAt: data.readAt,
             });
         };
 
-        const onMessageReaction = (raw: {
-            conversationId?: string;
-            messageId?: string;
-            actorId?: string;
-            actorReaction?: string | null;
-            reactions?: Array<{ type: string; count: number }>;
-        }) => {
-            if (!raw?.conversationId || !raw?.messageId) return;
+        const onMessageReaction = (raw: unknown) => {
+            const data = unwrapSocketPayload<{
+                conversationId?: string;
+                messageId?: string;
+                actorId?: string;
+                actorReaction?: string | null;
+                reactions?: Array<{ type: string; count: number }>;
+            }>(raw);
+            if (!data?.conversationId || !data?.messageId) return;
             applyMessageReactionToCache(queryClient, {
-                conversationId: raw.conversationId,
-                messageId: raw.messageId,
-                actorId: raw.actorId,
-                actorReaction: raw.actorReaction,
-                reactions: raw.reactions,
+                conversationId: data.conversationId,
+                messageId: data.messageId,
+                actorId: data.actorId,
+                actorReaction: data.actorReaction,
+                reactions: data.reactions,
             });
         };
 
-        const onTyping = (data: {
-            conversationId?: string;
-            userId?: string;
-            isTyping?: boolean;
-        }) => {
-            if (!data.conversationId) return;
+        const onTyping = (raw: unknown) => {
+            const data = unwrapSocketPayload<{
+                conversationId?: string;
+                userId?: string;
+                isTyping?: boolean;
+            }>(raw);
+            if (!data?.conversationId) return;
             const myId = getMyUserId();
             if (myId && data.userId && data.userId === myId) return;
             setConversationTyping(
@@ -165,27 +186,29 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             setSocket((prev) => (prev === socketInstance ? null : prev));
         };
 
-        // Tab / window close — drop the connection so it does not linger.
-        const onPageHide = () => {
+        // Only on full tab close — do NOT use pagehide (fires on tab switch / bfcache).
+        const onBeforeUnload = () => {
             try {
                 socketInstance.disconnect();
             } catch {
                 /* ignore */
             }
         };
-        window.addEventListener("pagehide", onPageHide);
-        window.addEventListener("beforeunload", onPageHide);
+        window.addEventListener("beforeunload", onBeforeUnload);
 
         socketInstance.on("connect", handleConnect);
-        socketInstance.on("disconnect", handleDisconnect);
         socketInstance.on("connect_error", handleConnectError);
         socketInstance.on("user.online", updatePresence);
         socketInstance.on("user.offline", updatePresence);
         socketInstance.on("user.presence", updatePresence);
         socketInstance.on("message.new", onMessageNew);
+        socketInstance.on("conversation.updated", onConversationUpdated);
         socketInstance.on("messages.read", onMessagesRead);
         socketInstance.on("message.reaction", onMessageReaction);
         socketInstance.on("typing", onTyping);
+
+        // If already connected (rare), publish immediately.
+        if (socketInstance.connected) handleConnect();
 
         const heartbeat = setInterval(() => {
             if (socketInstance.connected) {
@@ -195,8 +218,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
         return () => {
             clearInterval(heartbeat);
-            window.removeEventListener("pagehide", onPageHide);
-            window.removeEventListener("beforeunload", onPageHide);
+            window.removeEventListener("beforeunload", onBeforeUnload);
             hardClose();
         };
     }, [queryClient, accessToken]);

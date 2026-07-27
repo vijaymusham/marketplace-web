@@ -149,10 +149,10 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         const authData = await authApi(idToken, {
             ...(!profile?.exists
                 ? {
-                      name: profile.name.trim(),
-                      email: profile.email.trim(),
-                      referralCode: profile.referralCode?.trim() || undefined,
-                  }
+                    name: profile.name.trim(),
+                    email: profile.email.trim(),
+                    referralCode: profile.referralCode?.trim() || undefined,
+                }
                 : {}),
             platform: "web",
             fcmToken: fcmToken || undefined,
@@ -164,6 +164,13 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
 
         if (fcmToken) {
             localStorage.setItem("fcmToken", fcmToken);
+            // Refresh/register on the dedicated endpoint so this account owns the token.
+            try {
+                const { registerDeviceToken } = await import("@/components/api/apis");
+                await registerDeviceToken({ token: fcmToken, platform: "web" });
+            } catch (error) {
+                console.warn("[FCM] device-token register after login failed:", error);
+            }
         }
 
         dispatch(setUser(authData));
@@ -496,7 +503,6 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                         </span>
                                     </>
                                 }
-                                icon={<ShieldCheck className="h-8 w-8" strokeWidth={1.75} />}
                             />
 
                             <div className="mt-8 flex justify-between gap-2">

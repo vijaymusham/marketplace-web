@@ -593,12 +593,36 @@ export const updateOffer = async (
 export const getUserPresence = async (userId: string): Promise<ApiUserPresence> => {
     try {
         const { data } = await customAxios.get(`/chat/users/${userId}/presence`);
-        console.log("datas", data);
         const presence = unwrapData<ApiUserPresence>(data);
         if (!presence) throw { message: "Presence not found" } satisfies ApiError;
         return presence;
     } catch (error) {
         rethrow("getUserPresence", error);
+    }
+};
+
+// ==================== NOTIFICATIONS (FCM) ====================
+
+export const registerDeviceToken = async (payload: {
+    token: string;
+    platform: "ios" | "android" | "web";
+}) => {
+    try {
+        const { data } = await customAxios.put("/notifications/device-token", payload);
+        return unwrapData(data) ?? data;
+    } catch (error) {
+        rethrow("registerDeviceToken", error);
+    }
+};
+
+export const unregisterDeviceToken = async (payload: { token: string }) => {
+    try {
+        const { data } = await customAxios.delete("/notifications/device-token", {
+            data: payload,
+        });
+        return unwrapData(data) ?? data;
+    } catch (error) {
+        rethrow("unregisterDeviceToken", error);
     }
 };
 

@@ -68,6 +68,20 @@ async function getAccessToken(): Promise<string | null> {
 }
 
 async function clearAuthData() {
+    const fcmToken = localStorage.getItem("fcmToken");
+    const accessToken = localStorage.getItem("token");
+    // Unregister while the session token is still available.
+    if (fcmToken && accessToken) {
+        try {
+            await axios.delete(`${getBaseURL()}/notifications/device-token`, {
+                data: { token: fcmToken },
+                headers: { Authorization: `Bearer ${accessToken}` },
+                timeout: 8000,
+            });
+        } catch {
+            /* ignore unregister failures during logout */
+        }
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("fcmToken");
     store.dispatch(clearuser());
@@ -82,7 +96,6 @@ async function handleAutoLogout() {
 
     try {
         await clearAuthData();
-        toast.error("Session expired. Please sign in again.");
         if (window.location.pathname !== "/") {
             window.location.assign("/");
         }

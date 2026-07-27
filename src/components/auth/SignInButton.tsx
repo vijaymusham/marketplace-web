@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+    Bell,
     ChevronRight,
     Heart,
     HelpCircle,
@@ -20,6 +21,11 @@ import AuthDrawer from "./AuthDrawer";
 import { useAuth } from "./AuthProvider";
 import { clearuser } from "@/components/redux/slices/authSlice";
 import { persistor, type AppDispatch, type RootState } from "@/components/redux/store";
+import {
+    disablePushNotifications,
+    enablePushNotifications,
+    getStoredFcmToken,
+} from "@/lib/fcmDeviceToken";
 
 const itemClass =
     "group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm font-bold text-slate-700 transition-all duration-200 hover:bg-primary/6 hover:text-primary";
@@ -34,14 +40,58 @@ export default function SignInButton() {
     const authData = useSelector((state: RootState) => state.user.user);
     const [open, setOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [pushEnabled, setPushEnabled] = useState(false);
+    const [pushBusy, setPushBusy] = useState(false);
     const isLoggedIn = Boolean(authData?.accessToken);
     const profile = authData?.user;
+
+    useEffect(() => {
+        if (!isLoggedIn || typeof window === "undefined" || !("Notification" in window)) {
+            setPushEnabled(false);
+            return;
+        }
+        setPushEnabled(
+            Notification.permission === "granted" && Boolean(getStoredFcmToken()),
+        );
+    }, [isLoggedIn, menuOpen]);
+
+    const handlePushToggle = async () => {
+        if (pushBusy) return;
+        setPushBusy(true);
+        try {
+            if (pushEnabled) {
+                await disablePushNotifications();
+                setPushEnabled(false);
+                toast.success("Push notifications off");
+                return;
+            }
+
+            const result = await enablePushNotifications();
+            if (result.ok) {
+                setPushEnabled(true);
+                toast.success("Push notifications on");
+            } else if (result.permission === "denied") {
+                setPushEnabled(false);
+                toast.error(
+                    "Notifications blocked. Enable them in browser site settings.",
+                );
+            } else {
+                setPushEnabled(false);
+                toast.error("Couldn’t enable notifications");
+            }
+        } catch {
+            toast.error("Couldn’t update notification settings");
+        } finally {
+            setPushBusy(false);
+        }
+    };
 
     const handleSignOut = async () => {
         setMenuOpen(false);
         try {
+            // Unregister FCM while auth header is still valid.
+            await disablePushNotifications();
             localStorage.removeItem("token");
-            localStorage.removeItem("fcmToken");
             dispatch(clearuser());
             await persistor.purge();
             await signOut();
@@ -197,6 +247,41 @@ export default function SignInButton() {
                                         <ChevronRight className="h-4 w-4 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
                                     </Link>
                                 ))}
+
+                                <div className={itemClass}>
+                                    <span className={iconWrap}>
+                                        <Bell className="h-4 w-4" strokeWidth={1.85} />
+                                    </span>
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block font-bold">Push notifications</span>
+                                        <span className="block text-[11px] font-medium text-slate-400 group-hover:text-primary/60">
+                                            {pushEnabled
+                                                ? "Enabled on this device"
+                                                : "Get message alerts"}
+                                        </span>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={pushEnabled}
+                                        aria-label="Toggle push notifications"
+                                        disabled={pushBusy}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            void handlePushToggle();
+                                        }}
+                                        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-60 ${
+                                            pushEnabled ? "bg-primary" : "bg-slate-200"
+                                        }`}
+                                    >
+                                        <span
+                                            className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                                                pushEnabled ? "translate-x-5" : "translate-x-0"
+                                            }`}
+                                        />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Footer actions */}

@@ -3,23 +3,32 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Bell, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 import {
   ensureNotificationPermission,
   getFcmToken,
   subscribeForegroundMessages,
 } from "@/constant/firebase/messaging";
 import { pushNotification } from "@/hooks/useNotifications";
+import { syncDeviceTokenToServer } from "@/lib/fcmDeviceToken";
+import type { RootState } from "@/components/redux/store";
 
 const DISMISS_KEY = "dealmarket-fcm-prompt-dismissed";
-const PROMPT_DELAY_MS = 5 * 60 * 1000; // 5 minutes after site open
+const PROMPT_DELAY_MS = 5 * 60 * 1000;
 
-/**
- * After 5 minutes on the site: show notification allow prompt.
- * Also listens for FCM messages while the tab is open.
- */
 export default function FcmProvider({ children }: { children: ReactNode }) {
   const [showPrompt, setShowPrompt] = useState(false);
   const [asking, setAsking] = useState(false);
+  const accessToken = useSelector(
+    (state: RootState) => state.user.user?.accessToken ?? null,
+  );
+
+  useEffect(() => {
+    if (!accessToken) return;
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+    void syncDeviceTokenToServer();
+  }, [accessToken]);
 
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
@@ -46,7 +55,6 @@ export default function FcmProvider({ children }: { children: ReactNode }) {
       }
 
       const unsub = await subscribeForegroundMessages((payload) => {
-        // Foreground only — no toast (background uses the system notification via SW).
         const title =
           payload.notification?.title ||
           payload.data?.title ||
@@ -58,12 +66,14 @@ export default function FcmProvider({ children }: { children: ReactNode }) {
           title,
           body: body || "New notification",
           type:
-            payload.data?.type === "message" ||
-            payload.data?.type === "deal" ||
-            payload.data?.type === "price" ||
-            payload.data?.type === "system"
-              ? payload.data.type
-              : "system",
+            payload.data?.type === "chat.message" ||
+            payload.data?.type === "message"
+              ? "message"
+              : payload.data?.type === "deal" ||
+                  payload.data?.type === "price" ||
+                  payload.data?.type === "system"
+                ? payload.data.type
+                : "system",
         });
       });
 
@@ -85,16 +95,16 @@ export default function FcmProvider({ children }: { children: ReactNode }) {
     if (asking) return;
     setAsking(true);
     try {
-      // Must run from this click so the browser shows the native Allow dialog.
       const permission = await ensureNotificationPermission();
       setShowPrompt(false);
 
       if (permission === "granted") {
-        const token = await getFcmToken();
-        if (token) localStorage.setItem("fcmToken", token);
+        await syncDeviceTokenToServer();
         toast.success("Notifications enabled");
       } else if (permission === "denied") {
-        toast.error("Notifications blocked. Enable them from the browser site settings.");
+        toast.error(
+          "Notifications blocked. Enable them from the browser site settings.",
+        );
       }
     } finally {
       setAsking(false);
@@ -139,8 +149,8 @@ export default function FcmProvider({ children }: { children: ReactNode }) {
               Allow notifications?
             </h2>
             <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
-              Get alerts for new messages, offers, and updates while you buy or sell on
-              Deal Market.
+              Get alerts for new messages, offers, and updates while you buy or sell
+              on Deal Market.
             </p>
 
             <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse">
