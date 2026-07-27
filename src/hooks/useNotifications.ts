@@ -12,49 +12,7 @@ export type AppNotification = {
 };
 
 const STORAGE_KEY = "dealmarket-notifications";
-
-const DEFAULT_NOTIFICATIONS: AppNotification[] = [
-  {
-    id: "n1",
-    title: "Price drop on Apple iPhone 17 Pro Max",
-    body: "A listing you viewed is now ₹500 cheaper. Check it before it’s gone.",
-    time: "2 min ago",
-    read: false,
-    type: "price",
-  },
-  {
-    id: "n2",
-    title: "New message from Rahul",
-    body: "“Is the Honda City still available? I can pick up today.”",
-    time: "18 min ago",
-    read: false,
-    type: "message",
-  },
-  {
-    id: "n3",
-    title: "Deal near you",
-    body: "12 fresh electronics ads were posted in your area this morning.",
-    time: "1 hr ago",
-    read: false,
-    type: "deal",
-  },
-  {
-    id: "n4",
-    title: "Wishlist reminder",
-    body: "Your saved BMW X5 still has active interest from 3 buyers.",
-    time: "Yesterday",
-    read: true,
-    type: "system",
-  },
-  {
-    id: "n5",
-    title: "Verification complete",
-    body: "Your seller profile is verified. Ads may now rank higher in search.",
-    time: "2 days ago",
-    read: true,
-    type: "system",
-  },
-];
+const MIGRATION_KEY = "dealmarket-notifications-cleared-demo";
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -63,19 +21,24 @@ function emit() {
   listeners.forEach((l) => l());
 }
 
+function clearLegacyDemoOnce() {
+  if (typeof window === "undefined") return;
+  if (window.localStorage.getItem(MIGRATION_KEY) === "1") return;
+  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.setItem(MIGRATION_KEY, "1");
+}
+
 function readNotifications(): AppNotification[] {
-  if (typeof window === "undefined") return DEFAULT_NOTIFICATIONS;
+  if (typeof window === "undefined") return [];
   try {
+    clearLegacyDemoOnce();
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw === null) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_NOTIFICATIONS));
-      return DEFAULT_NOTIFICATIONS;
-    }
+    if (raw === null) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
     return parsed as AppNotification[];
   } catch {
-    return DEFAULT_NOTIFICATIONS;
+    return [];
   }
 }
 
@@ -119,11 +82,15 @@ function getSnapshot() {
 }
 
 function getServerSnapshot() {
-  return JSON.stringify(DEFAULT_NOTIFICATIONS);
+  return "[]";
 }
 
 export function useNotifications() {
-  const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
   const items = JSON.parse(snapshot) as AppNotification[];
   const unreadCount = items.filter((n) => !n.read).length;
 
@@ -145,5 +112,13 @@ export function useNotifications() {
     writeNotifications(readNotifications().filter((n) => n.id !== id));
   }, []);
 
-  return { items, count: items.length, unreadCount, clearAll, markAllRead, markRead, remove };
+  return {
+    items,
+    count: items.length,
+    unreadCount,
+    clearAll,
+    markAllRead,
+    markRead,
+    remove,
+  };
 }

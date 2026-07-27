@@ -240,7 +240,7 @@ export const getSearchSuggestions = async (
 ): Promise<ApiSearchSuggestion[]> => {
     try {
         const { data } = await customAxios.get<ApiSearchSuggestionsResponse>(
-            `/ads/search/suggest?q=${query}&limit=8`,
+            `/ads/search/suggest?q=${encodeURIComponent(query)}&limit=8`,
         );
         const items = data?.data?.items;
         return Array.isArray(items) ? items : [];

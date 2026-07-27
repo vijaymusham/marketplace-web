@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { getSearchSuggestions } from "../api/apis";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { itemVariants, panelVariants } from "../animations/AnimationsHelper";
+import { slugify } from "@/lib/slug";
+import { ApiSearchSuggestion } from "../types/AllTypes";
 
 const SUGGESTIONS = [
     "products",
@@ -17,47 +19,121 @@ const SUGGESTIONS = [
     "more",
 ];
 
+const EMPTY_SUGGESTIONS: ApiSearchSuggestion[] = [];
 const INTERVAL_MS = 3000;
-
+const DEBOUNCE_MS = 400;
 
 function useDebounce(value: string, delay: number) {
     const [debouncedValue, setDebouncedValue] = useState(value);
+
     useEffect(() => {
-        const setTimer = setTimeout(() => {
+        const timer = window.setTimeout(() => {
             setDebouncedValue(value);
         }, delay);
-        return () => clearTimeout(setTimer);
+
+        return () => window.clearTimeout(timer);
     }, [value, delay]);
+
     return debouncedValue;
 }
 
-export default function SearchInput() {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const blurTimeoutRef = useRef<number | null>(null);
-    const [query, setQuery] = useState("");
-    const [focused, setFocused] = useState(false);
+function SearchSuggestionItem({
+    suggestion,
+}: {
+    suggestion: ApiSearchSuggestion;
+}) {
+    return (
+        <motion.div variants={itemVariants}>
+            <Link
+                href={`/category/${slugify(suggestion.subcategory)}`}
+                onMouseDown={(e) => e.preventDefault()}
+                className="block"
+            >
+                <div className="my-2 truncate text-base font-bold text-slate-700 capitalize transition-colors hover:text-primary">
+                    {suggestion.text}
+                    {suggestion.category && (
+                        <h4 className="text-xs font-semibold text-slate-400">
+                            {" "}
+                            in {suggestion.subcategory}
+                        </h4>
+                    )}
+                </div>
+            </Link>
+        </motion.div>
+    );
+}
+
+
+function PlaceholderCarousel({ onActivate }: { onActivate: () => void }) {
     const [index, setIndex] = useState(0);
 
-    const showCarousel = !focused && query.length === 0;
-    const debouncedQuery = useDebounce(query, 1000);
-
-    const { data: searchSuggestions = [] } = useQuery({
-        queryKey: ["searchSuggestions", debouncedQuery],
-        queryFn: () => getSearchSuggestions(debouncedQuery),
-        enabled: debouncedQuery.trim().length > 0,
-    });
-
-    const showSuggestions = focused && searchSuggestions.length > 0;
-
     useEffect(() => {
-        if (!showCarousel) return;
-
         const id = window.setInterval(() => {
             setIndex((prev) => (prev + 1) % SUGGESTIONS.length);
         }, INTERVAL_MS);
 
         return () => window.clearInterval(id);
-    }, [showCarousel]);
+    }, []);
+
+    return (
+        <motion.button
+            type="button"
+            key="carousel"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+            onClick={onActivate}
+            className="absolute inset-y-0 left-11 right-28 flex cursor-text items-center overflow-hidden text-left"
+            tabIndex={-1}
+            aria-hidden
+        >
+            <span className="shrink-0 text-base font-medium text-slate-400">
+                Search for&nbsp;
+            </span>
+            <span className="relative h-6 flex-1 overflow-hidden">
+                <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                        key={SUGGESTIONS[index]}
+                        initial={{ y: 10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -10, opacity: 0 }}
+                        transition={{
+                            y: { type: "spring", stiffness: 140, damping: 20 },
+                            opacity: {
+                                duration: 0.45,
+                                ease: [0.4, 0.0, 0.2, 1],
+                            },
+                        }}
+                        className="absolute inset-0 truncate text-base font-semibold text-slate-500 capitalize"
+                    >
+                        &quot;{SUGGESTIONS[index]}&quot;
+                    </motion.span>
+                </AnimatePresence>
+            </span>
+        </motion.button>
+    );
+}
+
+function SearchInput() {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const blurTimeoutRef = useRef<number | null>(null);
+    const [query, setQuery] = useState("");
+    const [focused, setFocused] = useState(false);
+
+    const trimmedQuery = query.trim();
+    const showCarousel = !focused && trimmedQuery.length === 0;
+    const debouncedQuery = useDebounce(trimmedQuery, DEBOUNCE_MS);
+
+    const { data: searchSuggestions = EMPTY_SUGGESTIONS } = useQuery({
+        queryKey: ["searchSuggestions", debouncedQuery],
+        queryFn: () => getSearchSuggestions(debouncedQuery),
+        enabled: focused && debouncedQuery.length > 0,
+        placeholderData: keepPreviousData,
+    });
+
+    const showSuggestions =
+        focused && trimmedQuery.length > 0 && searchSuggestions.length > 0;
 
     useEffect(() => {
         return () => {
@@ -67,21 +143,32 @@ export default function SearchInput() {
         };
     }, []);
 
-    const handleFocus = () => {
+    const focusInput = useCallback(() => {
+        inputRef.current?.focus();
+    }, []);
+
+    const handleFocus = useCallback(() => {
         if (blurTimeoutRef.current != null) {
             window.clearTimeout(blurTimeoutRef.current);
             blurTimeoutRef.current = null;
         }
         setFocused(true);
-    };
+    }, []);
 
-    const handleBlur = () => {
+    const handleBlur = useCallback(() => {
         blurTimeoutRef.current = window.setTimeout(() => {
             setFocused(false);
             setQuery("");
             blurTimeoutRef.current = null;
         }, 280);
-    };
+    }, []);
+
+    const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            setQuery(e.target.value);
+        },
+        [],
+    );
 
     return (
         <div className="group relative z-40 flex flex-1 items-center">
@@ -92,10 +179,12 @@ export default function SearchInput() {
                     ref={inputRef}
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={handleChange}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
-                    placeholder={focused ? "Search for products, brands and more..." : ""}
+                    placeholder={
+                        focused ? "Search for products, brands and more..." : ""
+                    }
                     aria-label="Search for products, brands and more"
                     className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-base font-medium text-slate-700 shadow-inner shadow-slate-100 transition-all duration-300 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/25"
                 />
@@ -111,26 +200,10 @@ export default function SearchInput() {
                             className="absolute z-50 mt-3 w-full origin-top rounded-2xl bg-white p-4 text-left shadow-lg will-change-transform"
                         >
                             {searchSuggestions.map((suggestion, i) => (
-                                <motion.div
-                                    key={`${suggestion.text}-${i}`}
-                                    variants={itemVariants}
-                                >
-                                    <Link
-                                        href={`/category/${suggestion.subcategory}`}
-                                        onMouseDown={(e) => e.preventDefault()}
-                                        className="block"
-                                    >
-                                        <div className="my-2 truncate text-base font-bold text-slate-700 capitalize transition-colors hover:text-primary">
-                                            {suggestion.text}
-                                            {suggestion.category && (
-                                                <h4 className="text-xs font-semibold text-slate-400">
-                                                    {" "}
-                                                    in {suggestion.subcategory}
-                                                </h4>
-                                            )}
-                                        </div>
-                                    </Link>
-                                </motion.div>
+                                <SearchSuggestionItem
+                                    key={`${suggestion.text}-${suggestion.subcategory}-${i}`}
+                                    suggestion={suggestion}
+                                />
                             ))}
                         </motion.div>
                     )}
@@ -138,39 +211,7 @@ export default function SearchInput() {
 
                 <AnimatePresence mode="wait">
                     {showCarousel && (
-                        <motion.button
-                            type="button"
-                            key="carousel"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
-                            onClick={() => inputRef.current?.focus()}
-                            className="absolute inset-y-0 left-11 right-28 flex cursor-text items-center overflow-hidden text-left"
-                            tabIndex={-1}
-                            aria-hidden
-                        >
-                            <span className="shrink-0 text-base font-medium text-slate-400">
-                                Search for&nbsp;
-                            </span>
-                            <span className="relative h-6 flex-1 overflow-hidden">
-                                <AnimatePresence mode="wait" initial={false}>
-                                    <motion.span
-                                        key={SUGGESTIONS[index]}
-                                        initial={{ y: 10, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        exit={{ y: -10, opacity: 0 }}
-                                        transition={{
-                                            y: { type: "spring", stiffness: 140, damping: 20 },
-                                            opacity: { duration: 0.45, ease: [0.4, 0.0, 0.2, 1] },
-                                        }}
-                                        className="absolute inset-0 truncate text-base font-semibold text-slate-500 capitalize"
-                                    >
-                                        &quot;{SUGGESTIONS[index]}&quot;
-                                    </motion.span>
-                                </AnimatePresence>
-                            </span>
-                        </motion.button>
+                        <PlaceholderCarousel onActivate={focusInput} />
                     )}
                 </AnimatePresence>
             </div>
@@ -185,3 +226,5 @@ export default function SearchInput() {
         </div>
     );
 }
+
+export default memo(SearchInput);

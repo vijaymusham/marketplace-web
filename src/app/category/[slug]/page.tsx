@@ -60,28 +60,28 @@ export default function CategoryPage() {
 
     const apiCategory = match
         ? normalized.find((c) => {
-              const nameSlug = slugify(c.name);
-              const routeCategorySlug = slugify(match.category.name);
-              return (
-                  c.name === match.category.name ||
-                  nameSlug === routeCategorySlug ||
-                  c.slug === routeCategorySlug ||
-                  (match.type === "category" && (nameSlug === slug || c.slug === slug))
-              );
-          })
+            const nameSlug = slugify(c.name);
+            const routeCategorySlug = slugify(match.category.name);
+            return (
+                c.name === match.category.name ||
+                nameSlug === routeCategorySlug ||
+                c.slug === routeCategorySlug ||
+                (match.type === "category" && (nameSlug === slug || c.slug === slug))
+            );
+        })
         : undefined;
 
     const apiSubcategory =
         match?.type === "subcategory"
             ? apiCategory?.subcategoryItems.find((sub) => {
-                  const nameSlug = slugify(sub.name);
-                  return (
-                      sub.name === match.subcategory ||
-                      nameSlug === slug ||
-                      sub.slug === slug ||
-                      nameSlug === slugify(match.subcategory)
-                  );
-              })
+                const nameSlug = slugify(sub.name);
+                return (
+                    sub.name === match.subcategory ||
+                    nameSlug === slug ||
+                    sub.slug === slug ||
+                    nameSlug === slugify(match.subcategory)
+                );
+            })
             : undefined;
 
     const resolvedCategoryId = categoryIdParam || apiCategory?.id || "";
@@ -131,7 +131,7 @@ export default function CategoryPage() {
                                     value={sort}
                                     onChange={(value) => setSort(value as SortValue)}
                                     options={[...SORT_OPTIONS]}
-                                    className="py-2.5! mt-3  max-w-46!"
+                                    className="py-2.5! mt-3  max-w-46! bg-white!"
                                 />
                             </div>
                         </header>

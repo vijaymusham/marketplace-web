@@ -7,7 +7,7 @@ import { ApiAd } from "../types/AllTypes";
 
 const PAGE_SIZE = 20;
 
-export default function PaginatedListings({ listings }: { listings: ApiAd[] }) {
+export default function PaginatedListings({ listings = [] }: { listings: ApiAd[] }) {
     const [page, setPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
 

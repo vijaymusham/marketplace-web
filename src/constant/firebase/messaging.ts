@@ -59,9 +59,26 @@ export async function registerMessagingServiceWorker(): Promise<ServiceWorkerReg
   try {
     const swUrl = buildServiceWorkerUrl();
 
-    // Prefer an existing registration for this script so we don't stack handlers.
+    // Drop stale SWs (e.g. old `firebase-messaging-sw.js?apiKey=...`) that
+    // would also handle pushes and create duplicate notifications.
+    const all = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(
+      all.map(async (reg) => {
+        const script = reg.active?.scriptURL || reg.waiting?.scriptURL || "";
+        if (
+          script.includes("firebase-messaging-sw.js") &&
+          !script.endsWith("/firebase-messaging-sw.js")
+        ) {
+          await reg.unregister();
+        }
+      }),
+    );
+
     const existing = await navigator.serviceWorker.getRegistration("/");
-    if (existing?.active?.scriptURL?.includes("firebase-messaging-sw.js")) {
+    if (
+      existing?.active?.scriptURL &&
+      existing.active.scriptURL.endsWith("/firebase-messaging-sw.js")
+    ) {
       await existing.update();
       await navigator.serviceWorker.ready;
       return existing;

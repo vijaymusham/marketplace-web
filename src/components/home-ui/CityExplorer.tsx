@@ -34,7 +34,19 @@ export default function CityExplorer() {
                         return (
                             <StaggerItem key={city.name} className="w-36 shrink-0 sm:w-29" y={24}>
                                 <Link
-                                    href={`/city/${slugify(city.name)}`}
+                                    href={{
+                                        pathname: `/city/${slugify(city.name)}`,
+                                        query: {
+                                            id: city.id,
+                                            stateId: city.stateId,
+                                            name: city.name,
+                                            imageUrl: city.imageUrl,
+                                            latitude: city.latitude,
+                                            longitude: city.longitude,
+                                            distanceKm: city.distanceKm,
+                                            distanceLabel: city.distanceLabel,
+                                        },
+                                    }}
                                     className="group block items-center justify-center"
                                 >
                                     <div className="relative aspect-square w-full overflow-hidden rounded-full bg-slate-100">
