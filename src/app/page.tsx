@@ -47,7 +47,6 @@ export default function Home() {
             <main className="flex-1 bg-white relative">
                 <CityExplorer />
                 <FreshRecommendations />
-                <BannerSection />
                 {data &&
                     Object.values(data).map((item: ApiAdsSection) => {
                         if (!item.ads?.length) return null;
@@ -62,6 +61,7 @@ export default function Home() {
                             />
                         );
                     })}
+                <BannerSection />
             </main>
         </>
     );
