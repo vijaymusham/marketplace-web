@@ -1,44 +1,53 @@
 /* eslint-disable no-undef */
 /**
  * FCM background service worker.
- * Firebase config is passed as query params when the SW is registered
- * (service workers cannot read Next.js env vars).
+ * Config comes from /firebase-messaging-config.js (stable URL — avoids duplicate SW handlers).
  */
 importScripts("https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js");
 importScripts(
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-messaging-compat.js",
 );
+importScripts("/firebase-messaging-config.js");
 
-const params = new URL(self.location.href).searchParams;
-
-const firebaseConfig = {
-  apiKey: params.get("apiKey") || "",
-  authDomain: params.get("authDomain") || "",
-  projectId: params.get("projectId") || "",
-  storageBucket: params.get("storageBucket") || "",
-  messagingSenderId: params.get("messagingSenderId") || "",
-  appId: params.get("appId") || "",
-  measurementId: params.get("measurementId") || undefined,
-};
+const firebaseConfig = self.__FIREBASE_CONFIG__ || {};
 
 if (firebaseConfig.apiKey && firebaseConfig.projectId) {
   firebase.initializeApp(firebaseConfig);
   const messaging = firebase.messaging();
 
-  messaging.onBackgroundMessage((payload) => {
+  messaging.onBackgroundMessage(async (payload) => {
     const notification = payload.notification || {};
     const data = payload.data || {};
     const title = notification.title || data.title || "Deal Market";
-    const options = {
-      body: notification.body || data.body || "",
+    const body = notification.body || data.body || "";
+
+    // Same tag → Chrome replaces instead of stacking a second banner.
+    const tag =
+      data.messageId ||
+      data.notificationId ||
+      data.tag ||
+      `dm-${title}-${body}`.slice(0, 100);
+
+    const windowClients = await self.clients.matchAll({
+      type: "window",
+      includeUncontrolled: true,
+    });
+    const hasVisibleClient = windowClients.some(
+      (client) => client.visibilityState === "visible" || client.focused,
+    );
+    // Foreground tab → in-app handler only; skip OS banner.
+    if (hasVisibleClient) return;
+
+    await self.registration.showNotification(title, {
+      body,
       icon: notification.icon || data.icon || "/file.svg",
+      tag,
+      renotify: false,
       data: {
         ...data,
         url: data.url || data.link || payload.fcmOptions?.link || "/",
       },
-    };
-
-    self.registration.showNotification(title, options);
+    });
   });
 }
 

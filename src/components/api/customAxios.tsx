@@ -69,6 +69,7 @@ async function getAccessToken(): Promise<string | null> {
 
 async function clearAuthData() {
     localStorage.removeItem("token");
+    localStorage.removeItem("fcmToken");
     store.dispatch(clearuser());
     await persistor.purge();
     await signOut(auth);
@@ -82,10 +83,16 @@ async function handleAutoLogout() {
     try {
         await clearAuthData();
         toast.error("Session expired. Please sign in again.");
+        if (window.location.pathname !== "/") {
+            window.location.assign("/");
+        }
     } catch {
         // Ignore logout failures — session is already invalid
         localStorage.removeItem("token");
         store.dispatch(clearuser());
+        if (window.location.pathname !== "/") {
+            window.location.assign("/");
+        }
     } finally {
         window.setTimeout(() => {
             isLoggingOut = false;

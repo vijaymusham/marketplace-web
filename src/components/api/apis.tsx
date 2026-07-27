@@ -15,6 +15,7 @@ import type {
     ApiChat,
     ApiChatMessage,
     ApiChatMessageText,
+    ApiChatOffer,
     ApiChats,
     ApiUserPresence,
 } from "@/components/types/AllTypes";
@@ -488,9 +489,11 @@ export const createOffer = async (
             `/chat/conversations/${id}/offers`,
             payload,
         );
-        const offer = unwrapData(data);
-        if (!offer) throw { message: "Couldn’t create offer" } satisfies ApiError;
-        return offer;
+        const offer = unwrapData(data) ?? data;
+        if (!offer || typeof offer !== "object") {
+            throw { message: "Couldn’t create offer" } satisfies ApiError;
+        }
+        return offer as ApiChatMessage | ApiChatOffer | Record<string, unknown>;
     } catch (error) {
         rethrow("createOffer", error);
     }
@@ -522,14 +525,14 @@ export const updateConversation = async (
 
 export const reactToMessage = async (
     messageId: string,
-    payload: { emoji: string },
+    payload: { reaction: "heart" | "thumbsup" },
 ) => {
     try {
         const { data } = await customAxios.put(
             `/chat/messages/${messageId}/reaction`,
             payload,
         );
-        return unwrapData(data) ?? data;
+        return unwrapData<ApiChatMessage>(data) ?? data;
     } catch (error) {
         rethrow("reactToMessage", error);
     }

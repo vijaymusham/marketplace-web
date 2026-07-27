@@ -24,6 +24,27 @@ import type { ApiChat } from "../types/AllTypes";
 import { chatKeys, patchChatInLists } from "./chatCache";
 import { useSocket } from "@/components/socket/SocketProvider";
 
+function formatLastMessagePreview(
+    preview: ApiChat["lastMessagePreview"] | string | null | undefined,
+): string {
+    if (!preview) return "";
+    if (typeof preview === "string") return preview;
+    if (typeof preview.content === "string" && preview.content.trim()) {
+        return preview.content;
+    }
+    switch (preview.messageType) {
+        case "offer":
+            return "Offer";
+        case "images":
+        case "image":
+            return "Photo";
+        case "voice":
+            return "Voice message";
+        default:
+            return "Message";
+    }
+}
+
 export default function ChatSidebar({
     activeChat,
     onSelect,
@@ -54,7 +75,7 @@ export default function ChatSidebar({
         if (!q) return items;
         return items.filter((c) => {
             const name = c.peer?.displayName?.toLowerCase() ?? "";
-            const preview = c.lastMessagePreview?.content?.toLowerCase() ?? "";
+            const preview = formatLastMessagePreview(c.lastMessagePreview).toLowerCase();
             return name.includes(q) || preview.includes(q);
         });
     }, [conversations?.items, query]);
@@ -333,8 +354,12 @@ function ConversationRow({
         initialData: false,
     });
 
-    const preview = conversation.lastMessagePreview?.content ?? conversation.lastMessagePreview;
-    const previewType = conversation.lastMessagePreview?.messageType;
+    const preview = formatLastMessagePreview(conversation.lastMessagePreview);
+    const previewType =
+        conversation.lastMessagePreview &&
+        typeof conversation.lastMessagePreview === "object"
+            ? conversation.lastMessagePreview.messageType
+            : undefined;
     const name = conversation.peer?.displayName ?? "";
     const photo =
         conversation.peer?.profilePhoto ||

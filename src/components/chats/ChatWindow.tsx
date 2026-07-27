@@ -15,6 +15,7 @@ import type { RootState } from "@/components/redux/store";
 import {
     ArrowDown,
     ArrowLeft,
+    Check,
     CheckCheck,
     ChevronDown,
     Copy,
@@ -58,6 +59,7 @@ import {
     markChatReadOnce,
     normalizeChatMessage,
     removeChatFromLists,
+    upsertMessageInCache,
 } from "./chatCache";
 import { useSocket } from "@/components/socket/SocketProvider";
 
@@ -68,7 +70,56 @@ const QUICK_REPLIES = [
     "I'm interested!",
 ];
 
-const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"] as const;
+/** Backend only allows heart | thumbsup */
+const QUICK_REACTIONS = [
+    { type: "thumbsup" as const, emoji: "👍" },
+    { type: "heart" as const, emoji: "❤️" },
+];
+
+function reactionEmoji(type: string) {
+    if (type === "heart") return "❤️";
+    if (type === "thumbsup") return "👍";
+    return type;
+}
+
+function MessageDeliveryTicks({
+    message,
+    mine,
+}: {
+    message: ApiChatMessage;
+    mine: boolean;
+}) {
+    if (!mine) return null;
+
+    const seen = Boolean(message.isRead || message.readAt);
+    const delivered =
+        seen ||
+        message.deliveryStatus === "delivered" ||
+        message.deliveryStatus === "read";
+
+    if (seen) {
+        // Peer saw it — blue/white double ticks
+        return (
+            <CheckCheck
+                className="h-3.5 w-3.5 text-sky-300"
+                aria-label="Seen"
+            />
+        );
+    }
+    if (delivered) {
+        // Delivered but not seen — gray double ticks
+        return (
+            <CheckCheck
+                className="h-3.5 w-3.5 text-white/45"
+                aria-label="Delivered"
+            />
+        );
+    }
+    // Sent — single gray tick
+    return (
+        <Check className="h-3.5 w-3.5 text-white/45" aria-label="Sent" />
+    );
+}
 
 type ChatWindowProps = {
     activeChat: string;
@@ -192,6 +243,8 @@ export default function ChatWindow({
         if (!socket?.connected || !activeChat) return;
 
         socket.emit("conversation.join", { conversationId: activeChat });
+        // Realtime mark-as-read so peer gets `messages.read` ticks.
+        socket.emit("messages.read", { conversationId: activeChat });
 
         const onMessageNew = (message: ApiChatMessage) => {
             if (message.conversationId !== activeChat) return;
@@ -202,6 +255,7 @@ export default function ChatWindow({
             });
             if (!normalized.isMine) {
                 markChatReadOnce(queryClient, activeChat, 1, markChatRead);
+                socket.emit("messages.read", { conversationId: activeChat });
             }
         };
 
@@ -247,20 +301,31 @@ export default function ChatWindow({
 
     const createOfferMutation = useMutation({
         mutationFn: (amount: number) => createOffer(activeChat, { amount }),
-        onSuccess: (offer) => {
-            // Offer endpoints may return the offer or an offer message — refresh messages once.
-            if (offer && typeof offer === "object" && "messageType" in offer) {
-                appendMessageToCache(
-                    queryClient,
-                    activeChat,
-                    offer as ApiChatMessage,
-                    { clearUnread: true, peerId },
-                );
+        onSuccess: (result) => {
+            // API may return a chat message, an offer entity, or a wrapper with message/offer.
+            const raw = result as Record<string, unknown> | null;
+            const asMessage =
+                raw && typeof raw === "object"
+                    ? (("messageType" in raw
+                          ? raw
+                          : raw.message &&
+                              typeof raw.message === "object" &&
+                              "messageType" in (raw.message as object)
+                            ? raw.message
+                            : null) as ApiChatMessage | null)
+                    : null;
+
+            if (asMessage?.id) {
+                appendMessageToCache(queryClient, activeChat, asMessage, {
+                    clearUnread: true,
+                    peerId,
+                });
             } else {
                 void queryClient.invalidateQueries({
                     queryKey: chatKeys.messages(activeChat),
                 });
             }
+            void queryClient.invalidateQueries({ queryKey: chatKeys.lists });
             toast.success("Offer sent");
             setOfferOpen(false);
         },
@@ -748,16 +813,24 @@ function MessageBubble({
     const [reactBarOpen, setReactBarOpen] = useState(false);
 
     const reactMutation = useMutation({
-        mutationFn: (emoji: string) => {
-            if (message.myReaction === emoji) {
+        mutationFn: (reaction: "heart" | "thumbsup") => {
+            if (message.myReaction === reaction) {
                 return removeReaction(message.id);
             }
-            return reactToMessage(message.id, { emoji });
+            return reactToMessage(message.id, { reaction });
         },
-        onSuccess: () => {
-            void queryClient.invalidateQueries({
-                queryKey: chatKeys.messages(conversationId),
-            });
+        onSuccess: (result) => {
+            if (result && typeof result === "object" && "id" in result) {
+                upsertMessageInCache(
+                    queryClient,
+                    conversationId,
+                    result as ApiChatMessage,
+                );
+            } else {
+                void queryClient.invalidateQueries({
+                    queryKey: chatKeys.messages(conversationId),
+                });
+            }
             setMenuOpen(false);
             setReactBarOpen(false);
         },
@@ -863,7 +936,7 @@ function MessageBubble({
                             </span>
                             {mine && (
                                 <span className="flex shrink-0 justify-end pl-1.5">
-                                    <CheckCheck className="h-3.5 w-3.5 text-emerald-300" />
+                                    <MessageDeliveryTicks message={message} mine={mine} />
                                 </span>
                             )}
                             {/* Absolute — no layout space when hidden */}
@@ -888,7 +961,7 @@ function MessageBubble({
                             <div className="relative">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src={message.mediaUrl || message.content}
+                                    src={message.mediaUrl || message.content || ""}
                                     alt="Shared"
                                     className="h-30 w-full max-w-70 rounded-2xl object-cover sm:h-35"
                                 />
@@ -903,14 +976,36 @@ function MessageBubble({
                             </div>
                         )}
 
-                    {kind === "offer" && message.offer && (
-                        <OfferCard
-                            offer={message.offer}
-                            mine={mine}
-                            menuOpen={menuOpen}
-                            hoverBtnClass={hoverBtn}
-                            onMenuClick={openMenu}
-                        />
+                    {kind === "offer" && (
+                        message.offer ? (
+                            <OfferCard
+                                offer={message.offer}
+                                mine={mine}
+                                menuOpen={menuOpen}
+                                hoverBtnClass={hoverBtn}
+                                onMenuClick={openMenu}
+                            />
+                        ) : (
+                            <div
+                                className={`relative rounded-[20px] border border-primary/20 bg-white px-3.5 py-3 text-[14px] font-semibold shadow-lg shadow-primary/15 ${
+                                    mine ? "rounded-tr-md" : "rounded-tl-md"
+                                }`}
+                            >
+                                <p className="text-primary">
+                                    {typeof message.content === "string" && message.content.trim()
+                                        ? message.content
+                                        : "Offer"}
+                                </p>
+                                <button
+                                    type="button"
+                                    aria-label="Message options"
+                                    onClick={openMenu}
+                                    className={`absolute top-1.5 right-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full text-[#94A3B8] transition ${hoverBtn}`}
+                                >
+                                    <ChevronDown className="h-3.5 w-3.5" />
+                                </button>
+                            </div>
+                        )
                     )}
 
                     {message.reactions && message.reactions.length > 0 && (
@@ -921,13 +1016,17 @@ function MessageBubble({
                                 <button
                                     key={r.type}
                                     type="button"
-                                    onClick={() => reactMutation.mutate(r.type)}
+                                    onClick={() => {
+                                        if (r.type === "heart" || r.type === "thumbsup") {
+                                            reactMutation.mutate(r.type);
+                                        }
+                                    }}
                                     className={`inline-flex items-center gap-1 rounded-full border bg-white px-2 py-0.5 text-[12px] shadow-sm transition hover:border-primary/30 ${r.reactedByMe
                                         ? "border-primary/40 bg-primary/5"
                                         : "border-[#E2E8F0]"
                                         }`}
                                 >
-                                    {r.type}
+                                    {reactionEmoji(r.type)}
                                     <span className="text-[11px] font-semibold text-[#64748B]">
                                         {r.count}
                                     </span>
@@ -941,17 +1040,17 @@ function MessageBubble({
                         <div
                             className={`absolute z-30 bottom-full mb-2 ${mine ? "right-0" : "left-0"}`}
                         >
-                            <div className="mb-1.5 flex items-center gap-0.5 rounded-full border border-slate-200/90 bg-white px-1.5 py-1 shadow-[0_8px_28px_rgba(15,23,42,0.14)]">
-                                {QUICK_REACTIONS.map((emoji) => (
+                            <div className="mb-1.5 flex items-center gap-0.5 rounded-full border border-slate-200/90 bg-white px-1.5 py-1 shadow-[0_12px_28px_rgba(15,23,42,0.14)]">
+                                {QUICK_REACTIONS.map((item) => (
                                     <button
-                                        key={emoji}
+                                        key={item.type}
                                         type="button"
                                         disabled={reactMutation.isPending}
-                                        onClick={() => reactMutation.mutate(emoji)}
-                                        className={`flex h-8 w-8 items-center justify-center rounded-full text-[16px] transition hover:scale-110 hover:bg-[#F4F6FB] disabled:opacity-50 ${message.myReaction === emoji ? "bg-primary/10 ring-1 ring-primary/30" : ""
+                                        onClick={() => reactMutation.mutate(item.type)}
+                                        className={`flex h-8 w-8 items-center justify-center rounded-full text-[16px] transition hover:scale-110 hover:bg-[#F4F6FB] disabled:opacity-50 ${message.myReaction === item.type ? "bg-primary/10 ring-1 ring-primary/30" : ""
                                             }`}
                                     >
-                                        {emoji}
+                                        {item.emoji}
                                     </button>
                                 ))}
                                 <button
@@ -1074,7 +1173,7 @@ function OfferCard({
     hoverBtnClass?: string;
     onMenuClick?: (e: ReactMouseEvent) => void;
 }) {
-    const amount = offer.amount ?? offer.listing?.price ?? 0;
+    const amount = Number(offer.amount ?? offer.listing?.price ?? 0) || 0;
     const price = `₹${amount.toLocaleString("en-IN")}`;
     const title = offer.listing?.title || "Offer";
     const image = offer.listing?.imageUrl;

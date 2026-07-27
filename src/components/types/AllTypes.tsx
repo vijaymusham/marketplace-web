@@ -478,21 +478,21 @@ export type ApiChatMessage = {
     id: string;
     conversationId?: string;
     senderId: string;
-    messageType: "text" | "images" | "offer" | "voice";
-    content: string;
+    messageType: "text" | "images" | "image" | "offer" | "voice" | "system";
+    content?: string | null;
     mediaUrl?: string;
-    deliveryStatus?: "sent" | "delivered" | "read";
+    deliveryStatus?: "sent" | "delivered" | "failed" | "read";
     isRead?: boolean;
-    readAt?: string;
+    readAt?: string | null;
     createdAt: string;
     updatedAt?: string;
     isMine: boolean;
     reactions?: {
-        type: string;
+        type: "heart" | "thumbsup" | string;
         count: number;
         reactedByMe: boolean;
     }[];
-    myReaction?: string | null;
+    myReaction?: "heart" | "thumbsup" | string | null;
     offer?: ApiChatOffer | null;
 };
 
@@ -513,8 +513,8 @@ export type ApiChats = {
 
 export type ApiChatLastMessagePreview = {
     id?: string;
-    content: string;
-    messageType?: "text" | "images" | "offer" | "voice";
+    content?: string | null;
+    messageType?: "text" | "images" | "image" | "offer" | "voice" | "system";
     createdAt?: string;
 };
 

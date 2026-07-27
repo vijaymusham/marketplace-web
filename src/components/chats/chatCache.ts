@@ -34,6 +34,23 @@ export function normalizeChatMessage(
     return { ...message, isMine };
 }
 
+export function previewTextForMessage(message: ApiChatMessage): string {
+    if (typeof message.content === "string" && message.content.trim()) {
+        return message.content;
+    }
+    if (message.messageType === "offer") {
+        const amount = message.offer?.amount;
+        return typeof amount === "number"
+            ? `Offer · ₹${amount.toLocaleString("en-IN")}`
+            : "Offer";
+    }
+    if (message.messageType === "images" || message.messageType === "image") {
+        return "Photo";
+    }
+    if (message.messageType === "voice") return "Voice message";
+    return "Message";
+}
+
 const typingClearTimers = new Map<string, number>();
 
 export function setConversationTyping(
@@ -194,7 +211,7 @@ export function appendMessageToCache(
             lastMessageAt: normalized.createdAt || c.lastMessageAt,
             lastMessagePreview: {
                 id: normalized.id,
-                content: normalized.content,
+                content: previewTextForMessage(normalized),
                 messageType: normalized.messageType,
                 createdAt: normalized.createdAt,
             },
@@ -226,4 +243,92 @@ export function markChatReadOnce(
         .catch(() => {
             markReadInFlight.delete(chatId);
         });
+}
+
+/** Peer opened the thread — mark my outgoing messages as read. */
+export function applyMessagesReadToCache(
+    queryClient: QueryClient,
+    event: { conversationId: string; readerId?: string; readAt?: string },
+) {
+    const { conversationId, readerId, readAt } = event;
+    if (!conversationId) return;
+
+    const myId = getMyUserId();
+    // Only update ticks on *my* messages when the peer is the reader.
+    if (myId && readerId && readerId === myId) return;
+
+    queryClient.setQueryData<ApiChatMessage[]>(
+        chatKeys.messages(conversationId),
+        (old = []) =>
+            old.map((m) => {
+                const mine = myId ? m.senderId === myId : m.isMine;
+                if (!mine || m.isRead) return m;
+                return {
+                    ...m,
+                    isRead: true,
+                    readAt: readAt || new Date().toISOString(),
+                    deliveryStatus: "delivered",
+                };
+            }),
+    );
+}
+
+/** Live reaction update from WS `message.reaction`. */
+export function applyMessageReactionToCache(
+    queryClient: QueryClient,
+    event: {
+        conversationId: string;
+        messageId: string;
+        actorId?: string;
+        actorReaction?: string | null;
+        reactions?: Array<{ type: string; count: number }>;
+    },
+) {
+    const { conversationId, messageId } = event;
+    if (!conversationId || !messageId) return;
+
+    const myId = getMyUserId();
+
+    queryClient.setQueryData<ApiChatMessage[]>(
+        chatKeys.messages(conversationId),
+        (old = []) =>
+            old.map((m) => {
+                if (m.id !== messageId) return m;
+
+                const reactions = (event.reactions || []).map((r) => ({
+                    type: r.type,
+                    count: r.count,
+                    reactedByMe:
+                        Boolean(myId && event.actorId === myId && event.actorReaction === r.type) ||
+                        (m.reactions?.find((x) => x.type === r.type)?.reactedByMe ?? false),
+                }));
+
+                let myReaction = m.myReaction ?? null;
+                if (myId && event.actorId === myId) {
+                    myReaction = event.actorReaction ?? null;
+                    // Refresh reactedByMe from actor state.
+                    for (const r of reactions) {
+                        r.reactedByMe = r.type === myReaction;
+                    }
+                }
+
+                return { ...m, reactions, myReaction };
+            }),
+    );
+}
+
+/** Replace one message in the thread cache (e.g. after react REST ack). */
+export function upsertMessageInCache(
+    queryClient: QueryClient,
+    chatId: string,
+    message: ApiChatMessage,
+) {
+    const normalized = normalizeChatMessage(message, getMyUserId());
+    queryClient.setQueryData<ApiChatMessage[]>(chatKeys.messages(chatId), (old = []) => {
+        const idx = old.findIndex((m) => m.id === normalized.id);
+        if (idx === -1) return [...old, normalized];
+        const next = old.slice();
+        next[idx] = { ...old[idx], ...normalized };
+        return next;
+    });
 }

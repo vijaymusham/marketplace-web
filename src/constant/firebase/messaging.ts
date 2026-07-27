@@ -17,20 +17,8 @@ let messagingInstance: Messaging | null = null;
 let messagingInitPromise: Promise<Messaging | null> | null = null;
 
 function buildServiceWorkerUrl(): string {
-  const params = new URLSearchParams({
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
-    messagingSenderId:
-      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
-  });
-
-  const measurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID;
-  if (measurementId) params.set("measurementId", measurementId);
-
-  return `/firebase-messaging-sw.js?${params.toString()}`;
+  // Stable path (no query string) so only one SW registration handles pushes.
+  return "/firebase-messaging-sw.js";
 }
 
 /** Ask the browser for notification permission (must run from a user click). */
@@ -69,10 +57,19 @@ export async function registerMessagingServiceWorker(): Promise<ServiceWorkerReg
   }
 
   try {
-    const registration = await navigator.serviceWorker.register(
-      buildServiceWorkerUrl(),
-      { scope: "/" },
-    );
+    const swUrl = buildServiceWorkerUrl();
+
+    // Prefer an existing registration for this script so we don't stack handlers.
+    const existing = await navigator.serviceWorker.getRegistration("/");
+    if (existing?.active?.scriptURL?.includes("firebase-messaging-sw.js")) {
+      await existing.update();
+      await navigator.serviceWorker.ready;
+      return existing;
+    }
+
+    const registration = await navigator.serviceWorker.register(swUrl, {
+      scope: "/",
+    });
     await navigator.serviceWorker.ready;
     return registration;
   } catch (error) {

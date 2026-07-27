@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
     ChevronRight,
     Heart,
@@ -27,6 +28,7 @@ const iconWrap =
     "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary";
 
 export default function SignInButton() {
+    const router = useRouter();
     const { signOut } = useAuth();
     const dispatch = useDispatch<AppDispatch>();
     const authData = useSelector((state: RootState) => state.user.user);
@@ -39,10 +41,12 @@ export default function SignInButton() {
         setMenuOpen(false);
         try {
             localStorage.removeItem("token");
+            localStorage.removeItem("fcmToken");
             dispatch(clearuser());
             await persistor.purge();
             await signOut();
             toast.success("Signed out");
+            router.replace("/");
         } catch {
             toast.error("Failed to sign out. Please try again.");
         }

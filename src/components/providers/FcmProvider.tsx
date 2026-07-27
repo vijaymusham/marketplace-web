@@ -46,14 +46,13 @@ export default function FcmProvider({ children }: { children: ReactNode }) {
       }
 
       const unsub = await subscribeForegroundMessages((payload) => {
+        // Foreground only — no toast (background uses the system notification via SW).
         const title =
           payload.notification?.title ||
           payload.data?.title ||
           "Deal Market";
         const body =
           payload.notification?.body || payload.data?.body || "";
-
-        toast(body ? `${title}: ${body}` : title);
 
         pushNotification({
           title,

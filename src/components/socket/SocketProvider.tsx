@@ -9,9 +9,13 @@ import {
 } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import type { ApiChatMessage, ApiUserPresence } from "@/components/types/AllTypes";
+import type { RootState } from "@/components/redux/store";
 import {
     appendMessageToCache,
+    applyMessageReactionToCache,
+    applyMessagesReadToCache,
     applyPresenceToCache,
     getMyUserId,
     setConversationTyping,
@@ -22,11 +26,6 @@ const SocketContext = createContext<Socket | null>(null);
 function getSocketUrl() {
     const base = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
     return base ? `${base}/chat` : "";
-}
-
-function getAuthToken() {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
 }
 
 function normalizePresence(raw: unknown): ApiUserPresence | null {
@@ -59,20 +58,37 @@ function normalizePresence(raw: unknown): ApiUserPresence | null {
 export function SocketProvider({ children }: { children: ReactNode }) {
     const [socket, setSocket] = useState<Socket | null>(null);
     const queryClient = useQueryClient();
+    const accessToken = useSelector(
+        (state: RootState) => state.user.user?.accessToken ?? null,
+    );
 
     useEffect(() => {
         const url = getSocketUrl();
-        const token = getAuthToken();
-        if (!url || !token) return;
+        const token =
+            accessToken ||
+            (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+
+        // No session → ensure any previous socket is gone.
+        if (!url || !token) {
+            setSocket(null);
+            return;
+        }
 
         const socketInstance = io(url, {
             transports: ["websocket", "polling"],
             auth: { token },
+            // Avoid zombie reconnects after logout / tab close.
+            reconnection: true,
+            reconnectionAttempts: 8,
         });
 
         const handleConnect = () => {
             setSocket(socketInstance);
             socketInstance.emit("presence.ping", {});
+        };
+
+        const handleDisconnect = () => {
+            setSocket((prev) => (prev === socketInstance ? null : prev));
         };
 
         const handleConnectError = (error: Error) => {
@@ -94,6 +110,36 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             appendMessageToCache(queryClient, chatId, raw);
         };
 
+        const onMessagesRead = (raw: {
+            conversationId?: string;
+            readerId?: string;
+            readAt?: string;
+        }) => {
+            if (!raw?.conversationId) return;
+            applyMessagesReadToCache(queryClient, {
+                conversationId: raw.conversationId,
+                readerId: raw.readerId,
+                readAt: raw.readAt,
+            });
+        };
+
+        const onMessageReaction = (raw: {
+            conversationId?: string;
+            messageId?: string;
+            actorId?: string;
+            actorReaction?: string | null;
+            reactions?: Array<{ type: string; count: number }>;
+        }) => {
+            if (!raw?.conversationId || !raw?.messageId) return;
+            applyMessageReactionToCache(queryClient, {
+                conversationId: raw.conversationId,
+                messageId: raw.messageId,
+                actorId: raw.actorId,
+                actorReaction: raw.actorReaction,
+                reactions: raw.reactions,
+            });
+        };
+
         const onTyping = (data: {
             conversationId?: string;
             userId?: string;
@@ -109,12 +155,36 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             );
         };
 
+        const hardClose = () => {
+            try {
+                socketInstance.removeAllListeners();
+                socketInstance.disconnect();
+            } catch {
+                /* ignore */
+            }
+            setSocket((prev) => (prev === socketInstance ? null : prev));
+        };
+
+        // Tab / window close — drop the connection so it does not linger.
+        const onPageHide = () => {
+            try {
+                socketInstance.disconnect();
+            } catch {
+                /* ignore */
+            }
+        };
+        window.addEventListener("pagehide", onPageHide);
+        window.addEventListener("beforeunload", onPageHide);
+
         socketInstance.on("connect", handleConnect);
+        socketInstance.on("disconnect", handleDisconnect);
         socketInstance.on("connect_error", handleConnectError);
         socketInstance.on("user.online", updatePresence);
         socketInstance.on("user.offline", updatePresence);
         socketInstance.on("user.presence", updatePresence);
         socketInstance.on("message.new", onMessageNew);
+        socketInstance.on("messages.read", onMessagesRead);
+        socketInstance.on("message.reaction", onMessageReaction);
         socketInstance.on("typing", onTyping);
 
         const heartbeat = setInterval(() => {
@@ -125,16 +195,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
         return () => {
             clearInterval(heartbeat);
-            socketInstance.off("connect", handleConnect);
-            socketInstance.off("connect_error", handleConnectError);
-            socketInstance.off("user.online", updatePresence);
-            socketInstance.off("user.offline", updatePresence);
-            socketInstance.off("user.presence", updatePresence);
-            socketInstance.off("message.new", onMessageNew);
-            socketInstance.off("typing", onTyping);
-            socketInstance.disconnect();
+            window.removeEventListener("pagehide", onPageHide);
+            window.removeEventListener("beforeunload", onPageHide);
+            hardClose();
         };
-    }, [queryClient]);
+    }, [queryClient, accessToken]);
 
     return (
         <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
