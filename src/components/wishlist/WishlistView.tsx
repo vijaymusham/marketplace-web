@@ -5,17 +5,21 @@ import { Heart, Loader2 } from "lucide-react";
 import WishlistCard from "@/components/wishlist/WishlistCard";
 import WishlistEmpty from "@/components/wishlist/WishlistEmpty";
 import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getWishlist, removeFromWishlist } from "../api/apis";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { removeFromWishlist } from "../api/apis";
 import type { ApiWishlist } from "../types/AllTypes";
+import { useIsLoggedIn, useWishlistQuery } from "@/hooks/useWishlistQuery";
+import { requestSignIn } from "@/lib/auth-events";
+import { useEffect } from "react";
 
 export default function WishlistView() {
     const queryClient = useQueryClient();
+    const isLoggedIn = useIsLoggedIn();
+    const { data: wishlist = [], isLoading } = useWishlistQuery();
 
-    const { data: wishlist = [], isLoading } = useQuery({
-        queryKey: ["wishlist"],
-        queryFn: () => getWishlist(),
-    });
+    useEffect(() => {
+        if (!isLoggedIn) requestSignIn();
+    }, [isLoggedIn]);
 
     const removeMutation = useMutation({
         mutationFn: (listingId: string) => removeFromWishlist(listingId),
@@ -32,6 +36,10 @@ export default function WishlistView() {
             void queryClient.invalidateQueries({ queryKey: ["wishlist"] });
         },
     });
+
+    if (!isLoggedIn) {
+        return <WishlistEmpty />;
+    }
 
     if (isLoading) {
         return (

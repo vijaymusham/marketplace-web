@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -14,10 +14,12 @@ import {
     Share2,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addToWishlist, createChat, getAdById, getWishlist, removeFromWishlist } from "@/components/api/apis";
+import { addToWishlist, createChat, getAdById, removeFromWishlist } from "@/components/api/apis";
 import type { ApiAdDetail, ApiWishlist } from "@/components/types/AllTypes";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useIsLoggedIn, useWishlistQuery } from "@/hooks/useWishlistQuery";
+import { requestSignIn } from "@/lib/auth-events";
 
 function formatPrice(price: number) {
     return `₹${Number.isFinite(price) ? price.toLocaleString("en-IN") : "0"}`;
@@ -94,10 +96,8 @@ export default function ListingDetail({ id }: { id: string }) {
         enabled: Boolean(id),
     });
 
-    const { data: wishlist = [] } = useQuery({
-        queryKey: ["wishlist"],
-        queryFn: () => getWishlist(),
-    });
+    const isLoggedIn = useIsLoggedIn();
+    const { data: wishlist = [] } = useWishlistQuery();
 
     const inWishlist = wishlist.some((item: ApiWishlist) => item.id === ad?.id);
     const router = useRouter();
@@ -139,27 +139,53 @@ export default function ListingDetail({ id }: { id: string }) {
         }
     };
 
-    const handleToggleLike = () => {
-        const next = !inWishlist;
-        startTransition(async () => {
+    const handleToggleLike = async () => {
+        if (!isLoggedIn) {
+            requestSignIn();
+            toast.error("Sign in to save items");
+            return;
+        }
+        if (!ad?.id) return;
 
-            try {
-                const id = String(ad?.id);
-                if (next) {
-                    await addToWishlist(id);
-                    toast.success("Added to wishlist");
-                } else {
-                    await removeFromWishlist(id);
-                    toast.success("Removed from wishlist");
-                }
-                await Promise.all([
-                    queryClient.invalidateQueries({ queryKey: ["wishlist"] }),
-                    queryClient.invalidateQueries({ queryKey: ["listing", id] }),
-                ]);
-            } catch {
-                toast.error("Couldn’t update wishlist");
-            }
+        const listingId = String(ad.id);
+        const previous = queryClient.getQueryData<ApiWishlist[]>(["wishlist"]);
+
+        queryClient.setQueryData<ApiWishlist[]>(["wishlist"], (old = []) => {
+            if (inWishlist) return old.filter((item) => item.id !== ad.id);
+            return [
+                ...old,
+                {
+                    id: ad.id,
+                    title: ad.title,
+                    imageUrl: ad.images?.[0]?.url ?? "",
+                    isFavorite: true,
+                    price: ad.price,
+                    currency: "INR",
+                    location: [ad.locality, ad.city?.name].filter(Boolean).join(", "),
+                    metadata: "",
+                    postedAt: ad.createdAt ?? "",
+                    postedAtLabel: "",
+                    favoritedAt: new Date().toISOString(),
+                    category: ad.category
+                        ? { id: ad.category.id, name: ad.category.name, slug: ad.category.slug }
+                        : { id: "", name: "", slug: "" },
+                } as ApiWishlist,
+            ];
         });
+
+        try {
+            if (inWishlist) {
+                await removeFromWishlist(listingId);
+                toast.success("Removed from wishlist");
+            } else {
+                await addToWishlist(listingId);
+                toast.success("Added to wishlist");
+            }
+            await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+        } catch {
+            queryClient.setQueryData(["wishlist"], previous);
+            toast.error("Couldn’t update wishlist");
+        }
     };
 
 

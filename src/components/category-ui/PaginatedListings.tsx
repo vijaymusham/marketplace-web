@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import ListingCard from "@/components/sections/ListingCard";
 import { Stagger, StaggerItem } from "@/components/animations/Motion";
 import { ApiAd } from "../types/AllTypes";
+import { scrollToTop } from "@/lib/lenis";
 
 const PAGE_SIZE = 20;
 
@@ -15,7 +16,7 @@ export default function PaginatedListings({ listings = [] }: { listings: ApiAd[]
         const clamped = Math.min(Math.max(next, 1), totalPages);
         if (clamped === page) return;
         setPage(clamped);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollToTop();
     };
 
     const visible = listings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

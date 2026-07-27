@@ -17,7 +17,7 @@ const HorizontalList = ({
     data: ApiAd[];
 }) => {
     return (
-        <section className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 rounded-2xl ${className}`}>
+        <section className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 rounded-2xl ${className ?? ""}`}>
             <Reveal>
                 <div className="flex justify-between gap-4">
                     <div>
@@ -40,7 +40,7 @@ const HorizontalList = ({
                 </div>
             </Reveal>
 
-            <Stagger className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-5!" stagger={0.08}>
+            <Stagger className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-5" stagger={0.08}>
                 {data?.map((item) => (
                     <StaggerItem key={item.id} y={40}>
                         <ListingCard listing={item} />

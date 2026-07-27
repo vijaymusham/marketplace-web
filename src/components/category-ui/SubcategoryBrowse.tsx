@@ -19,6 +19,7 @@ import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
 import { getCategoriesAds, getCities } from "../api/apis";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiAd, ApiCategoryAds } from "../types/AllTypes";
+import { scrollToTop } from "@/lib/lenis";
 
 const PAGE_SIZE = 20;
 const DEFAULT_COORDS = { latitude: 19.076, longitude: 72.8777 };
@@ -188,7 +189,7 @@ export default function SubcategoryBrowse({
         const clamped = Math.min(Math.max(next, 1), totalPages);
         if (clamped === page) return;
         setPage(clamped);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollToTop();
     };
 
     const pageNumbers = useMemo(
@@ -289,11 +290,10 @@ export default function SubcategoryBrowse({
                                             type="button"
                                             onClick={() => goTo(n)}
                                             aria-current={n === page ? "page" : undefined}
-                                            className={`flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 text-sm font-semibold transition-colors ${
-                                                n === page
+                                            className={`flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 text-sm font-semibold transition-colors ${n === page
                                                     ? "bg-slate-950 text-white"
                                                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                                            }`}
+                                                }`}
                                         >
                                             {n}
                                         </button>

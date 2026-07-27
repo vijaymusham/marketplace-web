@@ -1,7 +1,8 @@
 import type { SVGProps } from "react";
-import { ArrowRight, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { scrollToTop } from "@/lib/lenis";
 
 function FacebookLogo(props: SVGProps<SVGSVGElement>) {
     return (
@@ -139,7 +140,14 @@ export default function Footer() {
                 <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
                     {/* brand */}
                     <div>
-                        <Link href="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5">
+                        <Link
+                            href="/"
+                            scroll={false}
+                            onClick={() => {
+                                if (window.location.pathname === "/") scrollToTop();
+                            }}
+                            className="flex items-center gap-2.5"
+                        >
                             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-indigo-500 text-white">
                                 <ShoppingBag className="h-4.5 w-4.5" strokeWidth={2} />
                             </span>
@@ -178,7 +186,12 @@ export default function Footer() {
                                     <li key={label}>
                                         <Link
                                             href={href}
-                                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                            scroll={false}
+                                            onClick={() => {
+                                                if (href === "#" || href.startsWith("#")) {
+                                                    scrollToTop();
+                                                }
+                                            }}
                                             className="text-sm transition-colors hover:text-white"
                                         >
                                             {label}
@@ -197,7 +210,6 @@ export default function Footer() {
                                 <li key={label}>
                                     <Link
                                         href="#"
-                                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                                         className="flex items-center gap-2.5 text-sm transition-colors hover:text-white"
                                     >
                                         <Icon className="h-4 w-4" />

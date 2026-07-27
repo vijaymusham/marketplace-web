@@ -24,6 +24,17 @@ function toListing(ad: ApiAdsBySectionAd): ApiAd {
     };
 }
 
+const SECTION_BG: Record<string, string> = {
+    "bg-sky-50": "bg-sky-50",
+    "bg-white": "bg-white",
+    "bg-violet-50": "bg-violet-50",
+    "bg-amber-50": "bg-amber-50",
+    "bg-emerald-50": "bg-emerald-50",
+    "bg-rose-50": "bg-rose-50",
+    "bg-orange-50": "bg-orange-50",
+    "bg-slate-50": "bg-slate-50",
+};
+
 export default function Home() {
     const { data } = useQuery({
         queryKey: ["adsBySection"],
@@ -37,20 +48,20 @@ export default function Home() {
                 <CityExplorer />
                 <FreshRecommendations />
                 <BannerSection />
-                {
-                    data && Object.values(data).map((item: ApiAdsSection) => {
+                {data &&
+                    Object.values(data).map((item: ApiAdsSection) => {
                         if (!item.ads?.length) return null;
+                        const bg = SECTION_BG[item.bgClass] ?? "bg-slate-50";
                         return (
                             <HorizontalList
-                                key={item?.title}
-                                className={`${item?.bgClass} my-8 `}
-                                title={item?.title}
-                                description={item?.subtitle}
-                                data={item?.ads?.map(toListing)}
+                                key={item.title}
+                                className={`${bg} my-8`}
+                                title={item.title}
+                                description={item.subtitle}
+                                data={item.ads.map(toListing)}
                             />
-                        )
-                    })
-                }
+                        );
+                    })}
             </main>
         </>
     );

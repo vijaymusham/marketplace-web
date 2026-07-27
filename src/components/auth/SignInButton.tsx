@@ -26,6 +26,7 @@ import {
     enablePushNotifications,
     getStoredFcmToken,
 } from "@/lib/fcmDeviceToken";
+import { SIGN_IN_EVENT } from "@/lib/auth-events";
 
 const itemClass =
     "group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm font-bold text-slate-700 transition-all duration-200 hover:bg-primary/6 hover:text-primary";
@@ -54,6 +55,12 @@ export default function SignInButton() {
             Notification.permission === "granted" && Boolean(getStoredFcmToken()),
         );
     }, [isLoggedIn, menuOpen]);
+
+    useEffect(() => {
+        const onRequestSignIn = () => setOpen(true);
+        window.addEventListener(SIGN_IN_EVENT, onRequestSignIn);
+        return () => window.removeEventListener(SIGN_IN_EVENT, onRequestSignIn);
+    }, []);
 
     const handlePushToggle = async () => {
         if (pushBusy) return;

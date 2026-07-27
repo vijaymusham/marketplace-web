@@ -1,13 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { scrollToTop, setLenis } from "@/lib/lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isFirstPath = useRef(true);
+
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.05,
@@ -15,6 +20,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       smoothWheel: true,
       touchMultiplier: 1.5,
     });
+
+    setLenis(lenis);
 
     // keep GSAP's scroll-triggered effects (e.g. ScrollReveal) in sync with lenis
     lenis.on("scroll", ScrollTrigger.update);
@@ -38,9 +45,19 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     return () => {
       document.removeEventListener("click", onClick);
       gsap.ticker.remove(onTick);
+      setLenis(null);
       lenis.destroy();
     };
   }, []);
+
+  // Smooth scroll to top on route change (skip initial load)
+  useEffect(() => {
+    if (isFirstPath.current) {
+      isFirstPath.current = false;
+      return;
+    }
+    scrollToTop();
+  }, [pathname]);
 
   return <>{children}</>;
 }

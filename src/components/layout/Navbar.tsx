@@ -11,8 +11,11 @@ import { getChats } from "../api/apis";
 import { useQuery } from "@tanstack/react-query";
 import { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
+import { scrollToTop } from "@/lib/lenis";
 
 export default function Navbar() {
+    const pathname = usePathname();
     const authData = useSelector((state: RootState) => state.user.user);
     const isLoggedIn = Boolean(authData?.accessToken);
     const { data: conversations } = useQuery({
@@ -23,7 +26,14 @@ export default function Navbar() {
     return (
         <header className="sticky top-0 z-30  bg-white/85 bg-linear-to-b from-primary/20 via-primary/10 to-white backdrop-blur-xl">
             <div className="mx-auto flex  items-center gap-3 px-4 py-4 sm:gap-5 sm:px-6 lg:px-8">
-                <Link href="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="group flex shrink-0 items-center gap-2.5">
+                <Link
+                    href="/"
+                    scroll={false}
+                    onClick={() => {
+                        if (pathname === "/") scrollToTop();
+                    }}
+                    className="group flex shrink-0 items-center gap-2.5"
+                >
                     <span className="hidden font-heading text-3xl font-extrabold tracking-tight text-slate-900 lg:block">
                         Deal<span className="text-primary">Market</span>
                     </span>
