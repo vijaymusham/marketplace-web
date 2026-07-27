@@ -8,6 +8,7 @@ import Preloader from "@/components/layout/Preloader";
 import { IntroProvider } from "@/components/layout/IntroContext";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import TanstackProvider from "@/components/providers/TanstackProvider";
+import FcmProvider from "@/components/providers/FcmProvider";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { SocketProvider } from "@/components/socket/SocketProvider";
 
@@ -42,21 +43,23 @@ export default function RootLayout({
                 <TanstackProvider>
                     <SocketProvider>
                         <AuthProvider>
-                            <IntroProvider>
-                                <SmoothScroll>
-                                    <Preloader />
-                                    <Navbar />
-                                    {children}
-                                    <Toaster
-                                        position="top-right"
-                                        reverseOrder={false}
-                                        gutter={8}
-                                        containerStyle={{ zIndex: 100000, fontFamily: "var(--font-display)", fontWeight: "600" }}
-                                        toasterId="default"
-                                    />
-                                    <SiteChrome />
-                                </SmoothScroll>
-                            </IntroProvider>
+                            <FcmProvider>
+                                <IntroProvider>
+                                    <SmoothScroll>
+                                        <Preloader />
+                                        <Navbar />
+                                        {children}
+                                        <Toaster
+                                            position="top-right"
+                                            reverseOrder={false}
+                                            gutter={8}
+                                            containerStyle={{ zIndex: 100000, fontFamily: "var(--font-display)", fontWeight: "600" }}
+                                            toasterId="default"
+                                        />
+                                        <SiteChrome />
+                                    </SmoothScroll>
+                                </IntroProvider>
+                            </FcmProvider>
                         </AuthProvider>
                     </SocketProvider>
                 </TanstackProvider>

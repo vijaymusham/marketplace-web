@@ -84,6 +84,24 @@ function writeNotifications(items: AppNotification[]) {
   emit();
 }
 
+/** Append a live push notification (e.g. from FCM foreground handler). */
+export function pushNotification(input: {
+  title: string;
+  body: string;
+  type?: AppNotification["type"];
+}) {
+  if (typeof window === "undefined") return;
+  const next: AppNotification = {
+    id: `fcm-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    title: input.title,
+    body: input.body,
+    time: "Just now",
+    read: false,
+    type: input.type ?? "system",
+  };
+  writeNotifications([next, ...readNotifications()]);
+}
+
 function subscribe(listener: Listener) {
   listeners.add(listener);
   const onStorage = (e: StorageEvent) => {

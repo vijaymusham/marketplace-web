@@ -51,9 +51,11 @@ function rethrow(label: string, error: unknown): never {
 export const authApi = async (
     idToken: string,
     payload?: {
-        name: string;
-        email: string;
+        name?: string;
+        email?: string;
         referralCode?: string;
+        platform?: "ios" | "android" | "web";
+        fcmToken?: string;
     },
 ) => {
     try {
@@ -62,6 +64,8 @@ export const authApi = async (
             name: payload?.name,
             email: payload?.email,
             referralCode: payload?.referralCode,
+            platform: payload?.platform ?? "web",
+            fcmToken: payload?.fcmToken,
         });
         return data;
     } catch (error) {

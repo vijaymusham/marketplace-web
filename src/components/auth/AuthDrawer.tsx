@@ -14,6 +14,10 @@ import {
     type User,
 } from "firebase/auth";
 import { auth } from "@/constant/firebase/firebase";
+import {
+    ensureNotificationPermission,
+    getFcmToken,
+} from "@/constant/firebase/messaging";
 import { authApi, authPhoneCheck, getUser } from "@/components/api/apis";
 import type { ApiError } from "@/components/api/customAxios";
 import { setUser } from "@/components/redux/slices/authSlice";
@@ -140,16 +144,26 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
     ) => {
         const idToken = await firebaseUser.getIdToken(true);
 
-        const payload = {
-            name: profile.name.trim(),
-            email: profile.email.trim(),
-            referralCode: profile.referralCode?.trim() || undefined,
-        };
+        const fcmToken = await getFcmToken();
 
-        const authData = await authApi(idToken, !profile?.exists ? payload : undefined);
+        const authData = await authApi(idToken, {
+            ...(!profile?.exists
+                ? {
+                      name: profile.name.trim(),
+                      email: profile.email.trim(),
+                      referralCode: profile.referralCode?.trim() || undefined,
+                  }
+                : {}),
+            platform: "web",
+            fcmToken: fcmToken || undefined,
+        });
 
         if (authData?.accessToken) {
             localStorage.setItem("token", authData.accessToken);
+        }
+
+        if (fcmToken) {
+            localStorage.setItem("fcmToken", fcmToken);
         }
 
         dispatch(setUser(authData));
@@ -227,6 +241,9 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
 
         setSending(true);
         try {
+            // Prompt for notifications on Continue click (user gesture).
+            await ensureNotificationPermission();
+
             const check = await authPhoneCheck(`+91${phone}`);
             if (check == null || typeof check.exists !== "boolean") {
                 toast.error("Unable to verify this phone number. Please try again.");
@@ -303,6 +320,9 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         if (otp.some((d) => !d) || verifying || !confirmationRef.current) return;
         setVerifying(true);
         try {
+            // Ask for push permission on this click (browsers require a user gesture).
+            await ensureNotificationPermission();
+
             // Firebase: verify OTP only. Account create/login is backend-only.
             const result = await confirmationRef.current.confirm(otp.join(""));
 
@@ -333,6 +353,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         if (!name.trim() || !emailValid || savingProfile || !auth.currentUser) return;
         setSavingProfile(true);
         try {
+            await ensureNotificationPermission();
             // Signup: send name/email/referral + Firebase idToken to backend only.
             await completeBackendAuth(auth.currentUser, {
                 name: name.trim(),
