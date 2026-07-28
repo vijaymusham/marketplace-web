@@ -35,7 +35,7 @@ export default function CityExplorer() {
                         {data?.map((city: ApiCity) => (
                             <StaggerItem
                                 key={city.name}
-                                className="w-19 shrink-0 snap-start sm:w-28 md:w-28 lg:w-30"
+                                className="w-21 shrink-0 snap-start sm:w-28 md:w-28 lg:w-30"
                                 y={24}
                             >
                                 <Link
