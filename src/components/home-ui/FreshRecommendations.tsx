@@ -28,7 +28,7 @@ export default function FreshRecommendations() {
     });
 
     return (
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="mx-auto max-w-7xl px-4 pt-5 pb-8 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
             <Enter>
                 <h2 className="font-heading text-xl font-extrabold text-slate-900 sm:text-2xl">
                     Fresh recommendations

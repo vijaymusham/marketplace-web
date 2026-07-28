@@ -210,7 +210,7 @@ function SearchInput({ compact = false }: { compact?: boolean }) {
                     aria-label="Search for products, brands and more"
                     className={
                         compact
-                            ? "w-full min-w-0 rounded-xl border-2 border-slate-200 bg-white py-2 pr-3 pl-9 text-base font-medium text-slate-700 placeholder:text-sm placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:py-2.5 sm:pl-10 sm:text-sm"
+                            ? "w-full min-w-0 rounded-xl border-2 border-slate-200 bg-white py-2.5 pr-3 pl-9 text-base font-medium text-slate-700 placeholder:text-sm placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:py-2.5 sm:pl-10 sm:text-sm"
                             : "w-full min-w-0 rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-sm font-medium text-slate-700 shadow-inner shadow-slate-100 transition-all duration-300 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-base"
                     }
                 />
