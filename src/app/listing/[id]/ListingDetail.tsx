@@ -450,10 +450,10 @@ export default function ListingDetail({ id }: { id: string }) {
                             {specs.map((row) => (
                                 <div
                                     key={row.label}
-                                    className="flex items-baseline justify-between gap-6 border-b border-slate-100 py-3.5"
+                                    className="flex items-baseline justify-between gap-4 border-b border-slate-100 py-3.5"
                                 >
-                                    <dt className="text-sm font-medium text-slate-400">{row.label}</dt>
-                                    <dd className="text-right text-sm font-bold text-slate-900">
+                                    <dt className="shrink-0 text-sm font-medium text-slate-400">{row.label}</dt>
+                                    <dd className="min-w-0 max-w-[65%] break-words text-right text-sm font-bold text-slate-900">
                                         {row.value}
                                     </dd>
                                 </div>
@@ -472,7 +472,7 @@ export default function ListingDetail({ id }: { id: string }) {
                 </div>
             </div>
 
-            <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-xl lg:hidden">
+            <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-100 bg-white/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
                 <div className="mx-auto flex max-w-lg gap-2">
                     <button
                         type="button"

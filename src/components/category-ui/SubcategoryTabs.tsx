@@ -62,17 +62,17 @@ export default function SubcategoryTabs({
 
     return (
         <nav className="border-b border-slate-200 bg-white/85 backdrop-blur-2xl">
-            <div className="relative mx-auto flex max-w-7xl items-stretch space-x-4 px-4 sm:px-6 lg:px-8">
+            <div className="relative mx-auto flex max-w-7xl flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-8">
                 <Link
                     href={`/category/${slugify(category.name)}`}
-                    className="flex shrink-0 items-center gap-2.5 py-3 pr-4 transition-opacity hover:opacity-80 sm:pr-6"
+                    className="flex shrink-0 items-center gap-2.5 py-3 pr-2 transition-opacity hover:opacity-80 sm:pr-6"
                 >
-                    <CategoryIcon className="h-11 w-11 shrink-0 text-slate-800 sm:h-13 sm:w-13" />
-                    <div>
+                    <CategoryIcon className="h-9 w-9 shrink-0 text-slate-800 sm:h-11 sm:w-11 md:h-13 md:w-13" />
+                    <div className="min-w-0">
                         <p className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
                             Category
                         </p>
-                        <h2 className="font-heading text-sm font-extrabold whitespace-nowrap text-slate-900 sm:text-base">
+                        <h2 className="truncate font-heading text-sm font-extrabold text-slate-900 sm:text-base">
                             {category.name}
                         </h2>
                     </div>
@@ -80,7 +80,7 @@ export default function SubcategoryTabs({
 
                 <div
                     ref={scrollRef}
-                    className="h-28  overflow-x-auto scroll-smooth scrollbar-hide"
+                    className="h-24 overflow-x-auto scroll-smooth scrollbar-hide sm:h-28"
                 >
                     <ul className="mx-auto flex h-full w-max items-stretch gap-1 sm:gap-2">
                         {category.subcategories.map((sub) => {
@@ -91,13 +91,13 @@ export default function SubcategoryTabs({
                                     <Link
                                         href={`/category/${slugify(sub)}`}
                                         aria-current={active ? "page" : undefined}
-                                        className={`group relative flex w-24 flex-col items-center justify-center gap-1.5 transition-colors sm:w-24 ${active
+                                        className={`group relative flex w-20 flex-col items-center justify-center gap-1 transition-colors sm:w-24 sm:gap-1.5 ${active
                                             ? "text-primary"
                                             : "text-slate-800 hover:text-primary"
                                             }`}
                                     >
-                                        <Icon className="h-10 w-10 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 sm:h-11 sm:w-11" />
-                                        <span className="text-center text-xs leading-tight font-semibold whitespace-normal sm:text-xs">
+                                        <Icon className="h-9 w-9 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 sm:h-10 sm:w-10 md:h-11 md:w-11" />
+                                        <span className="line-clamp-2 text-center text-[11px] leading-tight font-semibold sm:text-xs">
                                             {sub}
                                         </span>
                                         <span
@@ -116,7 +116,7 @@ export default function SubcategoryTabs({
                         type="button"
                         onClick={scrollNext}
                         aria-label="Show more subcategories"
-                        className="absolute top-1/2 right-1 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-colors hover:text-primary md:flex"
+                        className="absolute top-1/2 right-1 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-colors hover:text-primary sm:h-9 sm:w-9"
                     >
                         <ChevronRight className="h-5 w-5" />
                     </button>

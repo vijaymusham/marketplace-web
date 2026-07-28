@@ -91,31 +91,34 @@ export default function ListingCard({
                     type="button"
                     onClick={handleToggleLike}
                     aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                    className={`absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-lg transition-colors ${inWishlist ? "bg-white" : "bg-black/30 hover:bg-black/40"
-                        }`}
+                    className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-md transition-colors sm:top-2.5 sm:right-2.5 sm:h-8 sm:w-8 md:h-9 md:w-9 ${
+                        inWishlist ? "bg-white shadow-sm" : "bg-black/35 hover:bg-black/45"
+                    }`}
                 >
                     <Heart
-                        className={`h-4 w-4 ${inWishlist ? "fill-red-500 text-red-500" : "text-white"}`}
+                        className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
+                            inWishlist ? "fill-red-500 text-red-500" : "text-white"
+                        }`}
                         strokeWidth={2}
                     />
                 </button>
             </div>
 
             <Link href={`/listing/${listing.id}`} className="flex flex-1 flex-col pt-3">
-                <p className="min-h-4 text-xs text-slate-500">{listing.metadata}</p>
-                <h3 className="mt-1 truncate text-[15px] font-bold text-slate-900">
+                <p className="min-h-4 truncate text-[11px] text-slate-500 sm:text-xs">{listing.metadata}</p>
+                <h3 className="mt-1 truncate text-sm font-bold text-slate-900 sm:text-[15px]">
                     {listing.title}
                 </h3>
-                <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-500">
-                    <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-500 sm:text-xs">
+                    <MapPin className="h-3 w-3 shrink-0 text-slate-400 sm:h-3.5 sm:w-3.5" />
                     <span className="truncate">{listing.location}</span>
                 </p>
 
-                <div className="mt-3 flex items-center justify-between">
-                    <p className="text-[15px] font-extrabold text-slate-900">
+                <div className="mt-2.5 flex items-center justify-between gap-2 sm:mt-3">
+                    <p className="truncate text-sm font-extrabold text-slate-900 sm:text-[15px]">
                         {formatPrice(listing.price, listing.currency)}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="shrink-0 text-[11px] text-slate-500 sm:text-xs">
                         {listing.postedAtLabel || listing.postedAt}
                     </p>
                 </div>

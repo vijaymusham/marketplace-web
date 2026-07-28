@@ -125,13 +125,13 @@ export default function CategoryPage() {
                                     posted every day.
                                 </p>
                             </div>
-                            <div className="w-full shrink-0 sm:w-56">
+                            <div className="w-full shrink-0 sm:w-48">
                                 <SelectDropdown
                                     label=""
                                     value={sort}
                                     onChange={(value) => setSort(value as SortValue)}
                                     options={[...SORT_OPTIONS]}
-                                    className="py-2.5! mt-3  max-w-46! bg-white!"
+                                    className="mt-3 max-w-full bg-white! py-2.5! sm:max-w-48"
                                 />
                             </div>
                         </header>

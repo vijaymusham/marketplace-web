@@ -50,7 +50,7 @@ export default function NotificationButton() {
     }, [open]);
 
     return (
-        <div ref={rootRef} className="relative hidden sm:block">
+        <div ref={rootRef} className="relative">
             <button
                 type="button"
                 aria-label="Notifications"

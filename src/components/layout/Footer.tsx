@@ -119,10 +119,10 @@ function StoreBadge({
         <Link
             href="#"
             onClick={() => { toast.success('Coming soon 🥳') }}
-            className="flex items-center gap-3 rounded-xl border border-white/15 bg-black px-4 py-2 transition-colors hover:border-white/40"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/15 bg-black px-4 py-2 transition-colors hover:border-white/40 sm:w-auto"
         >
             {logo}
-            <span className="flex flex-col leading-tight">
+            <span className="flex flex-col leading-tight gap-1">
                 <span className="text-[10px] font-medium tracking-wide text-slate-300 uppercase">
                     {topLine}
                 </span>
@@ -134,12 +134,12 @@ function StoreBadge({
 
 export default function Footer() {
     return (
-        <footer className="overflow-hidden bg-[#0b0d12] text-slate-400 rounded-t-4xl">
-            <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8">
+        <footer className="overflow-hidden bg-[#0b0d12] text-slate-400 md:rounded-t-4xl">
+            <div className="mx-auto max-w-7xl px-4 pt-10 lg:pt-16 sm:px-6 lg:px-8">
                 {/* main columns */}
-                <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
+                <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr] lg:gap-12">
                     {/* brand */}
-                    <div>
+                    <div className="col-span-2 md:col-span-3 lg:col-span-1">
                         <Link
                             href="/"
                             scroll={false}
@@ -226,19 +226,19 @@ export default function Footer() {
                 <p className="mt-14 mb-5 text-center text-sm text-slate-500">
                     © {new Date().getFullYear()} Deal Market Limited  |  All rights reserved.
                 </p>
-                <div className=" flex flex-col items-center justify-center gap-5 border-t border-white/10 py-8 sm:flex-row sm:gap-8">
-                    <p className="text-sm font-semibold text-white sm:text-base">
+                <div className="flex flex-col items-center justify-center gap-5 border-t border-white/10 py-8 sm:flex-row sm:gap-8">
+                    <p className="px-2 text-center text-sm font-semibold text-white sm:text-base">
                         For better experience, download the Deal Market app now
                     </p>
-                    <div className="flex items-center gap-3">
+                    <div className="flex w-full md:flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
                         <StoreBadge
                             logo={<AppleLogo />}
-                            topLine="Download on the"
+                            topLine="Download on"
                             storeName="App Store"
                         />
                         <StoreBadge
                             logo={<PlayLogo />}
-                            topLine="Get it on"
+                            topLine="Available on"
                             storeName="Google Play"
                         />
                     </div>
@@ -246,9 +246,12 @@ export default function Footer() {
             </div>
 
             {/* giant watermark */}
-            <div className="relative select-none" aria-hidden="true">
-                <p className="mb-[-0.26em] text-center font-heading text-[19vw] leading-none font-extrabold tracking-tight whitespace-nowrap text-white/4">
-                    DealMarket<sup className="text-[0.25em]">®</sup>
+            <div className="relative select-none pointer-events-none mt-6 sm:mt-8 mb-1 sm:mb-2 px-2">
+                <p
+                    aria-hidden
+                    className="font-black text-[14.5vw] sm:text-[13vw] md:text-[14.5vw] leading-[0.9] text-center tracking-tight whitespace-nowrap bg-linear-to-b from-slate-400/50 from-[0%] via-slate-500/22 via-[60%] to-transparent to-[100%] bg-clip-text text-transparent"
+                >
+                    Deal Market
                 </p>
             </div>
         </footer>

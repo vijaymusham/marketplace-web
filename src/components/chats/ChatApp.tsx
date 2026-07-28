@@ -68,7 +68,7 @@ export default function ChatApp() {
             className="bg-[radial-gradient(900px_420px_at_8%_-10%,rgba(47,58,223,0.14),transparent_55%),radial-gradient(700px_380px_at_92%_0%,rgba(47,58,223,0.08),transparent_50%),linear-gradient(160deg,#EEF0FB,#F5F6FC_45%,#F8F9FD)] px-0 py-0 sm:px-4 sm:py-4 lg:px-6"
             data-lenis-prevent
         >
-            <div className="mx-auto flex h-[calc(100dvh-4.5rem)] max-w-[1480px] gap-0 sm:h-[calc(100dvh-6.5rem)] sm:gap-4 lg:gap-5">
+            <div className="mx-auto flex h-[calc(100dvh-6.75rem)] max-w-[1480px] gap-0 sm:gap-4 lg:h-[calc(100dvh-4.5rem)] lg:gap-5">
                 <div
                     className={`${showList ? "flex" : "hidden"
                         } h-full w-full flex-col rounded-3xl bg-white sm:rounded-[28px] lg:flex lg:w-[300px] lg:shrink-0 xl:w-[320px]`}

@@ -25,7 +25,7 @@ export default function PaginatedListings({ listings = [] }: { listings: ApiAd[]
         <div>
             <Stagger
                 key={page}
-                className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6"
+                className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-7 lg:grid-cols-3 xl:grid-cols-4 lg:gap-x-6"
                 stagger={0.07}
             >
                 {visible.map((listing) => (

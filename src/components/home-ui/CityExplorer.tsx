@@ -32,7 +32,7 @@ export default function CityExplorer() {
                 >
                     {data?.map((city: ApiCity) => {
                         return (
-                            <StaggerItem key={city.name} className="w-36 shrink-0 sm:w-29" y={24}>
+                            <StaggerItem key={city.name} className="w-28 shrink-0 sm:w-32 md:w-36" y={24}>
                                 <Link
                                     href={{
                                         pathname: `/city/${slugify(city.name)}`,
@@ -58,7 +58,7 @@ export default function CityExplorer() {
                                             className="rounded-full border-2 border-dotted border-orange-500 object-cover p-1 transition-transform duration-500 group-hover:scale-105"
                                         />
                                     </div>
-                                    <p className="mt-2.5 text-center text-sm font-bold text-slate-900">
+                                    <p className="mt-2.5 truncate text-center text-sm font-bold text-slate-900">
                                         {city.name || "No name"}
                                     </p>
                                     <p className="mt-0.5 text-center text-[13px] font-medium text-slate-500">

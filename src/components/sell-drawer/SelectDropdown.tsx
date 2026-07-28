@@ -58,7 +58,7 @@ export default function SelectDropdown({
 
     return (
         <div ref={rootRef} className="relative flex flex-col gap-1.5">
-            <label className="text-[15px] font-semibold text-black">{label}{required && "*"}</label>
+            <label className="text-sm font-semibold text-black sm:text-[15px]">{label}{required && "*"}</label>
 
             <motion.button
                 type="button"
@@ -69,7 +69,7 @@ export default function SelectDropdown({
                 aria-invalid={!!error}
                 whileTap={disabled ? undefined : { scale: 0.985 }}
                 onClick={() => !disabled && setOpen((v) => !v)}
-                className={`flex py-3 w-full items-center gap-2 rounded-xl text-[15px] font-semibold border bg-slate-100 px-3 text-left outline-none transition-[border-color,box-shadow,background-color] duration-200 cursor-pointer disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60 ${className} ${error
+                className={`flex w-full cursor-pointer items-center gap-2 rounded-xl border bg-slate-100 px-3 py-2.5 text-left text-sm font-semibold outline-none transition-[border-color,box-shadow,background-color] duration-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60 sm:py-3 sm:text-[15px] ${className} ${error
                     ? "border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-400/15"
                     : open
                         ? "border-slate-300"
@@ -97,7 +97,7 @@ export default function SelectDropdown({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.15 }}
-                        className={`min-w-0 flex-1 truncate text-[15px] font-semibold ${selected ? "text-slate-900" : "font-semibold text-slate-400"
+                        className={`min-w-0 flex-1 truncate text-sm font-semibold sm:text-[15px] ${selected ? "text-slate-900" : "font-semibold text-slate-400"
                             }`}
                     >
                         {selected?.label ?? placeholder}
@@ -108,7 +108,7 @@ export default function SelectDropdown({
                     transition={{ type: "spring", stiffness: 400, damping: 22 }}
                     className="flex shrink-0"
                 >
-                    <ChevronDown className="size-5 text-slate-400" strokeWidth={2.25} />
+                    <ChevronDown className="size-4 text-slate-400 sm:size-5" strokeWidth={2.25} />
                 </motion.span>
             </motion.button>
 
@@ -121,10 +121,10 @@ export default function SelectDropdown({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.97 }}
                         transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                        className="absolute inset-x-0 top-[calc(100%+4px)] font-semibold text-[15px] z-30 max-h-52 origin-top overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-200/60"
+                        className="absolute inset-x-0 top-[calc(100%+4px)] z-30 max-h-52 origin-top overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm font-semibold shadow-lg shadow-slate-200/60 sm:text-[15px]"
                     >
                         {options.length === 0 ? (
-                            <li className="px-3 py-2 text-[15px] font-semibold text-slate-400">
+                            <li className="px-3 py-2 text-sm font-semibold text-slate-400 sm:text-[15px]">
                                 No options
                             </li>
                         ) : (
@@ -145,13 +145,13 @@ export default function SelectDropdown({
                                                 onChange(String(option.value));
                                                 setOpen(false);
                                             }}
-                                            className={`flex w-full items-center cursor-pointer gap-2.5 px-3 py-2 text-left transition-colors ${isSelected
+                                            className={`flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left transition-colors ${isSelected
                                                 ? "bg-primary/8 text-primary"
                                                 : "text-slate-700 hover:bg-slate-100"
                                                 }`}
                                         >
                                             {option.icon && (
-                                                <span className={`flex h-5 w-5 shrink-0 items-center justify-center [&_svg]:h-5 [&_svg]:w-5 ${isSelected ? "text-primary" : "text-slate-700"}`}>
+                                                <span className={`flex h-4 w-4 shrink-0 items-center justify-center sm:h-5 sm:w-5 [&_svg]:h-full [&_svg]:w-full ${isSelected ? "text-primary" : "text-slate-700"}`}>
                                                     {option.icon}
                                                 </span>
                                             )}

@@ -900,7 +900,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                                 type="button"
                                                 onClick={() => removePhoto(photo.id)}
                                                 aria-label={`Remove photo ${index + 1}`}
-                                                className="absolute top-1.5 right-1.5 flex size-6 cursor-pointer items-center justify-center rounded-full bg-slate-900/70 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                                className="absolute top-1.5 right-1.5 flex size-7 cursor-pointer items-center justify-center rounded-full bg-slate-900/70 text-white opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                                             >
                                                 <X className="size-3.5" strokeWidth={2.5} />
                                             </button>
@@ -1169,25 +1169,23 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                         transition={{ delay: 0.28, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                         className="shrink-0 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-7"
                     >
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-2">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="flex cursor-pointer items-center gap-2 rounded-full border-2 border-white bg-slate-200 py-2.5 px-6 text-sm font-semibold text-slate-600  transition-all duration-200 hover:border-white hover:text-white"
+                                className="flex cursor-pointer items-center gap-2 rounded-full border-2 border-white bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-slate-300 sm:px-6"
                             >
-                                <span className="hidden max-w-24 truncate font-semibold md:block">
-                                    Cancel
-                                </span>
+                                Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isPosting}
-                                className="flex cursor-pointer items-center gap-2 rounded-full border-2 border-white bg-[#ff5a1f] py-1.5 pr-4 pl-1.5 text-sm font-semibold text-white transition-all duration-200 hover:border-white hover:text-white"
+                                className="flex cursor-pointer items-center gap-2 rounded-full border-2 border-white bg-[#ff5a1f] py-1.5 pr-3 pl-1.5 text-sm font-semibold text-white transition-all duration-200 hover:border-white hover:text-white sm:pr-4"
                             >
                                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#ff5a1f]">
                                     <Send className="h-4 w-4" strokeWidth={3} />
                                 </span>
-                                <span className="hidden max-w-24 truncate font-semibold md:block">
+                                <span className="font-semibold">
                                     {isPosting ? "Posting…" : "Post Now"}
                                 </span>
                             </button>

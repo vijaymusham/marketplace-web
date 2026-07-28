@@ -211,7 +211,7 @@ export default function SubcategoryBrowse({
             />
 
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
-                <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
+                <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
                     <CategorySidebar
                         categoryName={categoryName}
                         categoryId={categoryId}
@@ -247,7 +247,7 @@ export default function SubcategoryBrowse({
                         ) : (
                             <Stagger
                                 key={`${activeSubcategory}-${page}-${JSON.stringify(adsQuery)}`}
-                                className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-8"
+                                className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-7 lg:grid-cols-3 xl:grid-cols-4 lg:gap-x-5 lg:gap-y-8"
                                 stagger={0.07}
                             >
                                 {visible.map((listing) => (
@@ -270,10 +270,10 @@ export default function SubcategoryBrowse({
                                     type="button"
                                     onClick={() => goTo(page - 1)}
                                     disabled={page === 1}
-                                    className="mr-1 flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 disabled:pointer-events-none disabled:opacity-40"
+                                    className="mr-1 flex items-center gap-1 rounded-full px-2.5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 disabled:pointer-events-none disabled:opacity-40 sm:px-3"
                                 >
                                     <ChevronLeft className="h-4 w-4" />
-                                    Previous
+                                    <span className="hidden sm:inline">Previous</span>
                                 </button>
 
                                 {pageNumbers.map((n, i) =>
@@ -306,7 +306,7 @@ export default function SubcategoryBrowse({
                                     disabled={page === totalPages}
                                     className="ml-1 flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 disabled:pointer-events-none disabled:opacity-40"
                                 >
-                                    Next
+                                    <span className="hidden sm:inline">Next</span>
                                     <ChevronRight className="h-4 w-4" />
                                 </button>
                             </nav>

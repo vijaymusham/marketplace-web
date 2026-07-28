@@ -151,6 +151,7 @@ export default function CategorySidebar({
     totalCount: number;
     onFiltersChange?: (filters: CategorySidebarFilterState) => void;
 }) {
+    const [mobileOpen, setMobileOpen] = useState(false);
     const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
     const [selected, setSelected] = useState<Record<string, string[]>>({});
     const [priceRange, setPriceRange] = useState(EMPTY_SIDEBAR_FILTERS.priceRange);
@@ -160,17 +161,26 @@ export default function CategorySidebar({
     const [cityId, setCityId] = useState("");
     const [locality, setLocality] = useState("");
     const [type, setType] = useState("");
-    const [priceOpen, setPriceOpen] = useState(true);
-    const [locationOpen, setLocationOpen] = useState(true);
-    const [typeOpen, setTypeOpen] = useState(true);
-    const [fuelOpen, setFuelOpen] = useState(true);
-    const [yearOpen, setYearOpen] = useState(true);
-    const [kmsOpen, setKmsOpen] = useState(true);
+    const [priceOpen, setPriceOpen] = useState(false);
+    const [locationOpen, setLocationOpen] = useState(false);
+    const [typeOpen, setTypeOpen] = useState(false);
+    const [fuelOpen, setFuelOpen] = useState(false);
+    const [yearOpen, setYearOpen] = useState(false);
+    const [kmsOpen, setKmsOpen] = useState(false);
     const onFiltersChangeRef = useRef(onFiltersChange);
 
     useEffect(() => {
         onFiltersChangeRef.current = onFiltersChange;
     }, [onFiltersChange]);
+
+    useEffect(() => {
+        if (!mobileOpen) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = prev;
+        };
+    }, [mobileOpen]);
 
     const { data: apiCategories } = useQuery({
         queryKey: ["categories"],
@@ -291,7 +301,47 @@ export default function CategorySidebar({
     };
 
     return (
-        <aside className="w-full shrink-0 lg:w-64 xl:w-72">
+        <>
+            <div className="mb-4 flex items-center lg:hidden">
+                <button
+                    type="button"
+                    onClick={() => setMobileOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
+                >
+                    <SlidersHorizontal className="h-4 w-4" strokeWidth={1.85} />
+                    Filters & categories
+                </button>
+            </div>
+
+            {mobileOpen ? (
+                <button
+                    type="button"
+                    aria-label="Close filters"
+                    className="fixed inset-0 z-40 bg-slate-900/45 lg:hidden"
+                    onClick={() => setMobileOpen(false)}
+                />
+            ) : null}
+
+            <aside
+                className={
+                    mobileOpen
+                        ? "fixed inset-y-0 left-0 z-50 flex w-[min(100%,20rem)] flex-col overflow-y-auto overscroll-contain bg-white p-4 shadow-2xl lg:static lg:z-auto lg:flex lg:w-64 lg:p-0 lg:shadow-none xl:w-72"
+                        : "hidden w-full shrink-0 lg:block lg:w-64 xl:w-72"
+                }
+                data-lenis-prevent={mobileOpen || undefined}
+            >
+                {mobileOpen ? (
+                    <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 lg:hidden">
+                        <h2 className="text-base font-extrabold text-slate-900">Filters</h2>
+                        <button
+                            type="button"
+                            onClick={() => setMobileOpen(false)}
+                            className="rounded-full bg-slate-100 px-3.5 py-1.5 text-sm font-semibold text-slate-700"
+                        >
+                            Done
+                        </button>
+                    </div>
+                ) : null}
             <h2 className="text-lg font-bold text-slate-900">Category</h2>
 
             <Link
@@ -360,7 +410,7 @@ export default function CategorySidebar({
                     <FilterAccordion
                         key={`${resolvedSubCategoryId}-${group.key}`}
                         group={group}
-                        open={openFilters[group.key] ?? true}
+                        open={openFilters[group.key] ?? false}
                         selected={selected}
                         onToggle={() => toggleFilter(group.key)}
                         onToggleOption={(queryKey, value) =>
@@ -469,6 +519,7 @@ export default function CategorySidebar({
                 />
             </div>
         </aside>
+        </>
     );
 }
 

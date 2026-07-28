@@ -39,8 +39,10 @@ function useDebounce(value: string, delay: number) {
 
 function SearchSuggestionItem({
     suggestion,
+    compact,
 }: {
     suggestion: ApiSearchSuggestion;
+    compact?: boolean;
 }) {
     return (
         <motion.div variants={itemVariants}>
@@ -49,10 +51,13 @@ function SearchSuggestionItem({
                 onMouseDown={(e) => e.preventDefault()}
                 className="block"
             >
-                <div className="my-2 truncate text-base font-bold text-slate-700 capitalize transition-colors hover:text-primary">
+                <div
+                    className={`my-1.5 truncate font-bold text-slate-700 capitalize transition-colors hover:text-primary sm:my-2 ${compact ? "text-sm" : "text-sm sm:text-base"
+                        }`}
+                >
                     {suggestion.text}
                     {suggestion.category && (
-                        <h4 className="text-xs font-semibold text-slate-400">
+                        <h4 className="text-[11px] font-semibold text-slate-400 sm:text-xs">
                             {" "}
                             in {suggestion.subcategory}
                         </h4>
@@ -64,7 +69,13 @@ function SearchSuggestionItem({
 }
 
 
-function PlaceholderCarousel({ onActivate }: { onActivate: () => void }) {
+function PlaceholderCarousel({
+    onActivate,
+    compact,
+}: {
+    onActivate: () => void;
+    compact?: boolean;
+}) {
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
@@ -84,14 +95,15 @@ function PlaceholderCarousel({ onActivate }: { onActivate: () => void }) {
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
             onClick={onActivate}
-            className="absolute inset-y-0 left-11 right-28 flex cursor-text items-center overflow-hidden text-left"
+            className={`absolute inset-y-0 left-9 flex cursor-text items-center overflow-hidden text-left ${compact ? "right-3 sm:left-10" : "right-12 sm:left-11 sm:right-28"
+                }`}
             tabIndex={-1}
             aria-hidden
         >
-            <span className="shrink-0 text-base font-medium text-slate-400">
-                Search for&nbsp;
+            <span className={`shrink-0 font-medium text-slate-400 ${compact ? "text-xs sm:text-sm" : "hidden text-sm sm:inline sm:text-base"}`}>
+                {compact ? "Search " : "Search for\u00a0"}
             </span>
-            <span className="relative h-6 flex-1 overflow-hidden">
+            <span className={`relative flex-1 overflow-hidden ${compact ? "h-5" : "h-5 sm:h-6"}`}>
                 <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                         key={SUGGESTIONS[index]}
@@ -105,7 +117,8 @@ function PlaceholderCarousel({ onActivate }: { onActivate: () => void }) {
                                 ease: [0.4, 0.0, 0.2, 1],
                             },
                         }}
-                        className="absolute inset-0 truncate text-base font-semibold text-slate-500 capitalize"
+                        className={`absolute inset-0 truncate font-semibold text-slate-500 capitalize ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"
+                            }`}
                     >
                         &quot;{SUGGESTIONS[index]}&quot;
                     </motion.span>
@@ -115,7 +128,7 @@ function PlaceholderCarousel({ onActivate }: { onActivate: () => void }) {
     );
 }
 
-function SearchInput() {
+function SearchInput({ compact = false }: { compact?: boolean }) {
     const inputRef = useRef<HTMLInputElement>(null);
     const blurTimeoutRef = useRef<number | null>(null);
     const [query, setQuery] = useState("");
@@ -171,10 +184,15 @@ function SearchInput() {
     );
 
     return (
-        <div className="group relative z-40 flex flex-1 items-center">
-            <Search className="pointer-events-none absolute left-4 z-10 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-primary" />
+        <div className="group relative z-40 flex min-w-0 flex-1 items-center">
+            <Search
+                className={`pointer-events-none absolute z-10 text-slate-400 transition-colors group-focus-within:text-primary ${compact
+                    ? "left-3 h-4 w-4"
+                    : "left-3 h-4.5 w-4.5 sm:left-4 sm:h-5 sm:w-5"
+                    }`}
+            />
 
-            <div className="relative w-full">
+            <div className="relative min-w-0 w-full">
                 <input
                     ref={inputRef}
                     type="text"
@@ -183,10 +201,18 @@ function SearchInput() {
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     placeholder={
-                        focused ? "Search for products, brands and more..." : ""
+                        focused
+                            ? compact
+                                ? "Find cars, mobiles and more..."
+                                : "Search for products, brands and more..."
+                            : ""
                     }
                     aria-label="Search for products, brands and more"
-                    className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-base font-medium text-slate-700 shadow-inner shadow-slate-100 transition-all duration-300 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/25"
+                    className={
+                        compact
+                            ? "w-full min-w-0 rounded-xl border-2 border-slate-200 bg-white py-2 pr-3 pl-9 text-base font-medium text-slate-700 placeholder:text-sm placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:py-2.5 sm:pl-10 sm:text-sm"
+                            : "w-full min-w-0 rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-sm font-medium text-slate-700 shadow-inner shadow-slate-100 transition-all duration-300 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-base"
+                    }
                 />
 
                 <AnimatePresence mode="sync">
@@ -197,12 +223,14 @@ function SearchInput() {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="absolute z-50 mt-3 w-full origin-top rounded-2xl bg-white p-4 text-left shadow-lg will-change-transform"
+                            className={`absolute z-50 mt-2 w-full origin-top rounded-2xl bg-white text-left shadow-lg will-change-transform sm:mt-3 ${compact ? "p-2.5 sm:p-3" : "p-3 sm:p-4"
+                                }`}
                         >
                             {searchSuggestions.map((suggestion, i) => (
                                 <SearchSuggestionItem
                                     key={`${suggestion.text}-${suggestion.subcategory}-${i}`}
                                     suggestion={suggestion}
+                                    compact={compact}
                                 />
                             ))}
                         </motion.div>
@@ -211,18 +239,24 @@ function SearchInput() {
 
                 <AnimatePresence mode="wait">
                     {showCarousel && (
-                        <PlaceholderCarousel onActivate={focusInput} />
+                        <PlaceholderCarousel
+                            onActivate={focusInput}
+                            compact={compact}
+                        />
                     )}
                 </AnimatePresence>
             </div>
 
-            <button
-                type="button"
-                className="absolute right-1.5 flex items-center gap-1.5 rounded-full bg-linear-to-r from-primary to-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/30 transition-all duration-200 hover:from-primary-hover hover:to-indigo-600 hover:shadow-md active:scale-95"
-            >
-                Search
-                <Search className="h-3.5 w-3.5" />
-            </button>
+            {!compact && (
+                <button
+                    type="button"
+                    aria-label="Search"
+                    className="absolute right-1.5 flex items-center gap-1.5 rounded-full bg-linear-to-r from-primary to-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/30 transition-all duration-200 hover:from-primary-hover hover:to-indigo-600 hover:shadow-md active:scale-95"
+                >
+                    Search
+                    <Search className="h-3.5 w-3.5" />
+                </button>
+            )}
         </div>
     );
 }

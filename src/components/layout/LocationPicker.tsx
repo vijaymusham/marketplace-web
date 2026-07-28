@@ -3,20 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, X, LocateFixed, Search } from "lucide-react";
+import { ChevronDown, X, LocateFixed, Search, MapPin } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { setAddress, setLocation } from "../redux/slices/authSlice";
 import { toast } from "react-hot-toast";
 
-export default function LocationPicker() {
-    const dispatch = useDispatch<AppDispatch>();;
+function shortAddress(address: string | null | undefined) {
+    if (!address) return "Select location";
+    const part = address.split(",")[0]?.trim();
+    return part || address;
+}
+
+export default function LocationPicker({ compact = false }: { compact?: boolean }) {
+    const dispatch = useDispatch<AppDispatch>();
     const address = useSelector((state: RootState) => state.user.address);
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [pos, setPos] = useState({ top: 0, left: 0 });
     const triggerRef = useRef<HTMLButtonElement>(null);
-
 
     const getAddress = async (lat: number, lng: number) => {
         const res = await fetch(
@@ -31,22 +36,21 @@ export default function LocationPicker() {
         try {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
-                    console.log(position);
-
                     dispatch(
                         setLocation({
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude,
                         })
                     );
-                    const address = await getAddress(position.coords.latitude, position.coords.longitude);
-                    dispatch(setAddress(address));
+                    const nextAddress = await getAddress(
+                        position.coords.latitude,
+                        position.coords.longitude,
+                    );
+                    dispatch(setAddress(nextAddress));
                     toast.success("Location detected successfully");
                     setOpen(false);
                 },
                 (error) => {
-                    console.error(error);
-
                     switch (error.code) {
                         case error.PERMISSION_DENIED:
                             toast.error("Please allow location access.");
@@ -62,13 +66,12 @@ export default function LocationPicker() {
                     }
                 },
                 {
-                    enableHighAccuracy: true, // Use GPS when available
+                    enableHighAccuracy: true,
                     timeout: 15000,
-                    maximumAge: 0, // Don't use cached location
+                    maximumAge: 0,
                 }
             );
-        } catch (error) {
-            console.error(error);
+        } catch {
             toast.error("Unable to get location.");
         }
     }, [dispatch]);
@@ -86,7 +89,7 @@ export default function LocationPicker() {
             const el = triggerRef.current;
             if (!el) return;
             const rect = el.getBoundingClientRect();
-            const width = 380;
+            const width = Math.min(380, window.innerWidth - 32);
             const left = Math.min(
                 Math.max(16, rect.left),
                 window.innerWidth - width - 16,
@@ -108,24 +111,47 @@ export default function LocationPicker() {
         };
     }, [open]);
 
+    const label = shortAddress(address);
+
     return (
-        <div className="relative hidden md:block">
+        <div className={`relative ${compact ? "min-w-0 shrink" : "shrink-0"}`}>
             <button
                 ref={triggerRef}
                 type="button"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
-                className="flex shrink-0 flex-col items-start gap-0.5 text-left"
+                aria-label="Change location"
+                className={
+                    compact
+                        ? "flex min-w-0 max-w-full items-center justify-end gap-1 text-left"
+                        : "flex shrink-0 flex-col items-start gap-0.5 text-left"
+                }
             >
-                <span className="font-heading text-xs font-semibold text-slate-500">
-                    Location
-                </span>
-                <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 hover:text-primary">
-                    <span className="max-w-40 truncate font-semibold ">{address ? address : "Select location"}</span>
-                    <ChevronDown
-                        className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                    />
-                </span>
+                {compact ? (
+                    <>
+                        <MapPin className="h-4 w-4 shrink-0 text-slate-800" strokeWidth={2} />
+                        <span className="max-w-[7.5rem] truncate text-sm font-bold text-slate-900 sm:max-w-[9rem]">
+                            {label}
+                        </span>
+                        <ChevronDown
+                            className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <span className="font-heading text-xs font-semibold text-slate-500">
+                            Location
+                        </span>
+                        <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 hover:text-primary">
+                            <span className="max-w-28 truncate font-semibold lg:max-w-40">
+                                {address ? address : "Select location"}
+                            </span>
+                            <ChevronDown
+                                className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                            />
+                        </span>
+                    </>
+                )}
             </button>
 
             {mounted &&
@@ -154,7 +180,7 @@ export default function LocationPicker() {
                                     exit={{ opacity: 0, y: -8, scale: 0.98 }}
                                     transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
                                     style={{ top: pos.top, left: pos.left }}
-                                    className="fixed z-101 w-95 origin-top-left rounded-2xl bg-white p-6 shadow-xl"
+                                    className="fixed z-101 w-[min(100vw-2rem,23.75rem)] origin-top-left rounded-2xl bg-white p-5 shadow-xl sm:p-6"
                                     data-lenis-prevent
                                 >
                                     <span

@@ -39,7 +39,7 @@ export default function FreshRecommendations() {
             </Enter>
 
             <Stagger
-                className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-5!"
+                className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 xl:grid-cols-5"
                 stagger={0.08}
             >
                 {data.map((listing) => (

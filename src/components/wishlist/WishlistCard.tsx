@@ -33,7 +33,7 @@ export default function WishlistCard({
                     type="button"
                     onClick={onRemove}
                     aria-label={`Remove ${listing.title} from wishlist`}
-                    className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm ring-1 ring-slate-200/80 transition-colors hover:text-rose-500"
+                    className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm ring-1 ring-slate-200/80 transition-colors hover:text-rose-500 sm:top-4 sm:right-4 sm:h-9 sm:w-9"
                 >
                     <X className="h-4 w-4" strokeWidth={2.25} />
                 </button>
@@ -54,10 +54,12 @@ export default function WishlistCard({
                     </p>
                 </Link>
 
-                <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-slate-400">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{listing.location}</span>
-                    <span className="text-slate-300">·</span>
+                <p className="mt-3 flex flex-col gap-1 text-xs font-medium text-slate-400 sm:flex-row sm:items-center sm:gap-1.5">
+                    <span className="flex min-w-0 items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{listing.location}</span>
+                    </span>
+                    <span className="hidden text-slate-300 sm:inline">·</span>
                     <span>{listing.favoritedAt}</span>
                 </p>
 

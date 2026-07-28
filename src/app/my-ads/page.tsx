@@ -177,7 +177,7 @@ export default function MyAdsPage() {
 
                     <nav
                         aria-label="Ad status"
-                        className="flex gap-1 overflow-x-auto pb-px sm:justify-end"
+                        className="flex gap-1 overflow-x-auto pb-px scrollbar-hide sm:justify-end"
                     >
                         {TABS.map(({ key, label }) => {
                             const active = filter === key;

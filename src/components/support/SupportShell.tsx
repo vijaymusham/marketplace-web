@@ -94,7 +94,7 @@ export default function SupportShell({
                 {/* Mobile quick links — sticky under navbar */}
                 <nav
                     aria-label="On this page"
-                    className="sticky top-20 z-20 -mx-4 mt-5 bg-slate-50/95 px-4 py-2.5 backdrop-blur-md sm:top-24 sm:-mx-6 sm:px-6 lg:hidden"
+                    className="sticky top-[6.75rem] z-20 -mx-4 mt-5 bg-slate-50/95 px-4 py-2.5 backdrop-blur-md sm:-mx-6 sm:px-6 lg:top-18 lg:hidden"
                 >
                     <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         {links.map(({ id, label }) => {
@@ -119,7 +119,7 @@ export default function SupportShell({
 
                 <div className="mt-5 grid gap-4 sm:mt-6 sm:gap-5 lg:mt-5 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start lg:gap-5 xl:grid-cols-[268px_minmax(0,1fr)]">
                     {/* Desktop quick links — sticky while content scrolls */}
-                    <aside className="hidden self-start lg:sticky lg:top-28 lg:block lg:z-10">
+                    <aside className="hidden self-start lg:sticky lg:top-24 lg:block lg:z-10">
                         <nav
                             aria-label="On this page"
                             className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-[1.5rem] bg-white p-5 xl:p-6"

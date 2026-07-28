@@ -19,8 +19,8 @@ const HorizontalList = ({
     return (
         <section className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 rounded-2xl ${className ?? ""}`}>
             <Reveal>
-                <div className="flex justify-between gap-4">
-                    <div>
+                <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
                         <h2 className="font-heading text-xl font-extrabold text-slate-900 sm:text-2xl">
                             {title}
                         </h2>
@@ -28,19 +28,17 @@ const HorizontalList = ({
                             {description}
                         </p>
                     </div>
-                    <div className="mt-5 flex items-center justify-between gap-4">
-                        <button
-                            type="button"
-                            className="hidden shrink-0 items-center gap-2 rounded-full border border-slate-100 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:border-slate-300 sm:flex"
-                        >
-                            View all
-                            <ArrowRight className="h-4 w-4" />
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        className="mt-1 flex shrink-0 items-center gap-1.5 text-sm font-semibold text-primary sm:mt-0 sm:gap-2 sm:rounded-full sm:border sm:border-slate-100 sm:bg-white sm:px-4 sm:py-2 sm:text-slate-800 sm:transition-colors sm:hover:border-slate-300"
+                    >
+                        View all
+                        <ArrowRight className="h-4 w-4" />
+                    </button>
                 </div>
             </Reveal>
 
-            <Stagger className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-5" stagger={0.08}>
+            <Stagger className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 xl:grid-cols-5" stagger={0.08}>
                 {data?.map((item) => (
                     <StaggerItem key={item.id} y={40}>
                         <ListingCard listing={item} />

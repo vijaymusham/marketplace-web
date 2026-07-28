@@ -96,7 +96,7 @@ const CityDetails = () => {
                 </div>
 
                 <header className="mb-8 md:mb-10">
-                    <div className="relative aspect-21/9 overflow-hidden rounded-[1.75rem] bg-slate-100 sm:aspect-3/1">
+                    <div className="relative aspect-16/10 overflow-hidden rounded-2xl bg-slate-100 sm:aspect-21/9 sm:rounded-[1.75rem] md:aspect-3/1">
                         <Image
                             src={city.imageUrl || '/images/city-placeholder.png'}
                             alt={`${city.name} cityscape`}

@@ -5,9 +5,9 @@ import { Reveal } from "@/components/animations/Motion";
 
 export default function BannerSection() {
     return (
-        <section className="mx-auto max-w-7xl px-4  sm:px-6 pt-5 pb-2">
+        <section className="mx-auto max-w-7xl px-4 pt-5 pb-2 sm:px-6 lg:px-8">
             <Reveal y={20}>
-                <div className="relative isolate flex h-110 flex-col justify-end overflow-hidden rounded-3xl">
+                <div className="relative isolate flex h-56 flex-col justify-end overflow-hidden rounded-2xl sm:h-80 sm:rounded-3xl md:h-110">
                     <Image
                         src="/comingsoon.jpg"
                         alt="Seller packing an order to ship"

@@ -19,6 +19,7 @@ export default function CategoryTabs() {
     const [active, setActive] = useState(0);
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [panel, setPanel] = useState({ left: 0, width: PANEL_NARROW });
+    const [isTouch, setIsTouch] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const expandedScrollRef = useRef<HTMLDivElement>(null);
     const collapsedScrollRef = useRef<HTMLDivElement>(null);
@@ -30,6 +31,18 @@ export default function CategoryTabs() {
     });
 
     const categories = normalizeApiCategories(apiCategories);
+
+    useEffect(() => {
+        const mq = window.matchMedia("(hover: none), (pointer: coarse)");
+        const update = () => setIsTouch(mq.matches || window.innerWidth < 1024);
+        update();
+        mq.addEventListener("change", update);
+        window.addEventListener("resize", update);
+        return () => {
+            mq.removeEventListener("change", update);
+            window.removeEventListener("resize", update);
+        };
+    }, []);
 
     useEffect(() => {
         let raf = 0;
@@ -65,19 +78,23 @@ export default function CategoryTabs() {
         if (!container || !category) return;
 
         const containerRect = container.getBoundingClientRect();
-        const width = Math.min(
-            category.subcategories.length > 6 ? PANEL_WIDE : PANEL_NARROW,
-            containerRect.width - PANEL_MARGIN * 2,
-        );
+        const width = isTouch
+            ? containerRect.width - PANEL_MARGIN * 2
+            : Math.min(
+                category.subcategories.length > 6 ? PANEL_WIDE : PANEL_NARROW,
+                containerRect.width - PANEL_MARGIN * 2,
+            );
         const tabRect = target.getBoundingClientRect();
         const tabCenter = tabRect.left - containerRect.left + tabRect.width / 2;
-        const left = Math.min(
-            Math.max(tabCenter - width / 2, PANEL_MARGIN),
-            Math.max(containerRect.width - width - PANEL_MARGIN, PANEL_MARGIN),
-        );
+        const left = isTouch
+            ? PANEL_MARGIN
+            : Math.min(
+                Math.max(tabCenter - width / 2, PANEL_MARGIN),
+                Math.max(containerRect.width - width - PANEL_MARGIN, PANEL_MARGIN),
+            );
 
         setPanel({ left, width });
-        setOpenIndex(index);
+        setOpenIndex((prev) => (isTouch && prev === index ? null : index));
     };
 
     const scrollNext = () => {
@@ -88,18 +105,20 @@ export default function CategoryTabs() {
     return (
         <>
             <nav
-                onMouseLeave={() => setOpenIndex(null)}
-                className={`fixed inset-x-0 top-18 z-20 border-b transition-[background-color,box-shadow,border-color] duration-300 ${collapsed
+                onMouseLeave={() => {
+                    if (!isTouch) setOpenIndex(null);
+                }}
+                className={`fixed inset-x-0 top-[6.75rem] z-20 border-b transition-[background-color,box-shadow,border-color] duration-300 lg:top-18 ${collapsed
                     ? "border-slate-200/70 bg-white/85 backdrop-blur-2xl"
                     : "border-slate-200 bg-white/85 backdrop-blur-2xl"
                     }`}
             >
                 <div
                     ref={containerRef}
-                    className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+                    className="relative mx-auto max-w-7xl px-3 sm:px-6 lg:px-8"
                 >
                     <div
-                        className={`relative transition-[height] duration-300 ${EASE} ${collapsed ? "h-12" : "h-28"
+                        className={`relative transition-[height] duration-300 ${EASE} ${collapsed ? "h-12" : "h-24 sm:h-28"
                             }`}
                     >
                         <div
@@ -120,17 +139,27 @@ export default function CategoryTabs() {
                                             <li key={name} className="flex shrink-0">
                                                 <Link
                                                     href={`/category/${slugify(name)}?categoryId=${id}`}
-                                                    onMouseEnter={(e) => openTab(index, e.currentTarget)}
-                                                    onFocus={(e) => openTab(index, e.currentTarget)}
-                                                    onClick={() => setActive(index)}
+                                                    onMouseEnter={(e) => {
+                                                        if (!isTouch) openTab(index, e.currentTarget);
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        if (!isTouch) openTab(index, e.currentTarget);
+                                                    }}
+                                                    onClick={(e) => {
+                                                        if (isTouch && categories[index]?.subcategories.length) {
+                                                            e.preventDefault();
+                                                            openTab(index, e.currentTarget);
+                                                        }
+                                                        setActive(index);
+                                                    }}
                                                     tabIndex={collapsed ? -1 : 0}
-                                                    className={`group relative flex w-24 flex-col items-center justify-center gap-1.5 transition-colors sm:w-28 ${highlighted
+                                                    className={`group relative flex w-20 flex-col items-center justify-center gap-1 transition-colors sm:w-24 md:w-28 sm:gap-1.5 ${highlighted
                                                         ? "text-primary"
                                                         : "text-slate-800 hover:text-primary"
                                                         }`}
                                                 >
-                                                    <Icon className="h-11 w-11 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 sm:h-13 sm:w-13" />
-                                                    <span className="text-center text-xs leading-tight font-semibold whitespace-normal sm:text-[13px]">
+                                                    <Icon className="h-9 w-9 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 sm:h-11 sm:w-11 md:h-13 md:w-13" />
+                                                    <span className="line-clamp-2 text-center text-[11px] leading-tight font-semibold sm:text-xs md:text-[13px]">
                                                         {name}
                                                     </span>
                                                     <span
@@ -156,23 +185,33 @@ export default function CategoryTabs() {
                                 ref={collapsedScrollRef}
                                 className="h-full overflow-x-auto scroll-smooth scrollbar-hide"
                             >
-                                <ul className="mx-auto flex h-full w-max items-stretch gap-5">
+                                <ul className="mx-auto flex h-full w-max items-stretch gap-4 px-1 sm:gap-5">
                                     {categories.map(({ name, icon: Icon }, index) => {
                                         const highlighted = openIndex === index || active === index;
                                         return (
                                             <li key={name} className="flex shrink-0">
                                                 <Link
                                                     href={`/category/${slugify(name)}`}
-                                                    onMouseEnter={(e) => openTab(index, e.currentTarget)}
-                                                    onFocus={(e) => openTab(index, e.currentTarget)}
-                                                    onClick={() => setActive(index)}
+                                                    onMouseEnter={(e) => {
+                                                        if (!isTouch) openTab(index, e.currentTarget);
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        if (!isTouch) openTab(index, e.currentTarget);
+                                                    }}
+                                                    onClick={(e) => {
+                                                        if (isTouch && categories[index]?.subcategories.length) {
+                                                            e.preventDefault();
+                                                            openTab(index, e.currentTarget);
+                                                        }
+                                                        setActive(index);
+                                                    }}
                                                     tabIndex={collapsed ? 0 : -1}
                                                     className={`relative flex items-center gap-2 text-sm font-semibold whitespace-nowrap transition-colors ${highlighted
                                                         ? "text-primary"
                                                         : "text-slate-600 hover:text-primary"
                                                         }`}
                                                 >
-                                                    <Icon className="h-7 w-7 shrink-0" />
+                                                    <Icon className="h-6 w-6 shrink-0 sm:h-7 sm:w-7" />
                                                     {name}
                                                     <ChevronDown
                                                         className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${openIndex === index ? "rotate-180" : ""
@@ -194,7 +233,7 @@ export default function CategoryTabs() {
                     <button
                         onClick={scrollNext}
                         aria-label="Show more categories"
-                        className={`absolute top-1/2 right-1 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-all duration-300 ${EASE} hover:text-primary md:flex ${collapsed ? "h-7 w-7" : "h-9 w-9"
+                        className={`absolute top-1/2 right-1 flex -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-all duration-300 ${EASE} hover:text-primary ${collapsed ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
                             }`}
                     >
                         <ChevronRight className={collapsed ? "h-4 w-4" : "h-5 w-5"} />
@@ -203,15 +242,16 @@ export default function CategoryTabs() {
                     {openCategory && (
                         <div
                             style={{ left: panel.left, width: panel.width }}
-                            className="absolute top-full rounded-b-2xl border border-t-0 border-slate-200/70 bg-white/95 p-6 shadow-xl backdrop-blur-2xl"
+                            className="absolute top-full max-h-[min(70vh,28rem)] overflow-y-auto rounded-b-2xl border border-t-0 border-slate-200/70 bg-white/95 p-4 shadow-xl backdrop-blur-2xl sm:p-6"
                         >
                             <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
                                 <Link
                                     href={`/category/${slugify(openCategory.name)}`}
-                                    className="flex items-center gap-2.5 transition-colors hover:text-primary"
+                                    className="flex min-w-0 items-center gap-2.5 transition-colors hover:text-primary"
+                                    onClick={() => setOpenIndex(null)}
                                 >
-                                    {OpenIcon && <OpenIcon className="h-9 w-9 text-slate-800" />}
-                                    <h3 className="font-heading text-sm font-extrabold text-slate-900">
+                                    {OpenIcon && <OpenIcon className="h-8 w-8 shrink-0 text-slate-800 sm:h-9 sm:w-9" />}
+                                    <h3 className="truncate font-heading text-sm font-extrabold text-slate-900">
                                         {openCategory.name}
                                     </h3>
                                 </Link>
@@ -227,7 +267,8 @@ export default function CategoryTabs() {
                                     <li key={sub}>
                                         <Link
                                             href={`/category/${slugify(sub)}`}
-                                            className="block py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-primary"
+                                            onClick={() => setOpenIndex(null)}
+                                            className="block py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:text-primary sm:py-2"
                                         >
                                             {sub}
                                         </Link>
@@ -238,7 +279,19 @@ export default function CategoryTabs() {
                     )}
                 </div>
             </nav>
-            <div className="h-28" aria-hidden="true" />
+            {/* Backdrop for touch submenu */}
+            {openCategory && isTouch && (
+                <button
+                    type="button"
+                    aria-label="Close categories"
+                    className="fixed inset-0 z-10 bg-transparent"
+                    onClick={() => setOpenIndex(null)}
+                />
+            )}
+            <div
+                className={collapsed ? "h-12" : "h-24 sm:h-28"}
+                aria-hidden="true"
+            />
         </>
     );
 }
