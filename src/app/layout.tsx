@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
 import SmoothScroll from "@/components/layout/SmoothScroll";
@@ -11,6 +11,9 @@ import TanstackProvider from "@/components/providers/TanstackProvider";
 import FcmProvider from "@/components/providers/FcmProvider";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { SocketProvider } from "@/components/socket/SocketProvider";
+
+/** Matches navbar top tint: primary (#2f3adf) at 15% over white */
+const THEME_COLOR = "#e0e1fa";
 
 export const display = localFont({
     src: [
@@ -27,6 +30,14 @@ export const display = localFont({
 export const metadata: Metadata = {
     title: "Deal Market",
     description: "Buy and sell used products near you",
+    appleWebApp: {
+        statusBarStyle: "default",
+    },
+};
+
+export const viewport: Viewport = {
+    themeColor: THEME_COLOR,
+    colorScheme: "light",
 };
 
 export default function RootLayout({
