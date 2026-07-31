@@ -206,7 +206,7 @@ export default function CategoryTabs() {
                                                         setActive(index);
                                                     }}
                                                     tabIndex={collapsed ? 0 : -1}
-                                                    className={`relative flex items-center gap-2 text-sm font-semibold whitespace-nowrap transition-colors ${highlighted
+                                                    className={`relative flex items-center gap-2 text-sm font-semibold whitespace-nowr ap transition-colors ${highlighted
                                                         ? "text-primary"
                                                         : "text-slate-600 hover:text-primary"
                                                         }`}

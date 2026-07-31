@@ -3,6 +3,10 @@
 import { ArrowRight } from "lucide-react";
 import ListingCard from "../sections/ListingCard";
 import { Reveal, Stagger, StaggerItem } from "@/components/animations/Motion";
+import {
+    HOME_LISTINGS_GRID,
+    WithSkeleton,
+} from "@/components/ui/Skeleton";
 import type { ApiAd } from "../types/AllTypes";
 
 const HorizontalList = ({
@@ -10,11 +14,13 @@ const HorizontalList = ({
     title,
     description,
     data,
+    loading = false,
 }: {
     className?: string;
     title: string;
     description?: string;
     data: ApiAd[];
+    loading?: boolean;
 }) => {
     return (
         <section className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 rounded-2xl ${className ?? ""}`}>
@@ -38,13 +44,22 @@ const HorizontalList = ({
                 </div>
             </Reveal>
 
-            <Stagger className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 xl:grid-cols-5" stagger={0.08}>
-                {data?.map((item) => (
-                    <StaggerItem key={item.id} y={40}>
-                        <ListingCard listing={item} />
-                    </StaggerItem>
-                ))}
-            </Stagger>
+            <div className="mt-6">
+                <WithSkeleton
+                    loading={loading}
+                    count={5}
+                    variant="listing"
+                    gridClassName={HOME_LISTINGS_GRID}
+                >
+                    <Stagger className={HOME_LISTINGS_GRID} stagger={0.08}>
+                        {data?.map((item) => (
+                            <StaggerItem key={item.id} y={40}>
+                                <ListingCard listing={item} />
+                            </StaggerItem>
+                        ))}
+                    </Stagger>
+                </WithSkeleton>
+            </div>
         </section>
     );
 };

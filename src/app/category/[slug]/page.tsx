@@ -136,7 +136,13 @@ export default function CategoryPage() {
                             </div>
                         </header>
 
-                        <PaginatedListings key={sort} listings={ads} />
+                        <PaginatedListings
+                            key={sort}
+                            listings={ads}
+                            loading={isLoading}
+                            emptyTitle={`Oops! No ${category.name.toLowerCase()} deals`}
+                            emptyDescription={`Nothing in ${category.name.toLowerCase()} right now. Try another sort, browse a subcategory, or check back soon — fresh ads go live every day.`}
+                        />
                     </div>
                 </main>
             </>

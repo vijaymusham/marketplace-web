@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useIsLoggedIn, useWishlistQuery } from "@/hooks/useWishlistQuery";
 import { requestSignIn } from "@/lib/auth-events";
+import { ListingDetailSkeleton } from "@/components/ui/Skeleton";
 
 function formatPrice(price: number) {
     return `₹${Number.isFinite(price) ? price.toLocaleString("en-IN") : "0"}`;
@@ -202,13 +203,7 @@ export default function ListingDetail({ id }: { id: string }) {
     });
 
     if (isLoading) {
-        return (
-            <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-                <div className="h-80 animate-pulse rounded-[1.75rem] bg-slate-100" />
-                <div className="mt-6 h-8 w-1/3 animate-pulse rounded bg-slate-100" />
-                <div className="mt-3 h-6 w-2/3 animate-pulse rounded bg-slate-100" />
-            </div>
-        );
+        return <ListingDetailSkeleton />;
     }
 
     if (isError || !ad) {

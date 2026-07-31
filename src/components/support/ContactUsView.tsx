@@ -165,7 +165,7 @@ export default function ContactUsView() {
 
             <SupportSection id="office" number={4} title="Office">
                 <div className="rounded-[1.25rem] bg-[#f3f4f8] px-4 py-4 sm:px-5 sm:py-5">
-                    <p className="text-sm font-extrabold text-slate-900">Deal Market Limited</p>
+                    <p className="text-sm font-extrabold text-slate-900">Deal Pokket Limited</p>
                     <p className="mt-2 text-sm leading-relaxed font-medium text-slate-500">
                         Andheri East, Mumbai
                         <br />

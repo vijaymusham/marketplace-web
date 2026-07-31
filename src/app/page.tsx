@@ -35,8 +35,13 @@ const SECTION_BG: Record<string, string> = {
     "bg-slate-50": "bg-slate-50",
 };
 
+const SECTION_PLACEHOLDERS = [
+    { title: "Popular near you", subtitle: "Loading deals…", bgClass: "bg-sky-50" },
+    { title: "Trending now", subtitle: "Loading deals…", bgClass: "bg-violet-50" },
+];
+
 export default function Home() {
-    const { data } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["adsBySection"],
         queryFn: () => getAdsBySection({ latitude: 19.2183, longitude: 72.9781 }),
     });
@@ -47,20 +52,31 @@ export default function Home() {
             <main className="flex-1 bg-white relative">
                 <CityExplorer />
                 <FreshRecommendations />
-                {data &&
-                    Object.values(data).map((item: ApiAdsSection) => {
-                        if (!item.ads?.length) return null;
-                        const bg = SECTION_BG[item.bgClass] ?? "bg-slate-50";
-                        return (
-                            <HorizontalList
-                                key={item.title}
-                                className={`${bg} my-8`}
-                                title={item.title}
-                                description={item.subtitle}
-                                data={item.ads.map(toListing)}
-                            />
-                        );
-                    })}
+                {isLoading
+                    ? SECTION_PLACEHOLDERS.map((item) => (
+                          <HorizontalList
+                              key={item.title}
+                              className={`${SECTION_BG[item.bgClass] ?? "bg-slate-50"} my-8`}
+                              title={item.title}
+                              description={item.subtitle}
+                              data={[]}
+                              loading
+                          />
+                      ))
+                    : data &&
+                      Object.values(data).map((item: ApiAdsSection) => {
+                          if (!item.ads?.length) return null;
+                          const bg = SECTION_BG[item.bgClass] ?? "bg-slate-50";
+                          return (
+                              <HorizontalList
+                                  key={item.title}
+                                  className={`${bg} my-8`}
+                                  title={item.title}
+                                  description={item.subtitle}
+                                  data={item.ads.map(toListing)}
+                              />
+                          );
+                      })}
                 <BannerSection />
             </main>
         </>

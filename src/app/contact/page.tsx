@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ContactUsView from "@/components/support/ContactUsView";
 
 export const metadata: Metadata = {
-    title: "Contact Us | Deal Market",
+    title: "Contact Us | Deal Pokket",
     description: "Contact DealMarket support by email, phone, or message form.",
 };
 

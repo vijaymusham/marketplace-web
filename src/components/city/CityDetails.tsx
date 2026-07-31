@@ -41,7 +41,7 @@ const CityDetails = () => {
     const city = cityFromSearchParams(searchParams)
     const slug = String(params.slug ?? '')
 
-    const { data: categoryAds } = useQuery({
+    const { data: categoryAds, isLoading } = useQuery({
         queryKey: ['cityAds', city?.id],
         queryFn: () => getCategoriesAds({
             cityId: city!.id,
@@ -120,7 +120,13 @@ const CityDetails = () => {
                     </div>
                 </header>
 
-                <PaginatedListings listings={listings} />
+
+                <PaginatedListings
+                    listings={listings}
+                    loading={isLoading}
+                    emptyTitle={`Oops! No deals in ${city.name}`}
+                    emptyDescription={`We couldn’t find listings for ${city.name} yet. Try a nearby city or browse all deals — new ads land every day.`}
+                />
             </div>
         </main>
     )

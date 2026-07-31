@@ -56,7 +56,7 @@ export default function Navbar() {
                                 className="shrink-0"
                             >
                                 <span className="font-heading text-[1.35rem] leading-none font-extrabold tracking-tight text-slate-900">
-                                    Deal<span className="text-primary">Market</span>
+                                    Deal<span className="text-primary">Pokket</span>
                                 </span>
                             </Link>
 

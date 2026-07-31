@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import WishlistCard from "@/components/wishlist/WishlistCard";
 import WishlistEmpty from "@/components/wishlist/WishlistEmpty";
 import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
+import { WithSkeleton } from "@/components/ui/Skeleton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { removeFromWishlist } from "../api/apis";
 import type { ApiWishlist } from "../types/AllTypes";
@@ -41,15 +42,7 @@ export default function WishlistView() {
         return <WishlistEmpty />;
     }
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            </div>
-        );
-    }
-
-    if (wishlist.length === 0) {
+    if (!isLoading && wishlist.length === 0) {
         return <WishlistEmpty />;
     }
 
@@ -59,7 +52,9 @@ export default function WishlistView() {
                 <header className="mb-8 flex flex-col gap-5 border-b border-slate-100 pb-8 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold text-primary">
-                            {wishlist.length} saved {wishlist.length === 1 ? "deal" : "deals"}
+                            {isLoading
+                                ? "Loading…"
+                                : `${wishlist.length} saved ${wishlist.length === 1 ? "deal" : "deals"}`}
                         </p>
                         <h1 className="mt-1.5 flex items-center gap-2 font-heading text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
                             <Heart className="h-7 w-7 fill-red-500 text-red-500 md:h-8 md:w-8" /> Wishlist
@@ -70,35 +65,39 @@ export default function WishlistView() {
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5">
-                        <Link
-                            href="/"
-                            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
-                        >
-                            Keep browsing
-                        </Link>
-                        <button
-                            type="button"
-                            onClick={() => clearMutation.mutate()}
-                            disabled={clearMutation.isPending}
-                            className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
-                        >
-                            Clear all
-                        </button>
-                    </div>
+                    {!isLoading && (
+                        <div className="flex flex-wrap items-center gap-2.5">
+                            <Link
+                                href="/"
+                                className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+                            >
+                                Keep browsing
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={() => clearMutation.mutate()}
+                                disabled={clearMutation.isPending}
+                                className="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+                            >
+                                Clear all
+                            </button>
+                        </div>
+                    )}
                 </header>
             </Enter>
 
-            <Stagger className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2" stagger={0.09}>
-                {wishlist.map((listing: ApiWishlist) => (
-                    <StaggerItem key={listing.id} y={32}>
-                        <WishlistCard
-                            listing={listing}
-                            onRemove={() => removeMutation.mutate(listing.id)}
-                        />
-                    </StaggerItem>
-                ))}
-            </Stagger>
+            <WithSkeleton loading={isLoading} count={4} variant="wishlist">
+                <Stagger className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2" stagger={0.09}>
+                    {wishlist.map((listing: ApiWishlist) => (
+                        <StaggerItem key={listing.id} y={32}>
+                            <WishlistCard
+                                listing={listing}
+                                onRemove={() => removeMutation.mutate(listing.id)}
+                            />
+                        </StaggerItem>
+                    ))}
+                </Stagger>
+            </WithSkeleton>
         </div>
     );
 }

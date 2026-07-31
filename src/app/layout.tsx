@@ -28,7 +28,7 @@ export const display = localFont({
 });
 
 export const metadata: Metadata = {
-    title: "Deal Market",
+    title: "Deal Pokket",
     description: "Buy and sell used products near you",
     appleWebApp: {
         statusBarStyle: "default",

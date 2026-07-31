@@ -4,6 +4,10 @@ import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
 import { useQuery } from "@tanstack/react-query";
 import { getFreshAds } from "../api/apis";
 import ListingCard from "../sections/ListingCard";
+import {
+    HOME_LISTINGS_GRID,
+    WithSkeleton,
+} from "@/components/ui/Skeleton";
 import type { ApiAd, ApiFreshRecommendation } from "../types/AllTypes";
 
 function toListingCard(listing: ApiFreshRecommendation): ApiAd {
@@ -22,7 +26,7 @@ function toListingCard(listing: ApiFreshRecommendation): ApiAd {
 }
 
 export default function FreshRecommendations() {
-    const { data = [] } = useQuery({
+    const { data = [], isLoading } = useQuery({
         queryKey: ["freshRecommendations"],
         queryFn: () => getFreshAds({ latitude: 19.2183, longitude: 72.9781 }),
     });
@@ -38,16 +42,22 @@ export default function FreshRecommendations() {
                 </p>
             </Enter>
 
-            <Stagger
-                className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 xl:grid-cols-5"
-                stagger={0.08}
-            >
-                {data.map((listing) => (
-                    <StaggerItem key={listing.id} y={40}>
-                        <ListingCard listing={toListingCard(listing)} />
-                    </StaggerItem>
-                ))}
-            </Stagger>
+            <div className="mt-6">
+                <WithSkeleton
+                    loading={isLoading}
+                    count={10}
+                    variant="listing"
+                    gridClassName={HOME_LISTINGS_GRID}
+                >
+                    <Stagger className={HOME_LISTINGS_GRID} stagger={0.08}>
+                        {data.map((listing) => (
+                            <StaggerItem key={listing.id} y={40}>
+                                <ListingCard listing={toListingCard(listing)} />
+                            </StaggerItem>
+                        ))}
+                    </Stagger>
+                </WithSkeleton>
+            </div>
         </section>
     );
 }

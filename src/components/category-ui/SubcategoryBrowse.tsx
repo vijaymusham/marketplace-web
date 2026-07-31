@@ -12,10 +12,16 @@ import CategorySidebar, {
     YEAR_MIN,
     type CategorySidebarFilterState,
 } from "@/components/category-ui/CategorySidebar";
-import ListCard from "@/components/category-ui/ListCard";
 import SubcategoryTabs from "@/components/category-ui/SubcategoryTabs";
 import type { Listing } from "@/lib/listings";
 import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
+import {
+    LISTINGS_GRID,
+    Skeleton,
+    WithSkeleton,
+} from "@/components/ui/Skeleton";
+import ListingCard from "@/components/sections/ListingCard";
+import ListingsEmpty from "@/components/category-ui/ListingsEmpty";
 import { getCategoriesAds, getCities } from "../api/apis";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiAd, ApiCategoryAds } from "../types/AllTypes";
@@ -23,12 +29,6 @@ import { scrollToTop } from "@/lib/lenis";
 
 const PAGE_SIZE = 20;
 const DEFAULT_COORDS = { latitude: 19.076, longitude: 72.8777 };
-
-function formatPrice(price: number, currency?: string) {
-    const amount = Number.isFinite(price) ? price.toLocaleString("en-IN") : "0";
-    if (!currency || currency === "INR" || currency === "₹") return `₹${amount}`;
-    return `${currency} ${amount}`;
-}
 
 function adsFromResponse(
     payload: ApiCategoryAds | { items?: ApiAd[] } | null | undefined,
@@ -59,16 +59,19 @@ function paginationFromResponse(
     return { total, totalPages };
 }
 
-function apiAdToListing(ad: ApiAd): Listing {
+function listingToApiAd(listing: Listing): ApiAd {
+    const priceNum = Number(String(listing.price).replace(/[^\d.]/g, ""));
     return {
-        id: ad.id,
-        title: ad.title,
-        price: formatPrice(ad.price, ad.currency),
-        meta: ad.metadata,
-        location: ad.location,
-        date: ad.postedAtLabel,
-        image: ad.imageUrl,
-        isFavorite: ad.isFavorite,
+        id: String(listing.id),
+        title: listing.title,
+        imageUrl: listing.image,
+        isFavorite: Boolean(listing.isFavorite),
+        price: Number.isFinite(priceNum) ? priceNum : 0,
+        currency: "INR",
+        location: listing.location,
+        metadata: listing.meta ?? "",
+        postedAt: listing.date,
+        postedAtLabel: listing.date,
     };
 }
 
@@ -170,20 +173,21 @@ export default function SubcategoryBrowse({
         enabled: Boolean(categoryId && subCategoryId),
     });
 
-    const apiListings = useMemo(
-        () => adsFromResponse(ads).map(apiAdToListing),
-        [ads],
-    );
+    const usingApi = Boolean(categoryId && subCategoryId);
+    const apiListings = useMemo(() => adsFromResponse(ads), [ads]);
     const { total, totalPages: apiTotalPages } = paginationFromResponse(ads);
 
-    const usingApi = Boolean(categoryId && subCategoryId);
-    const visible = usingApi
+    const visible: ApiAd[] = usingApi
         ? apiListings
-        : listings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+        : listings
+              .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+              .map(listingToApiAd);
     const totalCount = usingApi ? total : listings.length;
     const totalPages = usingApi
         ? apiTotalPages
         : Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
+
+    const showSkeleton = isLoadingAds && usingApi && visible.length === 0;
 
     const goTo = (next: number) => {
         const clamped = Math.min(Math.max(next, 1), totalPages);
@@ -228,40 +232,43 @@ export default function SubcategoryBrowse({
                                 <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
                                     {activeSubcategory}
                                 </h1>
-                                <p className="mt-1.5 text-sm font-medium text-slate-500">
-                                    {isLoadingAds && usingApi
-                                        ? "Loading products…"
-                                        : `${totalCount} products in ${categoryName}`}
-                                </p>
+                                {showSkeleton ? (
+                                    <Skeleton className="mt-2 h-4 w-40 rounded" />
+                                ) : (
+                                    <p className="mt-1.5 text-sm font-medium text-slate-500">
+                                        {`${totalCount} products in ${categoryName}`}
+                                    </p>
+                                )}
                             </header>
                         </Enter>
 
-                        {isLoadingAds && usingApi && visible.length === 0 ? (
-                            <p className="py-16 text-center text-sm text-slate-400">
-                                Loading listings…
-                            </p>
-                        ) : visible.length === 0 ? (
-                            <p className="py-16 text-center text-sm text-slate-400">
-                                No products match the selected filters.
-                            </p>
-                        ) : (
-                            <Stagger
-                                key={`${activeSubcategory}-${page}-${JSON.stringify(adsQuery)}`}
-                                className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-7 lg:grid-cols-3 xl:grid-cols-4 lg:gap-x-5 lg:gap-y-8"
-                                stagger={0.07}
-                            >
-                                {visible.map((listing) => (
-                                    <StaggerItem key={listing.id} y={38}>
-                                        <ListCard
-                                            listing={listing}
-                                            badge={activeSubcategory.split(" ")[0]}
-                                        />
-                                    </StaggerItem>
-                                ))}
-                            </Stagger>
-                        )}
+                        <WithSkeleton
+                            loading={showSkeleton}
+                            count={8}
+                            variant="listing"
+                            gridClassName={LISTINGS_GRID}
+                        >
+                            {visible.length === 0 ? (
+                                <ListingsEmpty
+                                    title={`Oops! No ${activeSubcategory.toLowerCase()} deals`}
+                                    description={`No listings match your filters in ${activeSubcategory}. Clear filters or try a different subcategory — fresh deals go live every day.`}
+                                />
+                            ) : (
+                                <Stagger
+                                    key={`${activeSubcategory}-${page}-${JSON.stringify(adsQuery)}`}
+                                    className={LISTINGS_GRID}
+                                    stagger={0.07}
+                                >
+                                    {visible.map((listing) => (
+                                        <StaggerItem key={listing.id} y={38}>
+                                            <ListingCard listing={listing} />
+                                        </StaggerItem>
+                                    ))}
+                                </Stagger>
+                            )}
+                        </WithSkeleton>
 
-                        {totalPages > 1 && (
+                        {totalPages > 1 && !showSkeleton && (
                             <nav
                                 aria-label="Pagination"
                                 className="mt-10 flex flex-wrap items-center justify-center gap-1 sm:gap-2"

@@ -84,9 +84,23 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             return;
         }
 
+        const isNgrok = /ngrok(-free)?\.(dev|app|io)$/i.test(
+            (() => {
+                try {
+                    return new URL(url).hostname;
+                } catch {
+                    return "";
+                }
+            })(),
+        );
+
         const socketInstance = io(url, {
             transports: ["websocket", "polling"],
             auth: { token },
+            // Browsers ignore extraHeaders for WS; helps Node and polling where allowed.
+            ...(isNgrok
+                ? { extraHeaders: { "ngrok-skip-browser-warning": "1" } }
+                : {}),
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,

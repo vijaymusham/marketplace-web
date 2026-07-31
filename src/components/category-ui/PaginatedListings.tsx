@@ -1,14 +1,30 @@
-"use client";;
+"use client";
+
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ListingCard from "@/components/sections/ListingCard";
+import ListingsEmpty from "@/components/category-ui/ListingsEmpty";
 import { Stagger, StaggerItem } from "@/components/animations/Motion";
+import {
+    PAGINATED_LISTINGS_GRID,
+    WithSkeleton,
+} from "@/components/ui/Skeleton";
 import { ApiAd } from "../types/AllTypes";
 import { scrollToTop } from "@/lib/lenis";
 
 const PAGE_SIZE = 20;
 
-export default function PaginatedListings({ listings = [] }: { listings: ApiAd[] }) {
+export default function PaginatedListings({
+    listings = [],
+    loading = false,
+    emptyTitle = "Oops! No deals found",
+    emptyDescription = "We couldn’t find any deals in this category yet. Try another filter or check back soon — fresh listings go live every day.",
+}: {
+    listings: ApiAd[];
+    loading?: boolean;
+    emptyTitle?: string;
+    emptyDescription?: string;
+}) {
     const [page, setPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
 
@@ -23,19 +39,33 @@ export default function PaginatedListings({ listings = [] }: { listings: ApiAd[]
 
     return (
         <div>
-            <Stagger
-                key={page}
-                className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-7 lg:grid-cols-3 xl:grid-cols-4 lg:gap-x-6"
-                stagger={0.07}
+            <WithSkeleton
+                loading={loading}
+                count={8}
+                variant="listing"
+                gridClassName={PAGINATED_LISTINGS_GRID}
             >
-                {visible.map((listing) => (
-                    <StaggerItem key={listing.id} y={38}>
-                        <ListingCard listing={listing} />
-                    </StaggerItem>
-                ))}
-            </Stagger>
+                {visible.length === 0 ? (
+                    <ListingsEmpty
+                        title={emptyTitle}
+                        description={emptyDescription}
+                    />
+                ) : (
+                    <Stagger
+                        key={page}
+                        className={PAGINATED_LISTINGS_GRID}
+                        stagger={0.07}
+                    >
+                        {visible.map((listing) => (
+                            <StaggerItem key={listing.id} y={38}>
+                                <ListingCard listing={listing} />
+                            </StaggerItem>
+                        ))}
+                    </Stagger>
+                )}
+            </WithSkeleton>
 
-            {totalPages > 1 && (
+            {totalPages > 1 && !loading && (
                 <nav
                     aria-label="Pagination"
                     className="mt-10 flex flex-wrap items-center justify-center gap-1 sm:gap-2 cursor-pointer"

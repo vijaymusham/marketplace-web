@@ -152,7 +152,7 @@ export default function Footer() {
                                 <ShoppingBag className="h-4.5 w-4.5" strokeWidth={2} />
                             </span>
                             <span className="font-heading text-lg font-extrabold tracking-tight text-white">
-                                Deal<span className="text-indigo-400">Market</span>
+                                Deal<span className="text-indigo-400">Pokket</span>
                                 <sup className="ml-0.5 text-[10px]">®</sup>
                             </span>
                         </Link>
@@ -173,7 +173,7 @@ export default function Footer() {
                         </button>
 
                         <p className="mt-8 text-xs text-slate-500">
-                            © 2026 Deal Market Limited
+                            © 2026 Deal Pokket Limited
                         </p> */}
                     </div>
 
@@ -224,13 +224,13 @@ export default function Footer() {
                 {/* app download bar */}
 
                 <p className="mt-14 mb-5 text-center text-sm text-slate-500">
-                    © {new Date().getFullYear()} Deal Market Limited  |  All rights reserved.
+                    © {new Date().getFullYear()} Deal Pokket Limited  |  All rights reserved.
                 </p>
                 <div className="flex flex-col items-center justify-center gap-5 border-t border-white/10 py-8 sm:flex-row sm:gap-8">
                     <p className="px-2 text-center text-sm font-semibold text-white sm:text-base">
-                        For better experience, download the Deal Market app now
+                        For better experience, download the Deal Pokket app now
                     </p>
-                    <div className="flex w-full md:flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
+                    <div className="flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center md:flex-row">
                         <StoreBadge
                             logo={<AppleLogo />}
                             topLine="Download on"
@@ -251,7 +251,7 @@ export default function Footer() {
                     aria-hidden
                     className="font-black text-[14.5vw] sm:text-[13vw] md:text-[14.5vw] leading-[0.9] text-center tracking-tight whitespace-nowrap bg-linear-to-b from-slate-400/50 from-[0%] via-slate-500/22 via-[60%] to-transparent to-[100%] bg-clip-text text-transparent"
                 >
-                    Deal Market
+                    Deal Pokket
                 </p>
             </div>
         </footer>

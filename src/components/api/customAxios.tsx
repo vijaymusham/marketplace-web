@@ -27,10 +27,31 @@ const PUBLIC_API_PATHS = [
     "/ads/section",
 ];
 
+function getApiOrigin() {
+    return (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+}
+
 function getBaseURL() {
-    const envUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+    const envUrl = getApiOrigin();
     if (typeof window !== "undefined") return "/backend";
     return envUrl || "/backend";
+}
+
+/** Free ngrok shows an HTML interstitial unless this header is present. */
+function isNgrokOrigin(url = getApiOrigin()) {
+    return /ngrok(-free)?\.(dev|app|io)$/i.test(
+        (() => {
+            try {
+                return new URL(url).hostname;
+            } catch {
+                return "";
+            }
+        })(),
+    );
+}
+
+function ngrokBypassHeaders(): Record<string, string> {
+    return isNgrokOrigin() ? { "ngrok-skip-browser-warning": "1" } : {};
 }
 
 let isLoggingOut = false;
@@ -75,7 +96,10 @@ async function clearAuthData() {
         try {
             await axios.delete(`${getBaseURL()}/notifications/device-token`, {
                 data: { token: fcmToken },
-                headers: { Authorization: `Bearer ${accessToken}` },
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    ...ngrokBypassHeaders(),
+                },
                 timeout: 8000,
             });
         } catch {
@@ -160,6 +184,7 @@ const customAxios = axios.create({
     baseURL: getBaseURL(),
     headers: {
         "Content-Type": "application/json",
+        ...ngrokBypassHeaders(),
     },
     withCredentials: false
 });
@@ -168,6 +193,11 @@ customAxios.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
         // Keep baseURL correct even if the module was evaluated early.
         config.baseURL = getBaseURL();
+
+        // Forwarded through Next `/backend` rewrite so ngrok free doesn't return HTML.
+        if (isNgrokOrigin()) {
+            config.headers.set("ngrok-skip-browser-warning", "1");
+        }
 
         if (!isPublicPath(config.url)) {
             const token = await getAccessToken();
