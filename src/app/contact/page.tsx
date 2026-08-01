@@ -3,7 +3,7 @@ import ContactUsView from "@/components/support/ContactUsView";
 
 export const metadata: Metadata = {
     title: "Contact Us | Deal Pokket",
-    description: "Contact DealMarket support by email, phone, or message form.",
+    description: "Contact DealPokket support by email, phone, or message form.",
 };
 
 export default function ContactPage() {

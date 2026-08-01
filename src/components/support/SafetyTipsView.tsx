@@ -44,7 +44,7 @@ export default function SafetyTipsView() {
             <SupportSection id="messaging" number={3} title="Messaging">
                 <SupportList
                     items={[
-                        "Keep conversations on DealMarket chat whenever possible.",
+                        "Keep conversations on DealPokket chat whenever possible.",
                         "Be wary of users who push you off-platform immediately.",
                         "Don’t click suspicious links sent in chat.",
                         "Screenshot important agreements about price and condition.",
@@ -69,10 +69,10 @@ export default function SafetyTipsView() {
                     Our team reviews reports for spam, scams, and prohibited items. For
                     urgent danger, contact local authorities first, then let us know at{" "}
                     <a
-                        href="mailto:safety@dealmarket.in"
+                        href="mailto:safety@DealPokket.in"
                         className="font-bold text-primary hover:underline"
                     >
-                        safety@dealmarket.in
+                        safety@DealPokket.in
                     </a>
                     .
                 </p>

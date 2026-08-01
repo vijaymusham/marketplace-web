@@ -398,7 +398,7 @@ export default function ListingDetail({ id }: { id: string }) {
                             <p className="text-xs font-medium text-slate-500">
                                 {ad.mobileNumber
                                     ? `Contact: ${ad.mobileNumber}`
-                                    : "DealMarket seller"}
+                                    : "DealPokket seller"}
                             </p>
                         </div>
                     </div>

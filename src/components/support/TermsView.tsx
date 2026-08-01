@@ -16,13 +16,13 @@ export default function TermsView() {
         <SupportShell
             eyebrow="Terms & Conditions"
             title="Terms That Keep Deals Fair"
-            description="These Terms & Conditions govern your use of DealMarket. By creating an account or posting a listing, you agree to follow the rules below."
+            description="These Terms & Conditions govern your use of DealPokket. By creating an account or posting a listing, you agree to follow the rules below."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
             <SupportSection id="acceptance" number={1} title="Acceptance of Terms">
                 <p>
-                    Using DealMarket means you accept these Terms, our Privacy Policy, and
+                    Using DealPokket means you accept these Terms, our Privacy Policy, and
                     any community guidelines we publish. If you disagree, please do not use
                     the service.
                 </p>
@@ -60,7 +60,7 @@ export default function TermsView() {
 
             <SupportSection id="transactions" number={5} title="Transactions">
                 <p>
-                    DealMarket connects buyers and sellers but is not a party to most deals.
+                    DealPokket connects buyers and sellers but is not a party to most deals.
                     Payment, meetup, inspection, and delivery arrangements are between users.
                     Always meet safely and verify items before paying.
                 </p>
@@ -80,7 +80,7 @@ export default function TermsView() {
 
             <SupportSection id="liability" number={7} title="Limitation of Liability">
                 <p>
-                    To the fullest extent permitted by law, DealMarket is not liable for
+                    To the fullest extent permitted by law, DealPokket is not liable for
                     indirect, incidental, or consequential damages arising from deals between
                     users, listing content, or temporary service interruptions. Our total
                     liability for any claim related to the service is limited to amounts you

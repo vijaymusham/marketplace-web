@@ -20,7 +20,7 @@ type SupportShellProps = {
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function SupportShell({
-    eyebrow = "DealMarket Support",
+    eyebrow = "DealPokket Support",
     title,
     description,
     lastUpdated,
@@ -104,11 +104,10 @@ export default function SupportShell({
                                     key={id}
                                     type="button"
                                     onClick={() => scrollToSection(id)}
-                                    className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-bold whitespace-nowrap transition-colors duration-200 ${
-                                        active
+                                    className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-bold whitespace-nowrap transition-colors duration-200 ${active
                                             ? "bg-primary text-white"
                                             : "bg-white text-slate-600 active:bg-primary/10"
-                                    }`}
+                                        }`}
                                 >
                                     {label}
                                 </button>
@@ -135,16 +134,14 @@ export default function SupportShell({
                                             <button
                                                 type="button"
                                                 onClick={() => scrollToSection(id)}
-                                                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors duration-200 ${
-                                                    active
+                                                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors duration-200 ${active
                                                         ? "bg-primary/10 text-primary"
                                                         : "text-slate-500 hover:bg-[#f4f5f8] hover:text-slate-800"
-                                                }`}
+                                                    }`}
                                             >
                                                 <span
-                                                    className={`h-1.5 w-1.5 shrink-0 rounded-full transition-colors ${
-                                                        active ? "bg-primary" : "bg-slate-300"
-                                                    }`}
+                                                    className={`h-1.5 w-1.5 shrink-0 rounded-full transition-colors ${active ? "bg-primary" : "bg-slate-300"
+                                                        }`}
                                                     aria-hidden
                                                 />
                                                 {label}

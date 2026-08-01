@@ -17,13 +17,13 @@ export default function PrivacyView() {
         <SupportShell
             eyebrow="Privacy Policy"
             title="Your Data, Handled With Care"
-            description="This Privacy Policy explains how DealMarket collects, uses, and protects your information when you browse, buy, or sell on our marketplace."
+            description="This Privacy Policy explains how DealPokket collects, uses, and protects your information when you browse, buy, or sell on our marketplace."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
             <SupportSection id="overview" number={1} title="Overview">
                 <p>
-                    DealMarket is a local marketplace where people buy and sell near them.
+                    DealPokket is a local marketplace where people buy and sell near them.
                     We only collect what we need to run accounts, listings, messaging, and
                     safety features — and we never sell your personal data.
                 </p>
@@ -35,7 +35,7 @@ export default function PrivacyView() {
                         "Account details such as name, phone number, email, and profile photo.",
                         "Listing content you post, including photos, prices, and location labels.",
                         "Device and usage data like IP address, browser type, and app activity.",
-                        "Messages exchanged through DealMarket chat (to provide the service and enforce safety rules).",
+                        "Messages exchanged through DealPokket chat (to provide the service and enforce safety rules).",
                         "Support requests and feedback you send to our team.",
                     ]}
                 />
@@ -97,10 +97,10 @@ export default function PrivacyView() {
                 <p>
                     Questions about this policy? Email{" "}
                     <a
-                        href="mailto:privacy@dealmarket.in"
+                        href="mailto:privacy@DealPokket.in"
                         className="font-bold text-primary hover:underline"
                     >
-                        privacy@dealmarket.in
+                        privacy@DealPokket.in
                     </a>{" "}
                     or visit our{" "}
                     <Link href="/contact" className="font-bold text-primary hover:underline">

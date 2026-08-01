@@ -8,8 +8,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
     const { id } = await params;
     return {
-        title: id ? `Listing | DealMarket` : "Listing not found",
-        description: "View listing details on DealMarket",
+        title: id ? `Listing | DealPokket` : "Listing not found",
+        description: "View listing details on DealPokket",
     };
 }
 

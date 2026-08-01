@@ -2,8 +2,8 @@ import CityDetails from "@/components/city/CityDetails";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "City | DealMarket",
-    description: "Browse deals in your city on DealMarket.",
+    title: "City | DealPokket",
+    description: "Browse deals in your city on DealPokket.",
 };
 
 export default function CityPage() {

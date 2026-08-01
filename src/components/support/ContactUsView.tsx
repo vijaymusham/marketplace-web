@@ -53,7 +53,7 @@ export default function ContactUsView() {
         <SupportShell
             eyebrow="Contact"
             title="We’re Here to Help"
-            description="Reach DealMarket support by email, phone, or the form below. We typically reply within one business day."
+            description="Reach DealPokket support by email, phone, or the form below. We typically reply within one business day."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
@@ -62,8 +62,8 @@ export default function ContactUsView() {
                     <SupportTile
                         icon={Mail}
                         title="Email"
-                        detail="support@dealmarket.in"
-                        href="mailto:support@dealmarket.in"
+                        detail="support@DealPokket.in"
+                        href="mailto:support@DealPokket.in"
                     />
                     <SupportTile
                         icon={Phone}

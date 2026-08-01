@@ -13,7 +13,7 @@ import { pushNotification } from "@/hooks/useNotifications";
 import { syncDeviceTokenToServer } from "@/lib/fcmDeviceToken";
 import type { RootState } from "@/components/redux/store";
 
-const DISMISS_KEY = "dealmarket-fcm-prompt-dismissed";
+const DISMISS_KEY = "DealPokket-fcm-prompt-dismissed";
 const PROMPT_DELAY_MS = 5 * 60 * 1000;
 
 export default function FcmProvider({ children }: { children: ReactNode }) {

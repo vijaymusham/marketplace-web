@@ -24,7 +24,7 @@ const FAQS = [
         a: "Open My Ads from your account menu. From there you can review status, views, and mark a listing as sold when the deal is done.",
     },
     {
-        q: "Is DealMarket free to use?",
+        q: "Is DealPokket free to use?",
         a: "Browsing and posting basic ads is free. Optional promotions may be offered later to boost visibility.",
     },
     {
@@ -40,7 +40,7 @@ export default function HelpSupportView() {
         <SupportShell
             eyebrow="Help Center"
             title="Help When You Need It"
-            description="Quick answers for buying, selling, and managing your DealMarket account — plus ways to reach our support team."
+            description="Quick answers for buying, selling, and managing your DealPokket account — plus ways to reach our support team."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
@@ -61,7 +61,7 @@ export default function HelpSupportView() {
                         "Use bright, clear photos from multiple angles.",
                         "Write an honest title and mention brand, age, and condition.",
                         "Price competitively by checking similar local ads.",
-                        "Reply to buyers quickly and keep chat on DealMarket.",
+                        "Reply to buyers quickly and keep chat on DealPokket.",
                     ]}
                 />
             </SupportSection>
@@ -92,9 +92,8 @@ export default function HelpSupportView() {
                         return (
                             <div
                                 key={item.q}
-                                className={`overflow-hidden rounded-2xl transition-colors duration-200 ${
-                                    isOpen ? "bg-primary/8" : "bg-[#f3f4f8]"
-                                }`}
+                                className={`overflow-hidden rounded-2xl transition-colors duration-200 ${isOpen ? "bg-primary/8" : "bg-[#f3f4f8]"
+                                    }`}
                             >
                                 <button
                                     type="button"
@@ -103,30 +102,26 @@ export default function HelpSupportView() {
                                     className="flex w-full items-center gap-3 px-4 py-3.5 text-left sm:px-5 sm:py-4"
                                 >
                                     <span
-                                        className={`min-w-0 flex-1 text-sm font-bold sm:text-[15px] ${
-                                            isOpen ? "text-primary" : "text-slate-800"
-                                        }`}
+                                        className={`min-w-0 flex-1 text-sm font-bold sm:text-[15px] ${isOpen ? "text-primary" : "text-slate-800"
+                                            }`}
                                     >
                                         {item.q}
                                     </span>
                                     <span
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-                                            isOpen
+                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${isOpen
                                                 ? "bg-primary text-white"
                                                 : "bg-white text-slate-400"
-                                        }`}
+                                            }`}
                                     >
                                         <ChevronDown
-                                            className={`h-4 w-4 transition-transform duration-300 ${
-                                                isOpen ? "rotate-180" : ""
-                                            }`}
+                                            className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                                                }`}
                                         />
                                     </span>
                                 </button>
                                 <div
-                                    className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                                        isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                                    }`}
+                                    className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                                        }`}
                                 >
                                     <div className="min-h-0 overflow-hidden">
                                         <p className="px-4 pb-4 text-sm leading-relaxed font-medium text-slate-500 sm:px-5 sm:pb-5">
@@ -145,8 +140,8 @@ export default function HelpSupportView() {
                     <SupportTile
                         icon={Mail}
                         title="Email"
-                        detail="support@dealmarket.in"
-                        href="mailto:support@dealmarket.in"
+                        detail="support@DealPokket.in"
+                        href="mailto:support@DealPokket.in"
                     />
                     <SupportTile
                         icon={Phone}

@@ -3,7 +3,7 @@ import TermsView from "@/components/support/TermsView";
 
 export const metadata: Metadata = {
     title: "Terms & Conditions | Deal Pokket",
-    description: "Terms governing your use of the DealMarket marketplace.",
+    description: "Terms governing your use of the DealPokket marketplace.",
 };
 
 export default function TermsPage() {
