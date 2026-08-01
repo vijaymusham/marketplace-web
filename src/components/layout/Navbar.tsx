@@ -80,11 +80,11 @@ export default function Navbar() {
                             }}
                             className="group flex shrink-0 items-center gap-2.5"
                         >
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-indigo-500 text-white shadow-sm shadow-primary/25">
+                            {/* <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-indigo-500 text-white shadow-sm shadow-primary/25">
                                 <ShoppingBag className="h-4.5 w-4.5" strokeWidth={2} />
-                            </span>
+                            </span> */}
                             <span className="font-heading text-3xl font-extrabold tracking-tight text-slate-900">
-                                Deal<span className="text-primary">Market</span>
+                                Deal<span className="text-primary">Pokket</span>
                             </span>
                         </Link>
 

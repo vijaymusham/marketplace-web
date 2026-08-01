@@ -151,7 +151,7 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                 {isMenuTrigger ? (
                     <>
                         <p className="font-heading text-2xl font-extrabold tracking-tight text-slate-900">
-                            Deal<span className="text-primary">Market</span>
+                            Deal<span className="text-primary">Pokket</span>
                         </p>
                         <p className="mt-4 font-heading text-lg font-extrabold text-slate-900">
                             {label}

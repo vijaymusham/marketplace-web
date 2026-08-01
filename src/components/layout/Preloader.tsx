@@ -119,13 +119,13 @@ export default function Preloader() {
                                         WebkitTextStroke: "1.5px rgba(255,255,255,0.38)",
                                     }}
                                 >
-                                    Deal<span className="tracking-tight"> Market</span>
+                                    Deal<span className="tracking-tight"> Pokket</span>
                                 </span>
                                 <motion.span
                                     className="pointer-events-none absolute inset-0 select-none text-white"
                                     style={{ clipPath: textClip }}
                                 >
-                                    Deal<span className="text-white/95"> Market</span>
+                                    Deal<span className="text-white/95"> Pokket</span>
                                 </motion.span>
                             </motion.div>
 
