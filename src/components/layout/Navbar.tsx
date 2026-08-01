@@ -45,7 +45,6 @@ export default function Navbar() {
             <header className="sticky top-0 z-30 bg-white/90 bg-linear-to-b from-primary/15 via-primary/8 to-white backdrop-blur-xl">
                 {!isLarge ? (
                     <div>
-                        {/* Row 1: text logo left · location + menu right */}
                         <div className="flex items-center gap-3 px-3 pt-2.5 pb-1.5">
                             <Link
                                 href="/"
