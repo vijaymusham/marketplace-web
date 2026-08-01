@@ -161,8 +161,8 @@ export default function Footer() {
                             Buy and sell anything.
                         </h3>
                         <p className="mt-3 max-w-xs text-sm leading-relaxed">
-                            Buy and sell anything near you — from phones and furniture to
-                            cars and homes. Trusted by your community.
+                            Your local marketplace for everyday deals — discover great
+                            finds nearby and list what you no longer need.
                         </p>
 
                         {/* <button className="mt-6 flex items-center gap-3 rounded-full bg-white/10 py-1.5 pr-1.5 pl-5 text-sm font-semibold text-white transition-colors hover:bg-white/15">
