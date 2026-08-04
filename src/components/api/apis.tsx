@@ -97,6 +97,23 @@ export const getUser = async () => {
     }
 };
 
+export type UpdateProfilePayload = {
+    firstName?: string;
+    lastName?: string;
+    name?: string;
+    email?: string;
+    profilePhoto?: string | null;
+};
+
+export const updateProfile = async (payload: UpdateProfilePayload) => {
+    try {
+        const { data } = await customAxios.patch("/auth/me", payload);
+        return data;
+    } catch (error) {
+        rethrow("updateProfile", error);
+    }
+};
+
 export const getAds = async () => {
     try {
         const { data } = await customAxios.get("/ads");

@@ -187,8 +187,8 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                                 )}
                             </span>
                             {profile.phoneVerified && (
-                                <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white ring-2 ring-white">
-                                    <BadgeCheck className="h-3 w-3" strokeWidth={2.5} />
+                                <span className="absolute right-0 top-0 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-green-500 text-white ring-2 ring-white">
+                                    <BadgeCheck className="h-3.5 w-3.5" strokeWidth={2.5} />
                                 </span>
                             )}
                         </div>
@@ -210,17 +210,14 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                     </div>
                 )}
 
-                <button
-                    type="button"
-                    onClick={() => {
-                        setMenuOpen(false);
-                        toast("Profile editing coming soon");
-                    }}
+                <Link
+                    href="/profile"
+                    onClick={() => setMenuOpen(false)}
                     className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-linear-to-r from-primary to-[#4a56e8] px-4 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:brightness-105 active:scale-[0.98]"
                 >
                     View and edit profile
                     <ChevronRight className="h-4 w-4 opacity-80" strokeWidth={2.5} />
-                </button>
+                </Link>
             </div>
 
             <div className="flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-3 py-3">
