@@ -72,8 +72,8 @@ export default function ListingCard({
                 <Link href={`/listing/${listing.id}`} className="absolute inset-0 block">
                     {listing.imageUrl ? (
                         <Image
-                            src={listing.imageUrl}
-                            alt={listing.title}
+                            src={listing.imageUrl || "/no_image.jpeg"}
+                            alt={listing.title || "No image"}
                             fill
                             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
@@ -91,14 +91,12 @@ export default function ListingCard({
                     type="button"
                     onClick={handleToggleLike}
                     aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                    className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-md transition-colors sm:top-2.5 sm:right-2.5 sm:h-8 sm:w-8 md:h-9 md:w-9 ${
-                        inWishlist ? "bg-white shadow-sm" : "bg-black/35 hover:bg-black/45"
-                    }`}
+                    className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-md transition-colors sm:top-2.5 sm:right-2.5 sm:h-8 sm:w-8 md:h-9 md:w-9 ${inWishlist ? "bg-white shadow-sm" : "bg-black/35 hover:bg-black/45"
+                        }`}
                 >
                     <Heart
-                        className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
-                            inWishlist ? "fill-red-500 text-red-500" : "text-white"
-                        }`}
+                        className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${inWishlist ? "fill-red-500 text-red-500" : "text-white"
+                            }`}
                         strokeWidth={2}
                     />
                 </button>

@@ -20,8 +20,8 @@ export default function WishlistCard({
                 className="relative aspect-4/3 sm:aspect-auto sm:min-h-full"
             >
                 <Image
-                    src={listing.imageUrl}
-                    alt={listing.title}
+                    src={listing.imageUrl || "/no_image.jpeg"}
+                    alt={listing.title || "No image"}
                     fill
                     sizes="(min-width: 640px) 176px, 100vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
