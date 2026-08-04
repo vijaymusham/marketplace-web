@@ -555,11 +555,13 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                 return <PGGuestHousesForm {...subFormProps} />;
 
             // Pet Supplies
+            case "Fish & Aquarium":
             case "Fishes & Aquarium":
                 return <FishesAquariumForm {...subFormProps} />;
             case "Pet Food & Accessories":
                 return <PetFoodAccessoriesForm {...subFormProps} />;
             case "Dogs":
+            case "Cats":
                 return <DogsForm {...subFormProps} />;
             case "Other Pets":
                 return <OtherPetsForm {...subFormProps} />;

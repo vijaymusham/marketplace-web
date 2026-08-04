@@ -13,6 +13,7 @@ import {
   ServicesIcon,
   type CategoryIconComponent,
 } from "@/components/icons/category-icons";
+import { BicyclesIcon } from "@/components/icons/subcategory-icons";
 
 export type Category = {
   name: string;
@@ -25,6 +26,12 @@ const img = (keyword: string, lock: number) =>
   `https://loremflickr.com/400/400/${keyword}/all?lock=${lock}`;
 
 export const categories: Category[] = [
+    {
+        name:'Bikes',
+        icon: BicyclesIcon,
+        image: img("bicycle", 101),
+        subcategories: ["Bicycles", "Bike Accessories", "Bike Parts", "Bike Services"],
+    },
   {
     name: "Mobiles & Tablets",
     icon: MobilesTabletsIcon,
@@ -137,9 +144,10 @@ export const categories: Category[] = [
     icon: PetSuppliesIcon,
     image: img("dog", 111),
     subcategories: [
-      "Fishes & Aquarium",
+      "Cats",
       "Pet Food & Accessories",
       "Dogs",
+      "Fish & Aquarium",
       "Other Pets",
     ],
   },

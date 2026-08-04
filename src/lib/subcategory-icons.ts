@@ -62,12 +62,14 @@ import {
   SubcategoryFallbackIcon,
 } from "@/components/icons/subcategory-icons";
 import type { CategoryIconComponent } from "@/components/icons/category-icons";
+import { slugify } from "@/lib/slug";
 
 const icons: Record<string, CategoryIconComponent> = {
   // Mobiles & Tablets
   "Mobile Phones": MobilePhonesIcon,
   Tablets: TabletsIcon,
   Accessories: AccessoriesIcon,
+  "Mobile Accessories": AccessoriesIcon,
   "Smart Watches": SmartWatchesIcon,
   // Electronics
   "TVs, Video - Audio": TvsVideoAudioIcon,
@@ -90,12 +92,15 @@ const icons: Record<string, CategoryIconComponent> = {
   Men: MenIcon,
   Women: WomenIcon,
   Kids: KidsIcon,
-  // Vehicles
+  Footwear: AccessoriesIcon,
+  // Vehicles / Bikes
   Cars: CarsIcon,
   Motorcycles: MotorcyclesIcon,
   Scooters: ScootersIcon,
   Bicycles: BicyclesIcon,
   "Spare Parts": SparePartsIcon,
+  "2-Wheeler Spare Parts": SparePartsIcon,
+  Trucks: CommercialVehiclesIcon,
   "Commercial & Other Vehicles": CommercialVehiclesIcon,
   // Books & Hobbies
   Books: BooksIcon,
@@ -121,10 +126,12 @@ const icons: Record<string, CategoryIconComponent> = {
   "For Rent: Shops & Offices": ForRentShopsIcon,
   "For Sale: Shops & Offices": ForSaleShopsIcon,
   "PG & Guest Houses": PgGuestHousesIcon,
-  // Pet Supplies
+  // Pet Supplies (API uses "Fish & Aquarium"; keep legacy "Fishes" alias)
+  "Fish & Aquarium": FishesAquariumIcon,
   "Fishes & Aquarium": FishesAquariumIcon,
   "Pet Food & Accessories": PetFoodAccessoriesIcon,
   Dogs: DogsIcon,
+  Cats: DogsIcon,
   "Other Pets": OtherPetsIcon,
   // Services
   "Education & Classes": EducationClassesIcon,
@@ -138,6 +145,15 @@ const icons: Record<string, CategoryIconComponent> = {
   "Other Services": OtherServicesIcon,
 };
 
+const iconsBySlug = new Map(
+  Object.entries(icons).map(([name, icon]) => [slugify(name), icon]),
+);
+
 export function getSubcategoryIcon(name: string): CategoryIconComponent {
-  return icons[name] ?? SubcategoryFallbackIcon;
+  if (!name) return SubcategoryFallbackIcon;
+  return (
+    icons[name] ??
+    iconsBySlug.get(slugify(name)) ??
+    SubcategoryFallbackIcon
+  );
 }

@@ -9,9 +9,12 @@ import SubcategoryBrowse from "@/components/category-ui/SubcategoryBrowse";
 import SelectDropdown from "@/components/sell-drawer/SelectDropdown";
 import { getCategories, getCategoriesAds } from "@/components/api/apis";
 import type { ApiAd, ApiCategoryAds } from "@/components/types/AllTypes";
-import { normalizeApiCategories } from "@/lib/apiCategories";
+import {
+    findApiRoute,
+    normalizeApiCategories,
+} from "@/lib/apiCategories";
 import { listings, type Listing } from "@/lib/listings";
-import { findRouteBySlug, slugify } from "@/lib/slug";
+import { findRouteBySlug } from "@/lib/slug";
 
 const DEFAULT_COORDS = { latitude: 19.2183, longitude: 72.9781 };
 
@@ -48,44 +51,28 @@ export default function CategoryPage() {
     const slug = String(params.slug ?? "");
     const categoryIdParam = searchParams.get("categoryId") ?? "";
     const subcategoryIdParam = searchParams.get("subcategoryId") ?? "";
-    const match = findRouteBySlug(slug);
     const [sort, setSort] = useState<SortValue>("date");
 
-    const { data: apiCategories } = useQuery({
+    const { data: apiCategories, isFetched } = useQuery({
         queryKey: ["categories"],
         queryFn: getCategories,
     });
 
     const normalized = normalizeApiCategories(apiCategories);
+    const staticMatch = findRouteBySlug(slug);
+    const apiMatch = findApiRoute(normalized, slug, {
+        categoryId: categoryIdParam,
+        subcategoryId: subcategoryIdParam,
+    });
+    // Prefer API so new API-only subcategories (e.g. Footwear) resolve correctly.
+    const match = apiMatch ?? staticMatch;
 
-    const apiCategory = match
-        ? normalized.find((c) => {
-            const nameSlug = slugify(c.name);
-            const routeCategorySlug = slugify(match.category.name);
-            return (
-                c.name === match.category.name ||
-                nameSlug === routeCategorySlug ||
-                c.slug === routeCategorySlug ||
-                (match.type === "category" && (nameSlug === slug || c.slug === slug))
-            );
-        })
-        : undefined;
-
-    const apiSubcategory =
-        match?.type === "subcategory"
-            ? apiCategory?.subcategoryItems.find((sub) => {
-                const nameSlug = slugify(sub.name);
-                return (
-                    sub.name === match.subcategory ||
-                    nameSlug === slug ||
-                    sub.slug === slug ||
-                    nameSlug === slugify(match.subcategory)
-                );
-            })
-            : undefined;
-
-    const resolvedCategoryId = categoryIdParam || apiCategory?.id || "";
-    const resolvedSubCategoryId = subcategoryIdParam || apiSubcategory?.id || "";
+    const resolvedCategoryId =
+        categoryIdParam || apiMatch?.categoryId || "";
+    const resolvedSubCategoryId =
+        subcategoryIdParam ||
+        (apiMatch?.type === "subcategory" ? apiMatch.subcategoryId : "") ||
+        "";
 
     const { data: categoryAds, isLoading } = useQuery({
         queryKey: ["categoryAds", resolvedCategoryId, sort],
@@ -99,7 +86,19 @@ export default function CategoryPage() {
         enabled: Boolean(resolvedCategoryId) && match?.type === "category",
     });
 
-    if (!match) notFound();
+    if (!match) {
+        if (!isFetched) {
+            return (
+                <main className="flex-1 bg-white">
+                    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+                        <div className="h-8 w-48 animate-pulse rounded bg-slate-100" />
+                        <div className="mt-4 h-4 w-96 max-w-full animate-pulse rounded bg-slate-100" />
+                    </div>
+                </main>
+            );
+        }
+        notFound();
+    }
 
     if (match.type === "category") {
         const { category } = match;

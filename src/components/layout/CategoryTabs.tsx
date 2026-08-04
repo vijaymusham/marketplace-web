@@ -233,7 +233,7 @@ export default function CategoryTabs() {
                     <button
                         onClick={scrollNext}
                         aria-label="Show more categories"
-                        className={`absolute top-1/2 right-1 flex -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-all duration-300 ${EASE} hover:text-primary ${collapsed ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
+                        className={`absolute top-1/2 right-1 flex xl:hidden -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-all duration-300 ${EASE} hover:text-primary ${collapsed ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
                             }`}
                     >
                         <ChevronRight className={collapsed ? "h-4 w-4" : "h-5 w-5"} />
