@@ -41,7 +41,7 @@ const CityDetails = () => {
     const city = cityFromSearchParams(searchParams)
     const slug = String(params.slug ?? '')
 
-    const { data: categoryAds, isLoading } = useQuery({
+    const { data: categoryAds, isPending: isAdsPending, isFetching: isAdsFetching } = useQuery({
         queryKey: ['cityAds', city?.id],
         queryFn: () => getCategoriesAds({
             cityId: city!.id,
@@ -54,6 +54,8 @@ const CityDetails = () => {
     })
 
     const listings = adsFromResponse(categoryAds)
+    const showAdsSkeleton =
+        Boolean(city?.id) && (isAdsPending || (isAdsFetching && listings.length === 0))
 
     if (!city) {
         return (
@@ -123,7 +125,7 @@ const CityDetails = () => {
 
                 <PaginatedListings
                     listings={listings}
-                    loading={isLoading}
+                    loading={showAdsSkeleton}
                     emptyTitle={`Oops! No deals in ${city.name}`}
                     emptyDescription={`We couldn’t find listings for ${city.name} yet. Try a nearby city or browse all deals — new ads land every day.`}
                 />

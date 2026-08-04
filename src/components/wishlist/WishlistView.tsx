@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 import WishlistCard from "@/components/wishlist/WishlistCard";
 import WishlistEmpty from "@/components/wishlist/WishlistEmpty";
 import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
-import { WithSkeleton } from "@/components/ui/Skeleton";
+import { Skeleton, WithSkeleton } from "@/components/ui/Skeleton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { removeFromWishlist } from "../api/apis";
 import type { ApiWishlist } from "../types/AllTypes";
@@ -51,11 +51,13 @@ export default function WishlistView() {
             <Enter>
                 <header className="mb-8 flex flex-col gap-5 border-b border-slate-100 pb-8 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p className="text-sm font-semibold text-primary">
-                            {isLoading
-                                ? "Loading…"
-                                : `${wishlist.length} saved ${wishlist.length === 1 ? "deal" : "deals"}`}
-                        </p>
+                        {isLoading ? (
+                            <Skeleton className="h-4 w-24 rounded" />
+                        ) : (
+                            <p className="text-sm font-semibold text-primary">
+                                {`${wishlist.length} saved ${wishlist.length === 1 ? "deal" : "deals"}`}
+                            </p>
+                        )}
                         <h1 className="mt-1.5 flex items-center gap-2 font-heading text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
                             <Heart className="h-7 w-7 fill-red-500 text-red-500 md:h-8 md:w-8" /> Wishlist
                         </h1>

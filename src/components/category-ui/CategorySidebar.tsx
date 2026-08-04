@@ -28,6 +28,7 @@ import type {
     ApiCategoryFilterOption,
     ApiCategoryFilterSection,
 } from "../types/AllTypes";
+import { FilterSkeleton } from "@/components/ui/Skeleton";
 
 export const PRICE_MIN = 0;
 export const PRICE_MAX = 500_000;
@@ -402,9 +403,7 @@ export default function CategorySidebar({
             </ScrollContain>
 
             <div className="mt-6 space-y-1 border-t border-slate-100 pt-5">
-                {isLoadingFilters && (
-                    <p className="px-2 py-2 text-sm text-slate-400">Loading filters…</p>
-                )}
+                {isLoadingFilters && <FilterSkeleton count={4} />}
 
                 {filters.map((group) => (
                     <FilterAccordion

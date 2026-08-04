@@ -15,6 +15,7 @@ import {
 } from "@/lib/apiCategories";
 import { listings, type Listing } from "@/lib/listings";
 import { findRouteBySlug } from "@/lib/slug";
+import { CategoryPageSkeleton, Skeleton } from "@/components/ui/Skeleton";
 
 const DEFAULT_COORDS = { latitude: 19.2183, longitude: 72.9781 };
 
@@ -74,7 +75,7 @@ export default function CategoryPage() {
         (apiMatch?.type === "subcategory" ? apiMatch.subcategoryId : "") ||
         "";
 
-    const { data: categoryAds, isLoading } = useQuery({
+    const { data: categoryAds, isPending: isAdsPending, isFetching: isAdsFetching } = useQuery({
         queryKey: ["categoryAds", resolvedCategoryId, sort],
         queryFn: () =>
             getCategoriesAds({
@@ -88,14 +89,7 @@ export default function CategoryPage() {
 
     if (!match) {
         if (!isFetched) {
-            return (
-                <main className="flex-1 bg-white">
-                    <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-                        <div className="h-8 w-48 animate-pulse rounded bg-slate-100" />
-                        <div className="mt-4 h-4 w-96 max-w-full animate-pulse rounded bg-slate-100" />
-                    </div>
-                </main>
-            );
+            return <CategoryPageSkeleton />;
         }
         notFound();
     }
@@ -103,7 +97,9 @@ export default function CategoryPage() {
     if (match.type === "category") {
         const { category } = match;
         const ads = adsFromResponse(categoryAds ?? null);
-        const countLabel = ads.length || (isLoading ? "…" : 0);
+        const showAdsSkeleton =
+            Boolean(resolvedCategoryId) &&
+            (isAdsPending || (isAdsFetching && ads.length === 0));
 
         return (
             <>
@@ -118,11 +114,18 @@ export default function CategoryPage() {
                                 <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
                                     {category.name} for Sale
                                 </h1>
-                                <p className="mt-2 max-w-2xl text-sm text-slate-500 md:text-sm">
-                                    Browse all {category.name.toLowerCase()} listings near you.
-                                    Verified sellers, great prices and {countLabel}+ fresh ads
-                                    posted every day.
-                                </p>
+                                {showAdsSkeleton ? (
+                                    <div className="mt-2 space-y-2">
+                                        <Skeleton className="h-4 w-full max-w-xl rounded" />
+                                        <Skeleton className="h-4 w-2/3 max-w-md rounded" />
+                                    </div>
+                                ) : (
+                                    <p className="mt-2 max-w-2xl text-sm text-slate-500 md:text-sm">
+                                        Browse all {category.name.toLowerCase()} listings near you.
+                                        Verified sellers, great prices and {ads.length}+ fresh ads
+                                        posted every day.
+                                    </p>
+                                )}
                             </div>
                             <div className="w-full shrink-0 sm:w-48">
                                 <SelectDropdown
@@ -138,7 +141,7 @@ export default function CategoryPage() {
                         <PaginatedListings
                             key={sort}
                             listings={ads}
-                            loading={isLoading}
+                            loading={showAdsSkeleton}
                             emptyTitle={`Oops! No ${category.name.toLowerCase()} deals`}
                             emptyDescription={`Nothing in ${category.name.toLowerCase()} right now. Try another sort, browse a subcategory, or check back soon — fresh ads go live every day.`}
                         />

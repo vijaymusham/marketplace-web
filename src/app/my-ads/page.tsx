@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatSoldAtTimestamp, getMyAds, updateAds } from "@/components/api/apis";
 import MyAdsCard, { type MyAd, type MyAdStatus } from "@/components/my-ads/MyAdsCard";
+import { MyAdCardSkeleton } from "@/components/ui/Skeleton";
 
 type Filter = "all" | "active" | "inactive" | "pending" | "moderated";
 
@@ -202,9 +203,10 @@ export default function MyAdsPage() {
                 </header>
 
                 {isLoading ? (
-                    <div className="space-y-3">
-                        <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
-                        <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
+                    <div className="flex flex-col gap-4" aria-busy>
+                        {Array.from({ length: 3 }, (_, i) => (
+                            <MyAdCardSkeleton key={i} />
+                        ))}
                     </div>
                 ) : visibleAds.length === 0 ? (
                     <div className="border border-dashed border-slate-200 bg-slate-50 px-6 py-16 text-center rounded-2xl">

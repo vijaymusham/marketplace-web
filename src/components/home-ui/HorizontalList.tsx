@@ -5,6 +5,7 @@ import ListingCard from "../sections/ListingCard";
 import { Reveal, Stagger, StaggerItem } from "@/components/animations/Motion";
 import {
     HOME_LISTINGS_GRID,
+    Skeleton,
     WithSkeleton,
 } from "@/components/ui/Skeleton";
 import type { ApiAd } from "../types/AllTypes";
@@ -30,9 +31,13 @@ const HorizontalList = ({
                         <h2 className="font-heading text-xl font-extrabold text-slate-900 sm:text-2xl">
                             {title}
                         </h2>
-                        <p className="mt-1 text-sm text-slate-600 sm:text-[15px]">
-                            {description}
-                        </p>
+                        {loading ? (
+                            <Skeleton className="mt-2 h-3.5 w-48 max-w-full rounded" />
+                        ) : description ? (
+                            <p className="mt-1 text-sm text-slate-600 sm:text-[15px]">
+                                {description}
+                            </p>
+                        ) : null}
                     </div>
                     <button
                         type="button"

@@ -62,6 +62,7 @@ import {
     upsertMessageInCache,
 } from "./chatCache";
 import { useSocket } from "@/components/socket/SocketProvider";
+import { ChatMessagesSkeleton } from "@/components/ui/Skeleton";
 
 const QUICK_REPLIES = [
     "Is this still available?",
@@ -584,11 +585,7 @@ export default function ChatWindow({
                     ref={listRef}
                     className="h-full space-y-5 overflow-y-auto overscroll-contain bg-[radial-gradient(520px_220px_at_85%_0%,rgba(47,58,223,0.06),transparent_60%),linear-gradient(180deg,#F3F4FB_0%,#F8F9FD_42%,#FFFFFF_100%)] px-3 py-4 scrollbar-hide sm:space-y-6 sm:px-5 sm:py-5 lg:px-6"
                 >
-                    {loading && (
-                        <div className="flex h-full items-center justify-center">
-                            <span className="h-9 w-9 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
-                        </div>
-                    )}
+                    {loading && <ChatMessagesSkeleton />}
 
                     {!loading && messages.length === 0 && (
                         <div className="flex h-full flex-col items-center justify-center px-4 text-center">

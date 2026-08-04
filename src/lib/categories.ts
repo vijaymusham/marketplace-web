@@ -27,7 +27,7 @@ const img = (keyword: string, lock: number) =>
 
 export const categories: Category[] = [
     {
-        name:'Bikes',
+        name: "Bikes",
         icon: BicyclesIcon,
         image: img("bicycle", 101),
         subcategories: ["Bicycles", "Bike Accessories", "Bike Parts", "Bike Services"],

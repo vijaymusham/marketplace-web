@@ -180,8 +180,8 @@ export default function SubcategoryBrowse({
     const visible: ApiAd[] = usingApi
         ? apiListings
         : listings
-              .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-              .map(listingToApiAd);
+            .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+            .map(listingToApiAd);
     const totalCount = usingApi ? total : listings.length;
     const totalPages = usingApi
         ? apiTotalPages
@@ -298,8 +298,8 @@ export default function SubcategoryBrowse({
                                             onClick={() => goTo(n)}
                                             aria-current={n === page ? "page" : undefined}
                                             className={`flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 text-sm font-semibold transition-colors ${n === page
-                                                    ? "bg-slate-950 text-white"
-                                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                                ? "bg-slate-950 text-white"
+                                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                                                 }`}
                                         >
                                             {n}

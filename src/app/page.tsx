@@ -36,8 +36,8 @@ const SECTION_BG: Record<string, string> = {
 };
 
 const SECTION_PLACEHOLDERS = [
-    { title: "Popular near you", subtitle: "Loading deals…", bgClass: "bg-sky-50" },
-    { title: "Trending now", subtitle: "Loading deals…", bgClass: "bg-violet-50" },
+    { title: "Popular near you", bgClass: "bg-sky-50" },
+    { title: "Trending now", bgClass: "bg-violet-50" },
 ];
 
 export default function Home() {
@@ -54,29 +54,28 @@ export default function Home() {
                 <FreshRecommendations />
                 {isLoading
                     ? SECTION_PLACEHOLDERS.map((item) => (
-                          <HorizontalList
-                              key={item.title}
-                              className={`${SECTION_BG[item.bgClass] ?? "bg-slate-50"} my-8`}
-                              title={item.title}
-                              description={item.subtitle}
-                              data={[]}
-                              loading
-                          />
-                      ))
+                        <HorizontalList
+                            key={item.title}
+                            className={`${SECTION_BG[item.bgClass] ?? "bg-slate-50"} my-8`}
+                            title={item.title}
+                            data={[]}
+                            loading
+                        />
+                    ))
                     : data &&
-                      Object.values(data).map((item: ApiAdsSection) => {
-                          if (!item.ads?.length) return null;
-                          const bg = SECTION_BG[item.bgClass] ?? "bg-slate-50";
-                          return (
-                              <HorizontalList
-                                  key={item.title}
-                                  className={`${bg} my-8`}
-                                  title={item.title}
-                                  description={item.subtitle}
-                                  data={item.ads.map(toListing)}
-                              />
-                          );
-                      })}
+                    Object.values(data).map((item: ApiAdsSection) => {
+                        if (!item.ads?.length) return null;
+                        const bg = SECTION_BG[item.bgClass] ?? "bg-slate-50";
+                        return (
+                            <HorizontalList
+                                key={item.title}
+                                className={`${bg} my-8`}
+                                title={item.title}
+                                description={item.subtitle}
+                                data={item.ads.map(toListing)}
+                            />
+                        );
+                    })}
                 <BannerSection />
             </main>
         </>

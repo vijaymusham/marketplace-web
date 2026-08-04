@@ -63,6 +63,56 @@ export function WishlistCardSkeleton() {
     );
 }
 
+/** Matches CategoryTabs icon + label chip. */
+export function CategoryTabSkeleton() {
+    return (
+        <div className="flex w-20 flex-col items-center justify-center gap-1 sm:w-24 md:w-28" aria-hidden>
+            <Skeleton className="h-9 w-9 rounded-xl sm:h-11 sm:w-11 md:h-13 md:w-13" />
+            <Skeleton className="h-3 w-14 rounded sm:h-3.5 sm:w-16" />
+        </div>
+    );
+}
+
+/** Full CategoryTabs bar while categories load. */
+export function CategoryTabsSkeleton() {
+    return (
+        <>
+            <nav className="fixed inset-x-0 top-[6.75rem] z-20 border-b border-slate-200 bg-white/85 backdrop-blur-2xl lg:top-18" aria-busy>
+                <div className="relative mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+                    <div className="flex h-24 items-center gap-1 overflow-hidden sm:h-28 sm:gap-2">
+                        {Array.from({ length: 8 }, (_, i) => (
+                            <CategoryTabSkeleton key={i} />
+                        ))}
+                    </div>
+                </div>
+            </nav>
+            <div className="h-24 sm:h-28" aria-hidden />
+        </>
+    );
+}
+
+/** Subcategory tabs bar while categories resolve. */
+export function SubcategoryTabsSkeleton() {
+    return (
+        <nav className="border-b border-slate-200 bg-white/85 backdrop-blur-2xl" aria-busy>
+            <div className="relative mx-auto flex max-w-7xl flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-8">
+                <div className="flex shrink-0 items-center gap-2.5 py-3 pr-2 sm:pr-6">
+                    <Skeleton className="h-9 w-9 rounded-xl sm:h-11 sm:w-11 md:h-13 md:w-13" />
+                    <div className="min-w-0">
+                        <Skeleton className="h-2.5 w-14 rounded" />
+                        <Skeleton className="mt-1.5 h-4 w-24 rounded" />
+                    </div>
+                </div>
+                <div className="flex h-24 items-center gap-1 overflow-hidden sm:h-28 sm:gap-2">
+                    {Array.from({ length: 7 }, (_, i) => (
+                        <CategoryTabSkeleton key={i} />
+                    ))}
+                </div>
+            </div>
+        </nav>
+    );
+}
+
 /** Matches CityExplorer circular city chip. */
 export function CityCircleSkeleton() {
     return (
@@ -77,10 +127,179 @@ export function CityCircleSkeleton() {
     );
 }
 
+/** Matches MyAdsCard (image + status + title + price). */
+export function MyAdCardSkeleton() {
+    return (
+        <div
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+            aria-hidden
+        >
+            <div className="grid grid-cols-1 md:grid-cols-[9.5rem_1fr]">
+                <Skeleton className="aspect-4/3 md:aspect-auto md:min-h-36" />
+                <div className="flex min-w-0 flex-col p-4 sm:p-5">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Skeleton className="h-5 w-16 rounded-md" />
+                        <Skeleton className="h-3.5 w-28 rounded" />
+                    </div>
+                    <Skeleton className="mt-3 h-4 w-4/5 rounded" />
+                    <Skeleton className="mt-2 h-4 w-3/5 rounded" />
+                    <Skeleton className="mt-3 h-7 w-24 rounded" />
+                    <div className="mt-auto flex items-center justify-between gap-3 pt-4">
+                        <div className="flex gap-4">
+                            <Skeleton className="h-3.5 w-12 rounded" />
+                            <Skeleton className="h-3.5 w-12 rounded" />
+                        </div>
+                        <Skeleton className="h-9 w-24 rounded-lg" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/** Matches chat sidebar conversation row. */
+export function ChatRowSkeleton() {
+    return (
+        <div className="flex min-h-16 items-center gap-3 rounded-[20px] px-3 py-2.5" aria-hidden>
+            <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                    <Skeleton className="h-3.5 w-28 rounded" />
+                    <Skeleton className="h-3 w-10 rounded" />
+                </div>
+                <Skeleton className="mt-2 h-3 w-4/5 rounded" />
+            </div>
+        </div>
+    );
+}
+
+/** Full chat sidebar while conversations load. */
+export function ChatSidebarSkeleton() {
+    return (
+        <div className="flex h-full w-full flex-col bg-white p-4 pt-5 sm:rounded-3xl" aria-busy>
+            <Skeleton className="mb-3 h-7 w-28 rounded" />
+            <Skeleton className="mb-3 h-12 w-full rounded-[18px]" />
+            <div className="mb-4 flex gap-1.5 sm:mb-5">
+                <Skeleton className="h-8 w-14 rounded-full" />
+                <Skeleton className="h-8 w-20 rounded-full" />
+                <Skeleton className="h-8 w-18 rounded-full" />
+            </div>
+            <div className="min-h-0 flex-1 space-y-1.5 overflow-hidden">
+                {Array.from({ length: 8 }, (_, i) => (
+                    <ChatRowSkeleton key={i} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+/** Message bubbles while chat messages load. */
+export function ChatMessagesSkeleton() {
+    return (
+        <div className="flex h-full flex-col justify-end gap-4 px-1 py-2" aria-busy aria-hidden>
+            <div className="flex justify-start">
+                <Skeleton className="h-12 w-[55%] max-w-xs rounded-2xl rounded-bl-md" />
+            </div>
+            <div className="flex justify-end">
+                <Skeleton className="h-10 w-[45%] max-w-xs rounded-2xl rounded-br-md" />
+            </div>
+            <div className="flex justify-start">
+                <Skeleton className="h-16 w-[60%] max-w-sm rounded-2xl rounded-bl-md" />
+            </div>
+            <div className="flex justify-end">
+                <Skeleton className="h-10 w-[40%] max-w-xs rounded-2xl rounded-br-md" />
+            </div>
+            <div className="flex justify-start">
+                <Skeleton className="h-11 w-[50%] max-w-xs rounded-2xl rounded-bl-md" />
+            </div>
+        </div>
+    );
+}
+
+/** Category filter accordion rows. */
+export function FilterSkeleton({ count = 5 }: { count?: number }) {
+    return (
+        <div className="space-y-1" aria-busy aria-hidden>
+            {Array.from({ length: count }, (_, i) => (
+                <div key={i} className="flex items-center gap-2.5 rounded-xl px-2 py-2.5">
+                    <Skeleton className="h-4 w-4 shrink-0 rounded" />
+                    <Skeleton className="h-3.5 flex-1 rounded" />
+                    <Skeleton className="h-4 w-4 shrink-0 rounded" />
+                </div>
+            ))}
+        </div>
+    );
+}
+
+/** Route-level home page skeleton (category tabs + cities + listing grids). */
+export function HomePageSkeleton() {
+    return (
+        <div className="flex-1 bg-white" aria-busy>
+            <CategoryTabsSkeleton />
+
+            <div className="mx-auto max-w-7xl px-4 pt-4 pb-2 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6">
+                <Skeleton className="h-7 w-56 rounded sm:h-8 sm:w-72" />
+                <Skeleton className="mt-2 h-3.5 w-72 max-w-full rounded sm:h-4 sm:w-96" />
+                <div className={`${CITY_ROW} mt-3 sm:mt-4`}>
+                    {Array.from({ length: 10 }, (_, i) => (
+                        <CityCircleSkeleton key={i} />
+                    ))}
+                </div>
+            </div>
+
+            <div className="mx-auto max-w-7xl px-4 pt-5 pb-8 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
+                <Skeleton className="h-7 w-52 rounded sm:h-8 sm:w-64" />
+                <Skeleton className="mt-2 h-3.5 w-64 max-w-full rounded" />
+                <div className={`${HOME_LISTINGS_GRID} mt-6`}>
+                    {Array.from({ length: 10 }, (_, i) => (
+                        <ListingCardSkeleton key={i} />
+                    ))}
+                </div>
+            </div>
+
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                <Skeleton className="h-7 w-44 rounded sm:h-8 sm:w-56" />
+                <Skeleton className="mt-2 h-3.5 w-48 max-w-full rounded" />
+                <div className={`${HOME_LISTINGS_GRID} mt-6`}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                        <ListingCardSkeleton key={i} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/** Category browse header + listings grid. */
+export function CategoryPageSkeleton() {
+    return (
+        <>
+            <SubcategoryTabsSkeleton />
+            <main className="flex-1 bg-white" aria-busy>
+                <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+                    <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between md:mb-9">
+                        <div className="min-w-0 flex-1">
+                            <Skeleton className="h-8 w-56 rounded md:h-9 md:w-72" />
+                            <Skeleton className="mt-3 h-4 w-full max-w-xl rounded" />
+                            <Skeleton className="mt-2 h-4 w-2/3 max-w-md rounded" />
+                        </div>
+                        <Skeleton className="h-11 w-full rounded-xl sm:w-48" />
+                    </div>
+                    <div className={PAGINATED_LISTINGS_GRID}>
+                        {Array.from({ length: 8 }, (_, i) => (
+                            <ListingCardSkeleton key={i} />
+                        ))}
+                    </div>
+                </div>
+            </main>
+        </>
+    );
+}
+
 /** Matches ListingDetail page layout (gallery + info + about/details). */
 export function ListingDetailSkeleton() {
     return (
-        <div className="bg-white pb-24 lg:pb-12" aria-busy aria-label="Loading listing">
+        <div className="bg-white pb-24 lg:pb-12" aria-busy>
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
                 <Skeleton className="h-5 w-16 rounded" />
                 <div className="flex items-center gap-2">
@@ -215,22 +434,22 @@ export function WithSkeleton({
         (variant === "wishlist"
             ? WISHLIST_GRID
             : variant === "city"
-              ? CITY_ROW
-              : variant === "list"
-                ? LISTINGS_GRID
-                : HOME_LISTINGS_GRID);
+                ? CITY_ROW
+                : variant === "list"
+                    ? LISTINGS_GRID
+                    : HOME_LISTINGS_GRID);
 
     const Card =
         variant === "wishlist"
             ? WishlistCardSkeleton
             : variant === "city"
-              ? CityCircleSkeleton
-              : variant === "list"
-                ? ListCardSkeleton
-                : ListingCardSkeleton;
+                ? CityCircleSkeleton
+                : variant === "list"
+                    ? ListCardSkeleton
+                    : ListingCardSkeleton;
 
     return (
-        <div className={grid} aria-busy aria-label="Loading">
+        <div className={grid} aria-busy>
             {Array.from({ length: count }, (_, i) => (
                 <Card key={i} />
             ))}

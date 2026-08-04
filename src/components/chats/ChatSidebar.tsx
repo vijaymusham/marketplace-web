@@ -23,6 +23,7 @@ import { getChats, markChatRead, updateConversation } from "../api/apis";
 import type { ApiChat } from "../types/AllTypes";
 import { chatKeys, patchChatInLists } from "./chatCache";
 import { useSocket } from "@/components/socket/SocketProvider";
+import { ChatSidebarSkeleton } from "@/components/ui/Skeleton";
 
 function formatLastMessagePreview(
     preview: ApiChat["lastMessagePreview"] | string | null | undefined,
@@ -155,13 +156,7 @@ export default function ChatSidebar({
     }, [menuOpenId]);
 
     if (isLoadingChats) {
-        return (
-            <div className="flex h-full w-full flex-col bg-white p-4 pt-5 sm:rounded-3xl">
-                <div className="flex h-full w-full items-center justify-center">
-                    <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
-                </div>
-            </div>
-        );
+        return <ChatSidebarSkeleton />;
     }
 
     if (isErrorChats) {

@@ -256,15 +256,30 @@ export function WashingMachinesIcon(props: IconProps) {
 export function SofaDiningIcon(props: IconProps) {
   return (
     <Doodle {...props}>
-      <Shadow cx={32} cy={54} rx={20} />
-      <path d="M14 22h28l6-3.5H20z" fill={LIGHT} />
-      <path d="M42 22l6-3.5v12L42 34z" fill={DEPTH} />
-      <path d="M14 22h28v12H14z" fill="#fff" />
-      <path d="M10 34h36l6-4H16z" fill="#fff" />
-      <path d="M46 34l6-4v10l-6 4z" fill={DEPTH} />
-      <path d="M10 34h36v10H10z" fill="#fff" />
-      <path d="M14 44v4M42 44v4" />
-      <Sparkle x={54} y={14} />
+      <Shadow cx={30} cy={57} rx={21} />
+      {/* backrest */}
+      <path d="M16 14h30l4-2.5H20z" fill={LIGHT} />
+      <path d="M46 14l4-2.5v18L46 32z" fill={DEPTH} />
+      <path d="M16 14h30v18H16z" fill="#fff" />
+      <path d="M20 18h22v10H20z" fill={DEPTH} strokeWidth={1.2} />
+      {/* seat */}
+      <path d="M8 38h32l8-5H16z" fill="#fff" />
+      <path d="M40 38l8-5v10l-8 5z" fill={DEPTH} />
+      <path d="M8 38h32v10H8z" fill="#fff" />
+      <path d="M24 38l8-5M24 38v10" strokeWidth={1.3} />
+      {/* arms */}
+      <path d="M4 30h7l7-4.5H11z" fill={LIGHT} />
+      <path d="M4 30h7v18H4z" fill="#fff" />
+      <path d="M35 30h7l7-4.5h-7z" fill={LIGHT} />
+      <path d="M42 30l7-4.5v18L42 48z" fill={DEPTH} />
+      <path d="M35 30h7v18h-7z" fill="#fff" />
+      <path d="M7 48v3.5M39 48v3.5" />
+      {/* dining table (secondary object) */}
+      <path d="M48 28h10l3-2H51z" fill={LIGHT} />
+      <path d="M58 28l3-2v8l-3 2z" fill={DEPTH} />
+      <path d="M48 28h10v8H48z" fill="#fff" />
+      <path d="M53 36v5M51 41h4" strokeWidth={1.2} />
+      <Sparkle x={54} y={12} />
     </Doodle>
   );
 }
@@ -272,16 +287,26 @@ export function SofaDiningIcon(props: IconProps) {
 export function BedsWardrobesIcon(props: IconProps) {
   return (
     <Doodle {...props}>
-      <Shadow cx={32} cy={54} rx={20} />
-      {/* headboard */}
-      <path d="M14 16h28l6-3.5H20z" fill={LIGHT} />
-      <path d="M42 16l6-3.5v12L42 28z" fill={DEPTH} />
-      <path d="M14 16h28v12H14z" fill="#fff" />
+      <Shadow cx={30} cy={55} rx={22} />
+      {/* wardrobe */}
+      <path d="M42 10h12l4-2.5H46z" fill={LIGHT} />
+      <path d="M54 10l4-2.5v30L54 40z" fill={DEPTH} />
+      <path d="M42 10h12v30H42z" fill="#fff" />
+      <path d="M42 25h12" strokeWidth={1.2} />
+      <path d="M48 14.5h3.5v6H48z" fill={DEPTH} strokeWidth={1.1} />
+      <path d="M48 28.5h3.5v6H48z" fill={DEPTH} strokeWidth={1.1} />
+      <circle cx="51.5" cy="20.5" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="51.5" cy="34.5" r="0.9" fill="currentColor" stroke="none" />
+      {/* bed headboard */}
+      <path d="M8 16h28l5-3H13z" fill={LIGHT} />
+      <path d="M36 16l5-3v12l-5 3z" fill={DEPTH} />
+      <path d="M8 16h28v12H8z" fill="#fff" />
+      <path d="M12 19.5h20v6H12z" fill={DEPTH} strokeWidth={1.2} />
       {/* mattress */}
-      <path d="M12 28h36l6-3.5H18z" fill={LIGHT} />
-      <path d="M48 28l6-3.5v10L48 38z" fill={DEPTH} />
-      <path d="M12 28h36v10H12z" fill="#fff" />
-      <path d="M16 38v6M44 38v6" />
+      <path d="M6 28h34l6-3.5H12z" fill={LIGHT} />
+      <path d="M40 28l6-3.5v10L40 38z" fill={DEPTH} />
+      <path d="M6 28h34v10H6z" fill="#fff" />
+      <path d="M10 38v5M36 38v5" />
       <Sparkle x={14} y={10} />
     </Doodle>
   );
@@ -393,6 +418,47 @@ export function KidsIcon(props: IconProps) {
   );
 }
 
+const SHOE =
+  "M10 40v-5c0-1.5.8-2.4 2.4-2.7l9-1.2 3.5-7.5c.7-1.4 1.7-2.1 3.2-2.1h9c1.6 0 2.7.8 3.4 2.1l2.8 6 5.5.9c1.6.3 2.4 1.2 2.4 2.7v6c0 .9-.6 1.4-1.5 1.4H11.5C10.6 41.4 10 40.9 10 40z";
+
+export function FootwearIcon(props: IconProps) {
+  return (
+    <Doodle {...props}>
+      <Shadow cx={34} cy={53} rx={20} />
+      <g transform="translate(3.5 -3)">
+        <path d={SHOE} fill={DEPTH} />
+      </g>
+      <path d={SHOE} fill="#fff" />
+      <path d="M27 24.5h5.5v8.5H24z" fill={DEPTH} strokeWidth={1.2} />
+      <path d="M36 25h5c.8 0 1.3.4 1.7.9l2.5 5.6H36z" fill={DEPTH} strokeWidth={1.2} />
+      <path d="M15 36.5h30" strokeWidth={1.2} opacity={0.55} />
+      <path d="M42 34h5" strokeWidth={1.3} />
+      <Sparkle x={14} y={14} />
+    </Doodle>
+  );
+}
+
+export function FashionAccessoriesIcon(props: IconProps) {
+  return (
+    <Doodle {...props}>
+      <Shadow cx={32} cy={54} rx={17} />
+      {/* handbag — isometric slab like furniture/electronics */}
+      <path d="M18 28h24l7-4.5H25z" fill={LIGHT} />
+      <path d="M42 28l7-4.5v18L42 46z" fill={DEPTH} />
+      <path d="M18 28h24v18H18z" fill="#fff" />
+      <path d="M18 36h24" strokeWidth={1.2} />
+      <path d="M27 31h6v3h-6z" fill={DEPTH} strokeWidth={1.1} />
+      <path d="M28 28c1.8-6.5 10.2-6.5 12 0" strokeWidth={1.7} />
+      {/* watch / jewelry accent */}
+      <path d="M46 14h8l3-2H49z" fill={LIGHT} />
+      <path d="M54 14l3-2v10l-3 2z" fill={DEPTH} />
+      <path d="M46 14h8v10h-8z" fill="#fff" />
+      <circle cx="50" cy="19" r="2.4" fill={DEPTH} strokeWidth={1.2} />
+      <Sparkle x={14} y={12} />
+    </Doodle>
+  );
+}
+
 /* ─── Vehicles ─── */
 
 export function CarsIcon(props: IconProps) {
@@ -412,53 +478,112 @@ export function CarsIcon(props: IconProps) {
   );
 }
 
+/** Sports bike side profile — outline doodle (same style as VehiclesIcon) */
+const SPORTS_BIKE_BODY =
+  "M12 42v-4c0-1.4.6-2.2 1.8-2.5l5-1 3-9c.7-1.8 2-2.8 3.8-2.8h7c1.5 0 2.6.8 3.5 2.2l2 3.8 8-5c1.3-.8 2.8-.3 3.5 1.1l2.2 4.2 3.2.6c1.5.3 2.2 1.2 2.2 2.6v5.8c0 .9-.6 1.4-1.5 1.4H13.5C12.6 43.4 12 42.9 12 42z";
+
 export function MotorcyclesIcon(props: IconProps) {
   return (
     <Doodle {...props}>
-      <Shadow cx={32} cy={54} rx={20} />
-      <circle cx="16" cy="42" r="7" fill="#fff" />
-      <circle cx="16" cy="42" r="2" fill="currentColor" stroke="none" />
-      <circle cx="48" cy="42" r="7" fill="#fff" />
-      <circle cx="48" cy="42" r="2" fill="currentColor" stroke="none" />
-      <path d="M16 42l12-14h10l6 8 4 6" fill="none" />
-      <path d="M28 28h8l4-6h6" />
-      <path d="M34 28v8l-6 6" />
-      <path d="M40 22h6l2 4" fill="#fff" />
-      <Sparkle x={14} y={14} />
-    </Doodle>
-  );
-}
-
-export function ScootersIcon(props: IconProps) {
-  return (
-    <Doodle {...props}>
-      <Shadow cx={32} cy={54} rx={18} />
-      <circle cx="18" cy={44} r="6" fill="#fff" />
-      <circle cx="18" cy={44} r="1.8" fill="currentColor" stroke="none" />
-      <circle cx="46" cy={44} r="6" fill="#fff" />
-      <circle cx="46" cy={44} r="1.8" fill="currentColor" stroke="none" />
-      <path d="M18 44h20c4 0 8-4 8-10V26" />
-      <path d="M46 26h-6l-2-6h8z" fill="#fff" />
-      <path d="M28 34h10" strokeWidth={1.3} />
-      <path d="M38 26v-4c0-2 2-3 4-2" />
+      <Shadow cx={32} cy={53} rx={22} />
+      {/* depth silhouette */}
+      <g transform="translate(3.5 -3)">
+        <path d={SPORTS_BIKE_BODY} fill={DEPTH} />
+      </g>
+      {/* body */}
+      <path d={SPORTS_BIKE_BODY} fill="#fff" />
+      {/* tank / seat window accents */}
+      <path d="M24 26.5h5v7.5H21z" fill={DEPTH} strokeWidth={1.3} />
+      <path d="M31 25.5h4c.9 0 1.4.4 1.8 1l3 5.5H31z" fill={DEPTH} strokeWidth={1.3} />
+      {/* windscreen */}
+      <path d="M40 23l8-5.5 1.5 6-7 3.5z" fill={DEPTH} strokeWidth={1.3} />
+      <path d="M33 34h4" strokeWidth={1.3} />
+      {/* wheels */}
+      <circle cx="17" cy="43" r="6" fill="#fff" />
+      <circle cx="17" cy="43" r="1.7" fill="currentColor" stroke="none" />
+      <circle cx="48" cy="43" r="6" fill="#fff" />
+      <circle cx="48" cy="43" r="1.7" fill="currentColor" stroke="none" />
       <Sparkle x={14} y={12} />
     </Doodle>
   );
 }
 
+/** Scooty side profile — outline doodle (same style as VehiclesIcon) */
+export function ScootersIcon(props: IconProps) {
+  return (
+    <Doodle {...props}>
+      <Shadow cx={32} cy={54} rx={22} />
+      {/* soft depth underlay */}
+      <g transform="translate(3 -2.5)" stroke="none">
+        <circle cx="16" cy="44" r="7" fill={DEPTH} />
+        <circle cx="48" cy="44" r="7" fill={DEPTH} />
+        <path
+          d="M14 40c0-6 4-12 12-14h10c2 0 3 1 4 3l2 4h6c2 0 4 2 4 5v6H14z"
+          fill={DEPTH}
+        />
+      </g>
+      {/* wheels */}
+      <circle cx="16" cy="44" r="7" fill="#fff" />
+      <circle cx="16" cy="44" r="2.2" fill="currentColor" stroke="none" />
+      <circle cx="48" cy="44" r="7" fill="#fff" />
+      <circle cx="48" cy="44" r="2.2" fill="currentColor" stroke="none" />
+      {/* rear body + seat */}
+      <path
+        d="M12 40c0-7 5-13 14-14h8c1.5 0 2.5 1 3 2.5V36H14c-1.2 0-2 1-2 4z"
+        fill="#fff"
+      />
+      <path d="M18 26h14c1 0 2 .8 2 2v2H18z" fill={DEPTH} strokeWidth={1.2} />
+      {/* floorboard (step-through) */}
+      <path d="M28 38h14l3-2H31z" fill="#fff" />
+      <path d="M28 38h14v4H28z" fill="#fff" />
+      {/* front apron / stem */}
+      <path d="M42 36h6l2-1.5v-10l-2-1.5h-4l-2 1.5V34.5z" fill="#fff" />
+      <path d="M44 24h6l2-1.5H46z" fill={LIGHT} />
+      <path d="M50 24l2-1.5v8l-2 1.5z" fill={DEPTH} />
+      <path d="M44 24h6v8h-6z" fill="#fff" />
+      {/* headlight */}
+      <path d="M45.5 27h3.5v3.5h-3.5z" fill={DEPTH} strokeWidth={1.2} />
+      {/* handlebar */}
+      <path d="M46 22.5v-3.5c0-1.8 2-2.5 3.5-1.5" />
+      <path d="M44 19h8" strokeWidth={1.5} />
+      {/* front fender hint */}
+      <path d="M42 40c2-4 8-5 12-2" strokeWidth={1.3} />
+      <Sparkle x={14} y={12} />
+    </Doodle>
+  );
+}
+
+/** Bike with rider — outline doodle (matches VehiclesIcon style) */
 export function BicyclesIcon(props: IconProps) {
   return (
     <Doodle {...props}>
-      <Shadow cx={32} cy={54} rx={20} />
-      <circle cx="16" cy="42" r="7.5" fill="#fff" />
-      <circle cx="16" cy="42" r="2" fill="currentColor" stroke="none" />
-      <circle cx="48" cy="42" r="7.5" fill="#fff" />
-      <circle cx="48" cy="42" r="2" fill="currentColor" stroke="none" />
-      <path d="M16 42l14-16h8l10 16" />
-      <path d="M30 26l-4 10h12" />
-      <path d="M38 26v-6h6" />
-      <path d="M26 36l6-4" />
-      <Sparkle x={32} y={12} />
+      <Shadow cx={32} cy={55} rx={22} />
+      {/* soft depth */}
+      <g transform="translate(3 -2.5)" stroke="none">
+        <circle cx="15" cy="46" r="8" fill={DEPTH} />
+        <circle cx="49" cy="46" r="8" fill={DEPTH} />
+      </g>
+      {/* wheels */}
+      <circle cx="15" cy="46" r="8" fill="#fff" />
+      <circle cx="15" cy="46" r="2.2" fill="currentColor" stroke="none" />
+      <circle cx="49" cy="46" r="8" fill="#fff" />
+      <circle cx="49" cy="46" r="2.2" fill="currentColor" stroke="none" />
+      {/* frame */}
+      <path d="M15 46l12-16h10l12 16" />
+      <path d="M27 30l-3 10h14" />
+      <path d="M24 40l6-5" />
+      {/* handlebars */}
+      <path d="M37 30v-5h7" />
+      <path d="M44 25h4" strokeWidth={1.5} />
+      {/* seat */}
+      <path d="M24 28h7l2-1.5h-7z" fill={LIGHT} />
+      <path d="M31 28l2-1.5v3l-2 1.5z" fill={DEPTH} />
+      <path d="M24 28h7v3h-7z" fill="#fff" />
+      {/* rider — head + torso (outline) */}
+      <circle cx="33" cy="14" r="4.5" fill="#fff" />
+      <path d="M30 18.5c-1 4 0 8 3 10 2-1 5-4 6-8" fill="#fff" />
+      <path d="M33 28.5v2" />
+      <Sparkle x={52} y={12} />
     </Doodle>
   );
 }
@@ -621,19 +746,36 @@ export function SportsEquipmentIcon(props: IconProps) {
   );
 }
 
+/** Gym / indoor exercise bike (stationary cycling) */
 export function CyclingIcon(props: IconProps) {
   return (
     <Doodle {...props}>
-      <Shadow cx={32} cy={54} rx={20} />
-      <circle cx="16" cy="42" r="7.5" fill="#fff" />
-      <circle cx="16" cy="42" r="2" fill="currentColor" stroke="none" />
-      <circle cx="48" cy="42" r="7.5" fill="#fff" />
-      <circle cx="48" cy="42" r="2" fill="currentColor" stroke="none" />
-      <path d="M16 42l14-16h8l10 16" />
-      <path d="M30 26l-4 10h12" />
-      <path d="M38 26v-6h6" />
-      <path d="M32 16l2 4-2 2-2-2z" fill={DEPTH} />
-      <Sparkle x={32} y={10} />
+      <Shadow cx={32} cy={55} rx={20} />
+      {/* flywheel — depth + white face like car wheels */}
+      <g transform="translate(3.5 -3)">
+        <circle cx="40" cy="38" r="11" fill={DEPTH} stroke="none" />
+      </g>
+      <circle cx="40" cy="38" r="11" fill="#fff" />
+      <circle cx="40" cy="38" r="6.5" fill={DEPTH} strokeWidth={1.3} />
+      <circle cx="40" cy="38" r="2" fill="currentColor" stroke="none" />
+      {/* base */}
+      <path d="M18 42h20l5-3H23z" fill={LIGHT} />
+      <path d="M38 42l5-3v6l-5 3z" fill={DEPTH} />
+      <path d="M18 42h20v6H18z" fill="#fff" />
+      {/* upright + console (isometric slab) */}
+      <path d="M27 42V24" />
+      <path d="M20 18h16l5-3H25z" fill={LIGHT} />
+      <path d="M36 18l5-3v8l-5 3z" fill={DEPTH} />
+      <path d="M20 18h16v8H20z" fill="#fff" />
+      <path d="M24 20.5h9v3.5H24z" fill={DEPTH} strokeWidth={1.2} />
+      {/* handlebars */}
+      <path d="M20 18c-3.5-1-6 1.5-4.5 4" />
+      {/* seat */}
+      <path d="M16 34h8l3-2H19z" fill={LIGHT} />
+      <path d="M24 34l3-2v5l-3 2z" fill={DEPTH} />
+      <path d="M16 34h8v5h-8z" fill="#fff" />
+      <path d="M20 39v5" />
+      <Sparkle x={14} y={12} />
     </Doodle>
   );
 }
@@ -867,22 +1009,61 @@ export function PetFoodAccessoriesIcon(props: IconProps) {
   );
 }
 
+/** Outline dog face — same doodle style as other category icons */
 export function DogsIcon(props: IconProps) {
   return (
     <Doodle {...props}>
-      <Shadow cx={32} cy={54} rx={14} />
+      <Shadow cx={32} cy={54} rx={16} />
+      {/* soft depth (not a solid 3D block) */}
+      <ellipse cx="32" cy="28" rx="15" ry="13" transform="translate(3 -2.5)" fill={DEPTH} stroke="none" />
+      {/* floppy ears */}
+      <path
+        d="M16 22c-2.5 6-2 16 2 22 1.2-5 2-12 1.5-20z"
+        fill="#fff"
+      />
+      <path
+        d="M48 22c2.5 6 2 16-2 22-1.2-5-2-12-1.5-20z"
+        fill="#fff"
+      />
+      {/* head outline */}
+      <ellipse cx="32" cy="28" rx="15" ry="13" fill="#fff" />
+      {/* eyes — outline rings */}
+      <circle cx="25" cy="26" r="2.8" fill="#fff" />
+      <circle cx="39" cy="26" r="2.8" fill="#fff" />
+      <circle cx="25" cy="26" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="39" cy="26" r="1.1" fill="currentColor" stroke="none" />
+      {/* snout outline */}
+      <path
+        d="M24 36c0 5 3.5 8 8 8s8-3 8-8c0-2.5-2-4-8-4s-8 1.5-8 4z"
+        fill="#fff"
+      />
+      <ellipse cx="32" cy="38" rx="2.4" ry="1.8" fill={DEPTH} strokeWidth={1.2} />
+      <path d="M28 42c2.5 1.2 5.5 1.2 8 0" strokeWidth={1.3} />
+      <Sparkle x={52} y={12} />
+    </Doodle>
+  );
+}
+
+export function CatsIcon(props: IconProps) {
+  return (
+    <Doodle {...props}>
+      <Shadow cx={32} cy={54} rx={15} />
+      {/* depth silhouette */}
+      <ellipse cx="32" cy="32" rx="14" ry="12" transform="translate(3.5 -2.5)" fill={DEPTH} stroke="none" />
       {/* head */}
-      <ellipse cx="32" cy="30" rx="14" ry="12" fill="#fff" />
-      <path d="M46 30c0 6-4 10-8 11.5V22c4 1 8 4 8 8z" fill={DEPTH} stroke="none" />
-      {/* ears */}
-      <path d="M20 22l-4-10 10 6z" fill="#fff" />
-      <path d="M44 22l4-10-10 6z" fill="#fff" />
-      <path d="M48 12l-2 8 4-4z" fill={DEPTH} stroke="none" />
+      <ellipse cx="32" cy="32" rx="14" ry="12" fill="#fff" />
+      <path d="M46 32c0 6-4 10-8 11.5V24c4 1.2 8 4.2 8 8z" fill={DEPTH} stroke="none" />
+      {/* pointed ears */}
+      <path d="M20 24l-1.5-11 11 7z" fill="#fff" />
+      <path d="M44 24l1.5-11-11 7z" fill="#fff" />
+      <path d="M45.5 13l-1 7 3.5-2.5z" fill={DEPTH} stroke="none" />
+      <path d="M22.5 17l3.5 3.5M41.5 17l-3.5 3.5" strokeWidth={1.2} opacity={0.65} />
       {/* face */}
-      <circle cx="26" cy="28" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="36" cy="28" r="1.5" fill="currentColor" stroke="none" />
-      <ellipse cx="31" cy="34" rx="3" ry="2" fill="currentColor" stroke="none" />
-      <path d="M28 38c2 2 4 2 6 0" strokeWidth={1.3} />
+      <circle cx="26" cy="30" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="38" cy="30" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M32 32.5l-2.2 3.2h4.4z" fill="currentColor" stroke="none" />
+      <path d="M28 38.5c2.5 2 5.5 2 8 0" strokeWidth={1.3} />
+      <path d="M21 34.5h5M38 34.5h5" strokeWidth={1.1} opacity={0.5} />
       <Sparkle x={52} y={14} />
     </Doodle>
   );

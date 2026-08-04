@@ -1,9 +1,5 @@
-import React from 'react'
+import { HomePageSkeleton } from "@/components/ui/Skeleton";
 
-const loading = () => {
-    return (
-        <div>loading</div>
-    )
+export default function Loading() {
+    return <HomePageSkeleton />;
 }
-
-export default loading

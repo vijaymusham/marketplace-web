@@ -7,6 +7,7 @@ import { slugify } from "@/lib/slug";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getCategories } from "../api/apis";
+import { CategoryTabsSkeleton } from "@/components/ui/Skeleton";
 
 const PANEL_WIDE = 560;
 const PANEL_NARROW = 320;
@@ -25,7 +26,7 @@ export default function CategoryTabs() {
     const collapsedScrollRef = useRef<HTMLDivElement>(null);
     const collapsedRef = useRef(false);
 
-    const { data: apiCategories } = useQuery({
+    const { data: apiCategories, isPending } = useQuery({
         queryKey: ["categories"],
         queryFn: getCategories,
     });
@@ -71,6 +72,10 @@ export default function CategoryTabs() {
 
     const openCategory = openIndex !== null ? categories[openIndex] ?? null : null;
     const OpenIcon = openCategory?.icon;
+
+    if (isPending && categories.length === 0) {
+        return <CategoryTabsSkeleton />;
+    }
 
     const openTab = (index: number, target: HTMLElement) => {
         const container = containerRef.current;

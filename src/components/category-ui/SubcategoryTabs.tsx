@@ -8,6 +8,7 @@ import { normalizeApiCategories } from "@/lib/apiCategories";
 import { slugify } from "@/lib/slug";
 import { getSubcategoryIcon } from "@/lib/subcategory-icons";
 import { getCategories } from "../api/apis";
+import { SubcategoryTabsSkeleton } from "@/components/ui/Skeleton";
 
 export default function SubcategoryTabs({
     categoryName,
@@ -19,7 +20,7 @@ export default function SubcategoryTabs({
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canScrollNext, setCanScrollNext] = useState(false);
 
-    const { data: apiCategories } = useQuery({
+    const { data: apiCategories, isPending } = useQuery({
         queryKey: ["categories"],
         queryFn: getCategories,
     });
@@ -66,6 +67,7 @@ export default function SubcategoryTabs({
         };
     }, [updateScrollState, categoryName, category?.subcategories.length]);
 
+    if (isPending && !category) return <SubcategoryTabsSkeleton />;
     if (!category) return null;
     const CategoryIcon = category.icon;
 
