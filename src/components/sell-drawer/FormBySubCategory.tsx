@@ -623,21 +623,21 @@ export function CarsForm({ control, register, errors }: SubFormProps) {
             />
             <TextInput
                 label="KM driven"
-                name="kmDriven"
+                name="kmsDriven"
                 register={register}
                 required
                 maxLength={6}
-                error={errors.kmDriven?.message}
+                error={errors.kmsDriven?.message}
                 placeholder="e.g. 25000"
                 type="number"
             />
             <ChoiceChips
                 label="No. of Owners"
-                name="owners"
+                name="ownerType"
                 control={control}
                 required
                 options={ownerTypeOptions}
-                error={errors.owners?.message}
+                error={errors.ownerType?.message}
             />
             <TextInput
                 label="Insurance Valid Till"
@@ -700,21 +700,21 @@ export function MotorcyclesForm({ control, register, errors }: SubFormProps) {
             />
             <TextInput
                 label="KM driven"
-                name="kmDriven"
+                name="kmsDriven"
                 register={register}
                 required
                 maxLength={6}
-                error={errors.kmDriven?.message}
+                error={errors.kmsDriven?.message}
                 placeholder="e.g. 12000"
                 type="number"
             />
             <ChoiceChips
                 label="No. of Owners"
-                name="owners"
+                name="ownerType"
                 control={control}
                 required
                 options={ownerTypeOptions}
-                error={errors.owners?.message}
+                error={errors.ownerType?.message}
             />
         </SubFormGrid>
     );
@@ -751,21 +751,21 @@ export function ScootersForm({ control, register, errors }: SubFormProps) {
             />
             <TextInput
                 label="KM driven"
-                name="kmDriven"
+                name="kmsDriven"
                 register={register}
                 required
                 maxLength={6}
-                error={errors.kmDriven?.message}
+                error={errors.kmsDriven?.message}
                 placeholder="e.g. 8000"
                 type="number"
             />
             <ChoiceChips
                 label="No. of Owners"
-                name="owners"
+                name="ownerType"
                 control={control}
                 required
                 options={ownerTypeOptions}
-                error={errors.owners?.message}
+                error={errors.ownerType?.message}
             />
         </SubFormGrid>
     );
@@ -774,6 +774,15 @@ export function ScootersForm({ control, register, errors }: SubFormProps) {
 export function BicyclesForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
+            <TextInput
+                label="Year"
+                name="year"
+                register={register}
+                required
+                error={errors.year?.message}
+                placeholder="e.g. 2018"
+                type="number"
+            />
             <EmptySelect
                 data={bicycleBrandOptions}
                 label="Brand"
@@ -789,14 +798,6 @@ export function BicyclesForm({ control, register, errors }: SubFormProps) {
                 register={register}
                 error={errors.model?.message}
                 placeholder="e.g. MTB 26"
-            />
-            <ChoiceChips
-                label="Condition"
-                name="condition"
-                control={control}
-                required
-                options={conditionOptions}
-                error={errors.condition?.message}
             />
         </SubFormGrid>
     );
@@ -872,21 +873,21 @@ export function CommercialOtherVehiclesForm({ control, register, errors }: SubFo
             />
             <TextInput
                 label="KM driven"
-                name="kmDriven"
+                name="kmsDriven"
                 register={register}
                 required
                 maxLength={6}
-                error={errors.kmDriven?.message}
+                error={errors.kmsDriven?.message}
                 placeholder="e.g. 45000"
                 type="number"
             />
             <ChoiceChips
                 label="No. of Owners"
-                name="owners"
+                name="ownerType"
                 control={control}
                 required
                 options={ownerTypeOptions}
-                error={errors.owners?.message}
+                error={errors.ownerType?.message}
             />
         </SubFormGrid>
     );

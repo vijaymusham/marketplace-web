@@ -1,14 +1,3 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
-const s3 = new S3Client({
-    region: process.env.NEXT_PUBLIC_AWS_REGION || "",
-    credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || "",
-        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || "",
-    },
-    requestChecksumCalculation: "WHEN_REQUIRED",
-});
-
 interface UploadResponse {
     success: boolean;
     key?: string;
@@ -21,23 +10,30 @@ export const uploadToS3 = async (
     folder: string = "uploads"
 ): Promise<UploadResponse> => {
     try {
-        const extension = file.name.split(".").pop();
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder", folder);
 
-        const key = `${folder}/${Date.now()}.${extension}`;
+        const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
 
-        await s3.send(
-            new PutObjectCommand({
-                Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET || "",
-                Key: key,
-                Body: file,
-                ContentType: file.type,
-            })
-        );
+        const data = (await response.json()) as UploadResponse & {
+            error?: string;
+        };
+
+        if (!response.ok || !data.success || !data.url) {
+            return {
+                success: false,
+                error: data.error || `Upload failed (${response.status})`,
+            };
+        }
 
         return {
             success: true,
-            key,
-            url: `https://${process.env.NEXT_PUBLIC_AWS_BUCKET || ""}.s3.${process.env.NEXT_PUBLIC_AWS_REGION || ""}.amazonaws.com/${key}`,
+            key: data.key,
+            url: data.url,
         };
     } catch (error) {
         console.error(error);

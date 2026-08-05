@@ -66,8 +66,8 @@ export type SellFormValues = {
     year: string;
     fuel: string;
     transmission: string;
-    kmDriven: string;
-    owners: string;
+    kmsDriven: string;
+    ownerType: string;
     insuranceValidTill: string;
     registrationState: string;
     color: string;
@@ -171,8 +171,8 @@ export const emptySellFormValues: SellFormValues = {
     year: "",
     fuel: "",
     transmission: "",
-    kmDriven: "",
-    owners: "",
+    kmsDriven: "",
+    ownerType: "first",
     insuranceValidTill: "",
     registrationState: "",
     color: "",
