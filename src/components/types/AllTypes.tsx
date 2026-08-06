@@ -199,6 +199,7 @@ export const emptySellFormValues: SellFormValues = {
     carParking: "",
     parking: "",
     facing: "",
+    subType: "",
     projectName: "",
     projectStatus: "",
     plotArea: "",
