@@ -11,6 +11,7 @@ import TanstackProvider from "@/components/providers/TanstackProvider";
 import FcmProvider from "@/components/providers/FcmProvider";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { SocketProvider } from "@/components/socket/SocketProvider";
+import ClarityAnalytics from "@/components/layout/ClarityAnalytics";
 
 /** Matches navbar top tint: primary (#2f3adf) at 15% over white */
 const THEME_COLOR = "#e0e1fa";
@@ -67,6 +68,7 @@ export default function RootLayout({
                                             containerStyle={{ zIndex: 100000, fontFamily: "var(--font-display)", fontWeight: "600" }}
                                             toasterId="default"
                                         />
+                                        <ClarityAnalytics />
                                         <SiteChrome />
                                     </SmoothScroll>
                                 </IntroProvider>
