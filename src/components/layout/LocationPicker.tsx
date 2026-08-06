@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { setAddress, setLocation } from "../redux/slices/authSlice";
 import { toast } from "react-hot-toast";
+import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 
 function shortAddress(address: string | null | undefined) {
     if (!address) return "Select location";
@@ -221,12 +222,159 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
                                         </div>
 
                                         <div className="relative">
-                                            <Search className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                                            <input
-                                                type="text"
-                                                placeholder="Search delivery location"
-                                                autoFocus
-                                                className="w-full rounded-full border border-slate-200 py-3 pr-4 pl-11 text-sm text-slate-700 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            <Search className="pointer-events-none absolute top-1/2 left-4 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                            <GooglePlacesAutocomplete
+                                                apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}
+                                                selectProps={{
+                                                    placeholder: "Search delivery location",
+                                                    autoFocus: true,
+                                                    isClearable: true,
+                                                    className: "w-full text-sm",
+                                                    classNamePrefix: "location-places",
+                                                    noOptionsMessage: () => "No locations found",
+                                                    loadingMessage: () => "Searching…",
+                                                    menuPortalTarget:
+                                                        typeof document !== "undefined"
+                                                            ? document.body
+                                                            : null,
+                                                    menuPosition: "fixed",
+                                                    components: {
+                                                        DropdownIndicator: () => null,
+                                                        IndicatorSeparator: () => null,
+                                                    },
+                                                    styles: {
+                                                        container: (base) => ({
+                                                            ...base,
+                                                            width: "100%",
+                                                        }),
+                                                        control: (base, state) => ({
+                                                            ...base,
+                                                            minHeight: 48,
+                                                            borderRadius: 9999,
+                                                            borderWidth: 1,
+                                                            borderColor: state.isFocused
+                                                                ? "#2f3adf"
+                                                                : "#e2e8f0",
+                                                            boxShadow: state.isFocused
+                                                                ? "0 0 0 3px rgba(47, 58, 223, 0.15)"
+                                                                : "none",
+                                                            backgroundColor: "#fff",
+                                                            paddingLeft: 36,
+                                                            paddingRight: 4,
+                                                            cursor: "text",
+                                                            transition:
+                                                                "border-color 0.15s ease, box-shadow 0.15s ease",
+                                                            "&:hover": {
+                                                                borderColor: state.isFocused
+                                                                    ? "#2f3adf"
+                                                                    : "#cbd5e1",
+                                                            },
+                                                        }),
+                                                        valueContainer: (base) => ({
+                                                            ...base,
+                                                            padding: "2px 8px",
+                                                        }),
+                                                        input: (base) => ({
+                                                            ...base,
+                                                            margin: 0,
+                                                            fontWeight: 500,
+                                                            padding: 0,
+                                                            color: "#334155",
+                                                            fontSize: "0.875rem",
+                                                        }),
+                                                        placeholder: (base) => ({
+                                                            ...base,
+                                                            color: "#94a3b8",
+                                                            fontSize: "0.875rem",
+                                                            fontWeight: 500,
+                                                        }),
+                                                        singleValue: (base) => ({
+                                                            ...base,
+                                                            color: "#334155",
+                                                            fontSize: "0.875rem",
+                                                            fontWeight: 500,
+                                                        }),
+                                                        clearIndicator: (base) => ({
+                                                            ...base,
+                                                            color: "#94a3b8",
+                                                            padding: 6,
+                                                            cursor: "pointer",
+                                                            "&:hover": {
+                                                                color: "#64748b",
+                                                            },
+                                                        }),
+                                                        menu: (base) => ({
+                                                            ...base,
+                                                            marginTop: 8,
+                                                            borderRadius: 16,
+                                                            fontWeight: 500,
+                                                            overflow: "hidden",
+                                                            border: "1px solid #e2e8f0",
+                                                            boxShadow:
+                                                                "0 12px 40px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06)",
+                                                            zIndex: 200,
+                                                        }),
+                                                        menuPortal: (base) => ({
+                                                            ...base,
+                                                            zIndex: 200,
+                                                        }),
+                                                        menuList: (base) => ({
+                                                            ...base,
+                                                            padding: 6,
+                                                            maxHeight: 240,
+                                                            fontWeight: 500,
+                                                        }),
+                                                        option: (base, state) => ({
+                                                            ...base,
+                                                            borderRadius: 10,
+                                                            padding: "10px 12px",
+                                                            fontSize: "0.875rem",
+                                                            lineHeight: 1.35,
+                                                            fontFamily: "var(--font-heading)",
+                                                            cursor: "pointer",
+                                                            backgroundColor: state.isSelected
+                                                                ? "#2f3adf"
+                                                                : state.isFocused
+                                                                    ? "rgba(47, 58, 223, 0.08)"
+                                                                    : "transparent",
+                                                            color: state.isSelected
+                                                                ? "#fff"
+                                                                : "#334155",
+                                                            fontWeight: state.isSelected
+                                                                ? 600
+                                                                : 500,
+                                                            ":active": {
+                                                                backgroundColor: state.isSelected
+                                                                    ? "#2530b8"
+                                                                    : "rgba(47, 58, 223, 0.12)",
+                                                            },
+                                                        }),
+                                                        noOptionsMessage: (base) => ({
+                                                            ...base,
+                                                            color: "#94a3b8",
+                                                            fontSize: "0.875rem",
+                                                            padding: "12px",
+                                                            fontWeight: 500,
+                                                        }),
+                                                        loadingMessage: (base) => ({
+                                                            ...base,
+                                                            color: "#94a3b8",
+                                                            fontSize: "0.875rem",
+                                                            padding: "12px",
+                                                            fontWeight: 500,
+                                                        }),
+                                                    },
+                                                    onChange: (place) => {
+                                                        if (!place) return;
+                                                        const next =
+                                                            typeof place.label === "string"
+                                                                ? place.label
+                                                                : String(place.label ?? "");
+                                                        if (!next) return;
+                                                        dispatch(setAddress(next));
+                                                        setOpen(false);
+                                                    },
+                                                }}
                                             />
                                         </div>
                                     </div>

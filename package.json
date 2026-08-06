@@ -23,6 +23,7 @@
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-google-places-autocomplete": "^4.1.0",
     "react-hook-form": "^7.81.0",
     "react-hot-toast": "^2.6.0",
     "react-redux": "^9.3.0",
