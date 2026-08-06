@@ -67,8 +67,8 @@ export default function ListingCard({
     };
 
     return (
-        <div className="group flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform">
-            <div className="relative aspect-12/11 w-full overflow-hidden rounded-2xl bg-slate-100 shadow-none transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.28)]">
+        <div className="group flex cursor-pointer flex-col will-change-transform">
+            <div className="relative aspect-12/11 w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-100">
                 <Link href={`/listing/${listing.id}`} className="absolute inset-0 block">
                     {listing.imageUrl ? (
                         <Image
@@ -76,13 +76,13 @@ export default function ListingCard({
                             alt={listing.title || "No image"}
                             fill
                             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
+                            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
                         />
                     ) : null}
                 </Link>
 
                 {listing.isFavorite && (
-                    <span className="pointer-events-none absolute top-3 left-3 z-10 rounded-full bg-black/30 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-lg">
+                    <span className="pointer-events-none absolute top-3 left-3 z-10 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold tracking-wide text-slate-800 shadow-sm backdrop-blur-md">
                         Featured
                     </span>
                 )}
@@ -91,7 +91,7 @@ export default function ListingCard({
                     type="button"
                     onClick={handleToggleLike}
                     aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                    className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-md transition-colors sm:top-2.5 sm:right-2.5 sm:h-8 sm:w-8 md:h-9 md:w-9 ${inWishlist ? "bg-white shadow-sm" : "bg-black/35 hover:bg-black/45"
+                    className={`absolute top-2 right-2 z-10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full backdrop-blur-md transition-all duration-200 sm:top-2.5 sm:right-2.5 sm:h-8 sm:w-8 md:h-9 md:w-9 ${inWishlist ? "bg-white shadow-sm" : "bg-black/35 hover:bg-black/50"
                         }`}
                 >
                     <Heart
@@ -102,9 +102,11 @@ export default function ListingCard({
                 </button>
             </div>
 
-            <Link href={`/listing/${listing.id}`} className="flex flex-1 flex-col pt-3">
-                <p className="min-h-4 truncate text-[11px] text-slate-500 sm:text-xs">{listing.metadata}</p>
-                <h3 className="mt-1 truncate text-sm font-bold text-slate-900 sm:text-[15px]">
+            <Link href={`/listing/${listing.id}`} className="flex flex-1 flex-col pt-3.5">
+                <p className="min-h-4 truncate text-[11px] font-medium tracking-wide text-slate-400 uppercase sm:text-xs">
+                    {listing.metadata}
+                </p>
+                <h3 className="mt-1 truncate text-sm font-bold tracking-tight text-slate-900 transition-colors duration-200 group-hover:text-primary sm:text-[15px]">
                     {listing.title}
                 </h3>
                 <p className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-500 sm:text-xs">
@@ -113,10 +115,10 @@ export default function ListingCard({
                 </p>
 
                 <div className="mt-2.5 flex items-center justify-between gap-2 sm:mt-3">
-                    <p className="truncate text-sm font-extrabold text-slate-900 sm:text-[15px]">
+                    <p className="truncate text-sm font-extrabold tracking-tight text-slate-900 sm:text-[15px]">
                         {formatPrice(listing.price, listing.currency)}
                     </p>
-                    <p className="shrink-0 text-[11px] text-slate-500 sm:text-xs">
+                    <p className="shrink-0 text-[11px] text-slate-400 sm:text-xs">
                         {listing.postedAtLabel || listing.postedAt}
                     </p>
                 </div>

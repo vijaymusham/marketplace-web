@@ -3,11 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { slugify } from "@/lib/slug";
-import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
+import { Stagger, StaggerItem } from "@/components/animations/Motion";
 import { useQuery } from "@tanstack/react-query";
 import { getPopularCities } from "../api/apis";
 import type { ApiCity } from "../types/AllTypes";
 import { CITY_ROW, WithSkeleton } from "../ui/Skeleton";
+import SectionHeader from "./SectionHeader";
 
 export default function CityExplorer() {
     const { data, isLoading } = useQuery({
@@ -16,18 +17,24 @@ export default function CityExplorer() {
     });
 
     return (
-        <section>
-            <div className="mx-auto max-w-7xl px-4 pt-4 pb-2 sm:px-6 sm:pt-5 sm:pb-3 lg:px-8 lg:pt-6 lg:pb-4">
-                <Enter>
-                    <h2 className="font-heading text-lg font-extrabold text-slate-900 sm:text-xl md:text-2xl">
-                        Quick and easy deal finder
-                    </h2>
-                    <p className="mt-0.5 text-[13px] font-medium text-slate-500 sm:mt-1 sm:text-sm md:text-[15px]">
-                        Pick a vibe and explore the top deals across India
-                    </p>
-                </Enter>
+        <section className="relative">
+            <div className="mx-auto max-w-7xl px-4 pt-6 pb-3 sm:px-6 sm:pt-8 sm:pb-4 lg:px-8 lg:pt-10">
+                <SectionHeader
+                    eyebrow="Explore nearby"
+                    title="Quick and easy deal finder"
+                    description="Pick a city and explore the top deals across India"
+                />
 
-                <div className="relative mt-3 sm:mt-4">
+                <div className="relative mt-5 sm:mt-6">
+                    <div
+                        aria-hidden
+                        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-white to-transparent"
+                    />
+                    <div
+                        aria-hidden
+                        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-linear-to-l from-white to-transparent sm:w-12"
+                    />
+
                     <WithSkeleton
                         loading={isLoading}
                         count={12}
@@ -58,7 +65,7 @@ export default function CityExplorer() {
                                                 distanceLabel: city.distanceLabel,
                                             },
                                         }}
-                                        className="group block"
+                                        className="group block cursor-pointer"
                                     >
                                         <div className="relative aspect-square w-full overflow-hidden rounded-full bg-white/70">
                                             <Image
@@ -69,10 +76,10 @@ export default function CityExplorer() {
                                                 className="rounded-full border-2 border-dotted border-orange-500 object-cover p-0.5 transition-transform duration-500 group-hover:scale-105 sm:p-1"
                                             />
                                         </div>
-                                        <p className="mt-1.5 truncate text-center text-[12px] font-bold text-slate-900 sm:mt-2 sm:text-sm">
+                                        <p className="mt-2 truncate text-center text-[12px] font-bold text-slate-900 sm:mt-2.5 sm:text-sm">
                                             {city.name || "No name"}
                                         </p>
-                                        <p className="mt-px text-center text-[11px] font-medium text-slate-500 sm:mt-0.5 sm:text-[13px]">
+                                        <p className="mt-px text-center text-[11px] font-medium text-slate-500 sm:text-[13px]">
                                             {city.distanceLabel || "No distance label"}
                                         </p>
                                     </Link>

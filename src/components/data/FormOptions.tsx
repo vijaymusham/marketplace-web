@@ -423,6 +423,11 @@ export const fashionSizeOptions = [
     { value: "Free Size", label: "Free Size" },
 ];
 
+export const footwearSizeOptions = Array.from({ length: 10 }, (_, i) => {
+    const size = String(i + 3);
+    return { value: size, label: size };
+});
+
 export const petTypeOptions = [
     { value: "Dogs", label: "Dogs" },
     { value: "Cats", label: "Cats" },

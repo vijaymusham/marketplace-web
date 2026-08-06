@@ -64,7 +64,7 @@ export type SellFormValues = {
     model: string;
     variant: string;
     year: string;
-    fuel: string;
+    fuelType: string;
     transmission: string;
     kmsDriven: string;
     ownerType: string;
@@ -98,6 +98,7 @@ export type SellFormValues = {
     carParking: string;
     parking: string;
     facing: string;
+    subType: string;
     projectName: string;
     projectStatus: string;
     plotArea: string;
@@ -127,6 +128,7 @@ export type SellFormValues = {
     material: string;
 
     // Fashion
+    wear: string;
     size: string;
     gender: string;
 
@@ -169,10 +171,10 @@ export const emptySellFormValues: SellFormValues = {
     model: "",
     variant: "",
     year: "",
-    fuel: "",
+    fuelType: "",
     transmission: "",
     kmsDriven: "",
-    ownerType: "first",
+    ownerType: "",
     insuranceValidTill: "",
     registrationState: "",
     color: "",
@@ -223,6 +225,7 @@ export const emptySellFormValues: SellFormValues = {
     furnitureType: "",
     material: "",
     size: "",
+    wear: "",
     gender: "",
     petType: "",
     breed: "",

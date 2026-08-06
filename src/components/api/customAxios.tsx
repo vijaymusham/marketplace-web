@@ -146,7 +146,11 @@ function getErrorMessage(error: AxiosError): string {
     }
 
     const data = error.response.data as
-        | { message?: string; error?: string; errors?: string[] }
+        | {
+              message?: string;
+              error?: string;
+              errors?: Array<string | { field?: string; message?: string }>;
+          }
         | string
         | undefined;
 
@@ -155,7 +159,20 @@ function getErrorMessage(error: AxiosError): string {
     if (data && typeof data === "object") {
         if (data.message) return data.message;
         if (data.error) return data.error;
-        if (Array.isArray(data.errors) && data.errors[0]) return data.errors[0];
+        if (Array.isArray(data.errors) && data.errors.length > 0) {
+            const parts = data.errors
+                .map((item) => {
+                    if (typeof item === "string") return item;
+                    if (item && typeof item === "object" && item.message) {
+                        return item.field
+                            ? `${item.field}: ${item.message}`
+                            : item.message;
+                    }
+                    return null;
+                })
+                .filter(Boolean);
+            if (parts.length) return parts.join(" · ");
+        }
     }
 
     switch (error.response.status) {

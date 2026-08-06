@@ -71,7 +71,7 @@ export const categories: Category[] = [
     name: "Fashion",
     icon: FashionIcon,
     image: img("fashion", 104),
-    subcategories: ["Men", "Women", "Kids"],
+    subcategories: ["Men", "Women", "Kids", "Footwear", "Fashion Accessories"],
   },
   {
     name: "Vehicles",

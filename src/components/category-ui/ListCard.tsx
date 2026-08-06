@@ -18,7 +18,7 @@ export default function ListCard({
             href={`/listing/${listing.id}`}
             className="group flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform "
         >
-            <div className="relative aspect-square overflow-hidden rounded-[1.35rem] bg-[#f3f3f3] shadow-none transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.25)]">
+            <div className="relative aspect-square overflow-hidden rounded-[1.35rem] bg-[#f3f3f3]">
                 <Image
                     src={listing.image || "/no_image.jpeg"}
                     alt={listing.title || "No image"}

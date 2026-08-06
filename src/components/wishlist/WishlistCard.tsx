@@ -14,7 +14,7 @@ export default function WishlistCard({
     onRemove: () => void;
 }) {
     return (
-        <article className="group grid grid-cols-1 overflow-hidden rounded-3xl bg-slate-50 transition-colors duration-300 hover:bg-slate-100/80 sm:grid-cols-[11rem_1fr]">
+        <article className="group grid grid-cols-1 overflow-hidden rounded-3xl bg-slate-50 sm:grid-cols-[11rem_1fr]">
             <Link
                 href={`/listing/${listing.id}`}
                 className="relative aspect-4/3 sm:aspect-auto sm:min-h-full"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Enter, Stagger, StaggerItem } from "@/components/animations/Motion";
+import { Stagger, StaggerItem } from "@/components/animations/Motion";
 import { useQuery } from "@tanstack/react-query";
 import { getFreshAds } from "../api/apis";
 import ListingCard from "../sections/ListingCard";
@@ -9,6 +9,7 @@ import {
     WithSkeleton,
 } from "@/components/ui/Skeleton";
 import type { ApiAd, ApiFreshRecommendation } from "../types/AllTypes";
+import SectionHeader from "./SectionHeader";
 
 function toListingCard(listing: ApiFreshRecommendation): ApiAd {
     return {
@@ -32,17 +33,15 @@ export default function FreshRecommendations() {
     });
 
     return (
-        <section className="mx-auto max-w-7xl px-4 pt-5 pb-8 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
-            <Enter>
-                <h2 className="font-heading text-xl font-extrabold text-slate-900 sm:text-2xl">
-                    Fresh recommendations
-                </h2>
-                <p className="mt-1 text-sm text-slate-600 sm:text-[15px]">
-                    Handpicked deals near you. Updated daily
-                </p>
-            </Enter>
+        <section className="mx-auto max-w-7xl px-4 pt-6 pb-10 sm:px-6 sm:pt-8 sm:pb-12 lg:px-8 lg:pt-9">
+            <SectionHeader
+                eyebrow="Just listed"
+                title="Fresh recommendations"
+                description="Handpicked deals near you. Updated daily"
+                showDivider
+            />
 
-            <div className="mt-6">
+            <div className="mt-7 sm:mt-8">
                 <WithSkeleton
                     loading={isLoading}
                     count={10}

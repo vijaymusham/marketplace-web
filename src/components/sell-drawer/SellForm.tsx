@@ -26,6 +26,8 @@ import {
     AccessoriesForm,
     ACsForm,
     BedsWardrobesForm,
+    FashionAccessoriesForm,
+    FootwearForm,
     BicyclesForm,
     BooksForm,
     CamerasLensesForm,
@@ -77,13 +79,13 @@ import {
     SofaDiningForm,
     SparePartsForm,
     SportsEquipmentForm,
-    TabletsForm,
     ToursTravelForm,
     ToysForm,
     TVsVideoAudioForm,
+    TwoWheelerSparePartsForm,
     WashingMachinesForm,
-    WomenForm,
     // JobsForm,
+    WomenForm,
 } from "./FormBySubCategory";
 import { yesNoOptions } from "@/components/data/FormOptions";
 import { uploadToS3 } from "@/constant/helper/s3Upload";
@@ -442,10 +444,12 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
         switch (selectedSubcategory) {
             // Mobiles & Tablets
             case "Mobile Phones":
+            case "Mobiles":
                 return <MobilePhonesForm {...subFormProps} />;
             case "Tablets":
-                return <TabletsForm {...subFormProps} />;
+                return <MobilePhonesForm {...subFormProps} />;
             case "Accessories":
+            case "Mobile Accessories":
                 return <AccessoriesForm {...subFormProps} />;
             case "Smart Watches":
                 return <SmartWatchesForm {...subFormProps} />;
@@ -491,8 +495,12 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                 return <WomenForm {...subFormProps} />;
             case "Kids":
                 return <KidsForm {...subFormProps} />;
+            case "Footwear":
+                return <FootwearForm {...subFormProps} />;
+            case "Fashion Accessories":
+                return <FashionAccessoriesForm {...subFormProps} />;
 
-            // Vehicles
+            // Vehicles / Bikes
             case "Cars":
                 return <CarsForm {...subFormProps} />;
             case "Motorcycles":
@@ -503,6 +511,10 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                 return <BicyclesForm {...subFormProps} />;
             case "Spare Parts":
                 return <SparePartsForm {...subFormProps} />;
+            case "2-Wheeler Spare Parts":
+                return <TwoWheelerSparePartsForm {...subFormProps} />;
+            case "Trucks":
+                return <CarsForm {...subFormProps} />;
             case "Commercial & Other Vehicles":
                 return <CommercialOtherVehiclesForm {...subFormProps} />;
 

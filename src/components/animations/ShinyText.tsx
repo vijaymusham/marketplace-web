@@ -25,8 +25,8 @@ export default function ShinyText({
     disabled = false,
     speed = 2,
     className = "",
-    color = "#b5b5b5",
-    shineColor = "#ffffff",
+    color = "var(--color-primary)",
+    shineColor = "var(--color-secondary)",
     spread = 120,
     yoyo = false,
     pauseOnHover = false,
@@ -120,7 +120,7 @@ export default function ShinyText({
             onMouseLeave={handleMouseLeave}
         >
             {icon}
-            <motion.span className="shiny-text" style={{ ...gradientStyle, backgroundPosition }}>
+            <motion.span className="shiny-text font-semibold tracking-tight text-sm" style={{ ...gradientStyle, backgroundPosition }}>
                 {text}
             </motion.span>
         </span>

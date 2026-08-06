@@ -17,6 +17,7 @@ import {
     facingOptions,
     fashionGenderOptions,
     fashionSizeOptions,
+    footwearSizeOptions,
     fuelTypeOptions,
     furnitureTypeOptions,
     furnishingApiOptions,
@@ -267,16 +268,18 @@ export function MobilePhonesForm({ control, register, errors }: SubFormProps) {
     );
 }
 
-export function TabletsForm({ control, register, errors }: SubFormProps) {
+
+export function AccessoriesForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
-            <ChoiceChips
-                label="Type"
-                name="type"
+            <EmptySelect
+                data={mobileBrandOptions}
+                label="Brand"
+                name="brand"
                 control={control}
                 required
-                options={["iPads", "Samsung", "Other Tablets"]}
-                error={errors.type?.message}
+                error={errors.brand?.message}
+                placeholder="Select Brand"
             />
             <TextInput
                 label="Model"
@@ -284,7 +287,7 @@ export function TabletsForm({ control, register, errors }: SubFormProps) {
                 register={register}
                 required
                 error={errors.model?.message}
-                placeholder="e.g. Watch Series 9"
+                placeholder="e.g. Charger"
             />
             <ChoiceChips
                 label="Condition"
@@ -294,28 +297,21 @@ export function TabletsForm({ control, register, errors }: SubFormProps) {
                 options={conditionOptions}
                 error={errors.condition?.message}
             />
-        </SubFormGrid>
-    );
-}
-
-export function AccessoriesForm({ control, errors }: SubFormProps) {
-    return (
-        <SubFormGrid>
             <ChoiceChips
-                label="Type"
-                name="type"
+                label="Warranty Available"
+                name="warrantyAvailable"
                 control={control}
                 required
-                options={["Mobile", "Tablets"]}
-                error={errors.type?.message}
+                options={yesNoOptions}
+                error={errors.warrantyAvailable?.message}
             />
             <ChoiceChips
-                label="Condition"
-                name="condition"
+                label="Bill Available"
+                name="billAvailable"
                 control={control}
                 required
-                options={conditionOptions}
-                error={errors.condition?.message}
+                options={yesNoOptions}
+                error={errors.billAvailable?.message}
             />
         </SubFormGrid>
     );
@@ -341,12 +337,35 @@ export function SmartWatchesForm({ control, register, errors }: SubFormProps) {
                 placeholder="e.g. Watch Series 9"
             />
             <ChoiceChips
+                label="Storage"
+                name="storage"
+                control={control}
+                options={storageOptions}
+                error={errors.storage?.message}
+            />
+            <ChoiceChips
                 label="Condition"
                 name="condition"
                 control={control}
                 required
                 options={conditionOptions}
                 error={errors.condition?.message}
+            />
+            <ChoiceChips
+                label="Warranty Available"
+                name="warrantyAvailable"
+                control={control}
+                required
+                options={yesNoOptions}
+                error={errors.warrantyAvailable?.message}
+            />
+            <ChoiceChips
+                label="Bill Available"
+                name="billAvailable"
+                control={control}
+                required
+                options={yesNoOptions}
+                error={errors.billAvailable?.message}
             />
         </SubFormGrid>
     );
@@ -513,11 +532,11 @@ function FashionBaseForm({
     return (
         <SubFormGrid>
             <TextInput
-                label="Category"
-                name="type"
+                label="Type of Wear"
+                name="wear"
                 register={register}
                 required
-                error={errors.type?.message}
+                error={errors.wear?.message}
                 placeholder={defaultGender ? `${defaultGender} wear` : "e.g. T-Shirt"}
             />
             <TextInput
@@ -566,6 +585,92 @@ export function KidsForm(props: SubFormProps) {
     return <FashionBaseForm {...props} defaultGender="Kids" />;
 }
 
+export function FootwearForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <TextInput
+                label="Type of Wear"
+                name="wear"
+                register={register}
+                required
+                error={errors.wear?.message}
+                placeholder="e.g. Sneakers"
+            />
+            <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
+                required
+                error={errors.brand?.message}
+                placeholder="e.g. Nike"
+            />
+            <ChoiceChips
+                label="Size"
+                name="size"
+                control={control}
+                required
+                options={footwearSizeOptions}
+                error={errors.size?.message}
+            />
+            <ChoiceChips
+                label="Gender"
+                name="gender"
+                control={control}
+                required
+                options={fashionGenderOptions}
+                error={errors.gender?.message}
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
+
+export function FashionAccessoriesForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <TextInput
+                label="Type of Wear"
+                name="wear"
+                register={register}
+                required
+                error={errors.wear?.message}
+                placeholder="e.g. Watch, Belt, Bag"
+            />
+            <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
+                required
+                error={errors.brand?.message}
+                placeholder="e.g. Fossil"
+            />
+            <ChoiceChips
+                label="Gender"
+                name="gender"
+                control={control}
+                required
+                options={fashionGenderOptions}
+                error={errors.gender?.message}
+            />
+            <ChoiceChips
+                label="Condition"
+                name="condition"
+                control={control}
+                required
+                options={conditionOptions}
+                error={errors.condition?.message}
+            />
+        </SubFormGrid>
+    );
+}
+
 // ─── Vehicles ────────────────────────────────────────────────────────────────
 
 export function CarsForm({ control, register, errors }: SubFormProps) {
@@ -606,12 +711,12 @@ export function CarsForm({ control, register, errors }: SubFormProps) {
                 type="number"
             />
             <ChoiceChips
-                label="Fuel"
-                name="fuel"
+                label="Fuel Type"
+                name="fuelType"
                 control={control}
                 required
                 options={fuelTypeOptions}
-                error={errors.fuel?.message}
+                error={errors.fuelType?.message}
             />
             <ChoiceChips
                 label="Transmission"
@@ -822,13 +927,29 @@ export function SparePartsForm({ control, register, errors }: SubFormProps) {
                 error={errors.model?.message}
                 placeholder="Part / model name"
             />
-            <ChoiceChips
-                label="Condition"
-                name="condition"
-                control={control}
+        </SubFormGrid>
+    );
+}
+
+/** Bikes → 2-Wheeler Spare Parts (API requires brand/model/year/kmsDriven). */
+export function TwoWheelerSparePartsForm({ control, register, errors }: SubFormProps) {
+    return (
+        <SubFormGrid>
+            <TextInput
+                label="Brand"
+                name="brand"
+                register={register}
                 required
-                options={conditionOptions}
-                error={errors.condition?.message}
+                error={errors.brand?.message}
+                placeholder="e.g. Bosch"
+            />
+            <TextInput
+                label="Model"
+                name="model"
+                register={register}
+                required
+                error={errors.model?.message}
+                placeholder="Part / model name"
             />
         </SubFormGrid>
     );
@@ -898,6 +1019,14 @@ export function CommercialOtherVehiclesForm({ control, register, errors }: SubFo
 function BooksSportsBaseForm({ control, errors }: SubFormProps) {
     return (
         <SubFormGrid>
+            {/* <TextInput
+                label="subcategory"
+                name="subcategory"
+                register={register}
+                required
+                error={errors.subcategory?.message}
+                placeholder="e.g. Books, Sports Equipment, Cycling"
+            /> */}
             <ChoiceChips
                 label="Condition"
                 name="condition"
@@ -950,18 +1079,14 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
                 error={errors.listingType?.message}
             />
             <ChoiceChips
-                label="Type"
-                name="type"
+                label="Property Type"
+                name="propertyType"
                 control={control}
                 required
                 options={[
-                    "Flats / Apartments",
-                    "Farm House",
-                    "House & Villa",
-                    "Independent / Builder Floors",
-                    "Duplex",
+                    "apartment", "independent_house", "villa", "plot", "farmhouse", "pg", "office", "shop"
                 ]}
-                error={errors.type?.message}
+                error={errors.propertyType?.message}
             />
             <ChoiceChips
                 label="BHK"
@@ -987,23 +1112,10 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
                 options={furnishingApiOptions}
                 error={errors.furnishing?.message}
             />
-            <ChoiceChips
-                label="Project Status"
-                name="projectStatus"
-                control={control}
-                options={["New Launch", "Ready to Move", "Under Construction"]}
-                error={errors.projectStatus?.message}
-            />
-            <ChoiceChips
-                label="Listed by"
-                name="listedBy"
-                control={control}
-                options={["Builder", "Dealer", "Owner"]}
-                error={errors.listedBy?.message}
-            />
             <TextInput
                 label="Super Builtup area (sqft)"
                 name="superBuiltupArea"
+                type="number"
                 register={register}
                 required
                 error={errors.superBuiltupArea?.message}
@@ -1012,21 +1124,16 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
             <TextInput
                 label="Carpet Area (sqft)"
                 name="carpetArea"
+                type="number"
                 register={register}
                 required
                 error={errors.carpetArea?.message}
                 placeholder="e.g. 950"
             />
             <TextInput
-                label="Maintenance (Monthly)"
-                name="maintenance"
-                register={register}
-                error={errors.maintenance?.message}
-                placeholder="e.g. 2000"
-            />
-            <TextInput
                 label="Total Floors"
                 name="totalFloors"
+                type="number"
                 register={register}
                 error={errors.totalFloors?.message}
                 placeholder="e.g. 10"
@@ -1034,6 +1141,7 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
             <TextInput
                 label="Floor No"
                 name="floorNo"
+                type="number"
                 register={register}
                 error={errors.floorNo?.message}
                 placeholder="e.g. 3"
@@ -1077,17 +1185,14 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
                 error={errors.listingType?.message}
             />
             <ChoiceChips
-                label="Type"
-                name="type"
+                label="Property Type"
+                name="propertyType"
                 control={control}
                 required
                 options={[
-                    "Flats / Apartments",
-                    "Individual House / Villa",
-                    "Independent / Builder Floors",
-                    "Duplex",
+                    "apartment", "independent_house", "villa", "plot", "farmhouse", "pg", "office", "shop"
                 ]}
-                error={errors.type?.message}
+                error={errors.propertyType?.message}
             />
             <ChoiceChips
                 label="BHK"
@@ -1113,16 +1218,10 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
                 options={furnishingApiOptions}
                 error={errors.furnishing?.message}
             />
-            <ChoiceChips
-                label="Listed by"
-                name="listedBy"
-                control={control}
-                options={["Builder", "Dealer", "Owner"]}
-                error={errors.listedBy?.message}
-            />
             <TextInput
                 label="Super Builtup area (sqft)"
                 name="superBuiltupArea"
+                type="number"
                 register={register}
                 required
                 error={errors.superBuiltupArea?.message}
@@ -1131,10 +1230,27 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
             <TextInput
                 label="Carpet Area (sqft)"
                 name="carpetArea"
+                type="number"
                 register={register}
                 required
                 error={errors.carpetArea?.message}
                 placeholder="e.g. 950"
+            />
+            <TextInput
+                label="Total Floors"
+                name="totalFloors"
+                type="number"
+                register={register}
+                error={errors.totalFloors?.message}
+                placeholder="e.g. 10"
+            />
+            <TextInput
+                label="Floor No"
+                name="floorNo"
+                type="number"
+                register={register}
+                error={errors.floorNo?.message}
+                placeholder="e.g. 3"
             />
             <ChoiceChips
                 label="Bachelors Allowed"
@@ -1146,23 +1262,10 @@ export function ForRentHousesApartmentsForm({ control, register, errors }: SubFo
             <TextInput
                 label="Maintenance (Monthly)"
                 name="maintenance"
+                type="number"
                 register={register}
                 error={errors.maintenance?.message}
                 placeholder="e.g. 2000"
-            />
-            <TextInput
-                label="Total Floors"
-                name="totalFloors"
-                register={register}
-                error={errors.totalFloors?.message}
-                placeholder="e.g. 10"
-            />
-            <TextInput
-                label="Floor No"
-                name="floorNo"
-                register={register}
-                error={errors.floorNo?.message}
-                placeholder="e.g. 3"
             />
             <ChoiceChips
                 label="Car Parking"
@@ -1195,12 +1298,12 @@ export function LandsPlotsForm({ control, register, errors }: SubFormProps) {
     return (
         <SubFormGrid>
             <ChoiceChips
-                label="Type"
-                name="type"
+                label="Listing Type"
+                name="listingType"
                 control={control}
                 required
-                options={["For Rent", "For Sale"]}
-                error={errors.type?.message}
+                options={listingTypeOptions}
+                error={errors.listingType?.message}
             />
             <ChoiceChips
                 label="Listed by"
@@ -1210,23 +1313,26 @@ export function LandsPlotsForm({ control, register, errors }: SubFormProps) {
                 error={errors.listedBy?.message}
             />
             <TextInput
-                label="Plot Area"
+                label="Plot Area (in square feet)"
                 name="plotArea"
+                type="number"
                 register={register}
                 required
                 error={errors.plotArea?.message}
-                placeholder="e.g. 1500"
+                placeholder="e.g. 1500 (in square feet)"
             />
             <TextInput
-                label="Length"
+                label="Length (in feet)"
                 name="length"
+                type="number"
                 register={register}
                 error={errors.length?.message}
                 placeholder="Length"
             />
             <TextInput
-                label="Breadth"
+                label="Breadth (in feet)"
                 name="breadth"
+                type="number"
                 register={register}
                 error={errors.breadth?.message}
                 placeholder="Breadth"
@@ -1296,6 +1402,7 @@ export function ForSaleNewProjectsPropertiesForm({
             <TextInput
                 label="Carpet Area (sqft)"
                 name="carpetArea"
+                type="number"
                 register={register}
                 required
                 error={errors.carpetArea?.message}
@@ -1304,6 +1411,7 @@ export function ForSaleNewProjectsPropertiesForm({
             <TextInput
                 label="Super Builtup area (sqft)"
                 name="superBuiltupArea"
+                type="number"
                 register={register}
                 required
                 error={errors.superBuiltupArea?.message}
@@ -1320,6 +1428,7 @@ export function ForSaleNewProjectsPropertiesForm({
                 label="RERA Registration no"
                 name="reraNo"
                 register={register}
+                type="number"
                 error={errors.reraNo?.message}
                 placeholder="RERA number"
             />
@@ -1336,7 +1445,8 @@ export function ForSaleNewProjectsPropertiesForm({
                 name="projectLaunchYear"
                 register={register}
                 required
-                error={errors.carpetArea?.message}
+                type="number"
+                error={errors.expectedPossessionYear?.message}
                 placeholder="e.g. 2026"
             />
             <EmptySelect
@@ -1352,6 +1462,7 @@ export function ForSaleNewProjectsPropertiesForm({
                 name="expectedPossessionYear"
                 register={register}
                 required
+                type="number"
                 error={errors.expectedPossessionYear?.message}
                 placeholder="e.g. 2026"
             />
@@ -1360,6 +1471,7 @@ export function ForSaleNewProjectsPropertiesForm({
                 name="priceFrom"
                 register={register}
                 required
+                type="number"
                 error={errors.priceFrom?.message}
                 placeholder="e.g. 5000000"
             />
@@ -1367,6 +1479,7 @@ export function ForSaleNewProjectsPropertiesForm({
                 label="Price to"
                 name="priceTo"
                 register={register}
+                type="number"
                 error={errors.priceTo?.message}
                 placeholder="e.g. 8000000"
             />
@@ -1389,20 +1502,21 @@ export function ForSaleNewProjectsPropertiesForm({
                 label="No. of Towers"
                 name="noOfTowers"
                 control={control}
-                options={["1 to 3", "3 to 5", "5 to 10", "10 Plus"]}
+                options={["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"]}
                 error={errors.noOfTowers?.message}
             />
             <ChoiceChips
                 label="No. of Floors"
                 name="noOfFloors"
                 control={control}
-                options={["1 to 5", "6 to 10", "11 to 20", "20+"]}
+                options={["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"]}
                 error={errors.noOfFloors?.message}
             />
             <TextInput
                 label="Total Units"
                 name="totalUnits"
                 register={register}
+                type="number"
                 error={errors.totalUnits?.message}
                 placeholder="e.g. 200"
             />
@@ -1422,41 +1536,80 @@ export function ForRentShopsOfficesForm({ control, register, errors }: SubFormPr
     return (
         <SubFormGrid>
             <ChoiceChips
+                label="Listing Type"
+                name="listingType"
+                control={control}
+                required
+                options={["rent"]}
+                error={errors.listingType?.message}
+            />
+            <ChoiceChips
+                label="Property Type"
+                name="propertyType"
+                control={control}
+                required
+                options={[
+                    "apartment", "office", "shop"
+                ]}
+                error={errors.propertyType?.message}
+            />
+            <ChoiceChips
+                label="Bathrooms"
+                name="bathrooms"
+                control={control}
+                required
+                options={["1", "2", "3", "4", "4+"]}
+                error={errors.bathrooms?.message}
+            />
+            <ChoiceChips
                 label="Furnishing"
                 name="furnishing"
                 control={control}
+                required
                 options={furnishingApiOptions}
                 error={errors.furnishing?.message}
-            />
-            <ChoiceChips
-                label="Listed by"
-                name="listedBy"
-                control={control}
-                options={["Builder", "Dealer", "Owner"]}
-                error={errors.listedBy?.message}
             />
             <TextInput
                 label="Super Builtup area (sqft)"
                 name="superBuiltupArea"
+                type="number"
                 register={register}
                 required
                 error={errors.superBuiltupArea?.message}
-                placeholder="e.g. 800"
+                placeholder="e.g. 1200"
             />
             <TextInput
                 label="Carpet Area (sqft)"
                 name="carpetArea"
+                type="number"
                 register={register}
                 required
                 error={errors.carpetArea?.message}
-                placeholder="e.g. 650"
+                placeholder="e.g. 950"
+            />
+            <TextInput
+                label="Total Floors"
+                name="totalFloors"
+                type="number"
+                register={register}
+                error={errors.totalFloors?.message}
+                placeholder="e.g. 10"
+            />
+            <TextInput
+                label="Floor No"
+                name="floorNo"
+                type="number"
+                register={register}
+                error={errors.floorNo?.message}
+                placeholder="e.g. 3"
             />
             <TextInput
                 label="Maintenance (Monthly)"
                 name="maintenance"
+                type="number"
                 register={register}
                 error={errors.maintenance?.message}
-                placeholder="e.g. 3000"
+                placeholder="e.g. 2000"
             />
             <ChoiceChips
                 label="Car Parking"
@@ -1465,12 +1618,13 @@ export function ForRentShopsOfficesForm({ control, register, errors }: SubFormPr
                 options={["0", "1", "2", "3+"]}
                 error={errors.parking?.message}
             />
-            <TextInput
-                label="Washrooms"
-                name="washrooms"
-                register={register}
-                error={errors.washrooms?.message}
-                placeholder="e.g. 2"
+            <EmptySelect
+                data={facingOptions}
+                label="Facing"
+                name="facing"
+                control={control}
+                error={errors.facing?.message}
+                placeholder="Select Facing"
             />
             <TextInput
                 label="Project Name"
@@ -1488,48 +1642,72 @@ export function ForSaleShopsOfficesForm({ control, register, errors }: SubFormPr
     return (
         <SubFormGrid>
             <ChoiceChips
+                label="Listing Type"
+                name="listingType"
+                control={control}
+                required
+                options={["sell"]}
+                error={errors.listingType?.message}
+            />
+            <ChoiceChips
+                label="Property Type"
+                name="propertyType"
+                control={control}
+                required
+                options={[
+                    "office", "shop"
+                ]}
+                error={errors.propertyType?.message}
+            />
+            <ChoiceChips
+                label="Bathrooms"
+                name="bathrooms"
+                control={control}
+                required
+                options={["1", "2", "3", "4", "4+"]}
+                error={errors.bathrooms?.message}
+            />
+            <ChoiceChips
                 label="Furnishing"
                 name="furnishing"
                 control={control}
+                required
                 options={furnishingApiOptions}
                 error={errors.furnishing?.message}
-            />
-            <ChoiceChips
-                label="Project Status"
-                name="projectStatus"
-                control={control}
-                options={["New Launch", "Ready to Move", "Under Construction"]}
-                error={errors.projectStatus?.message}
-            />
-            <ChoiceChips
-                label="Listed by"
-                name="listedBy"
-                control={control}
-                options={["Builder", "Dealer", "Owner"]}
-                error={errors.listedBy?.message}
             />
             <TextInput
                 label="Super Builtup area (sqft)"
                 name="superBuiltupArea"
+                type="number"
                 register={register}
                 required
                 error={errors.superBuiltupArea?.message}
-                placeholder="e.g. 800"
+                placeholder="e.g. 1200"
             />
             <TextInput
                 label="Carpet Area (sqft)"
                 name="carpetArea"
+                type="number"
                 register={register}
                 required
                 error={errors.carpetArea?.message}
-                placeholder="e.g. 650"
+                placeholder="e.g. 950"
             />
             <TextInput
-                label="Maintenance (Monthly)"
-                name="maintenance"
+                label="Total Floors"
+                name="totalFloors"
+                type="number"
                 register={register}
-                error={errors.maintenance?.message}
-                placeholder="e.g. 3000"
+                error={errors.totalFloors?.message}
+                placeholder="e.g. 10"
+            />
+            <TextInput
+                label="Floor No"
+                name="floorNo"
+                type="number"
+                register={register}
+                error={errors.floorNo?.message}
+                placeholder="e.g. 3"
             />
             <ChoiceChips
                 label="Car Parking"
@@ -1538,12 +1716,21 @@ export function ForSaleShopsOfficesForm({ control, register, errors }: SubFormPr
                 options={["0", "1", "2", "3+"]}
                 error={errors.parking?.message}
             />
-            <TextInput
-                label="Washrooms"
-                name="washrooms"
-                register={register}
-                error={errors.washrooms?.message}
-                placeholder="e.g. 2"
+            <EmptySelect
+                data={facingOptions}
+                label="Facing"
+                name="facing"
+                control={control}
+                error={errors.facing?.message}
+                placeholder="Select Facing"
+            />
+            <ChoiceChips
+                label="Project Status"
+                name="projectStatus"
+                control={control}
+                required
+                options={["New Launch", "Under Construction"]}
+                error={errors.projectStatus?.message}
             />
             <TextInput
                 label="Project Name"
@@ -1552,7 +1739,6 @@ export function ForSaleShopsOfficesForm({ control, register, errors }: SubFormPr
                 maxLength={70}
                 error={errors.projectName?.message}
                 placeholder="Project name"
-                className="sm:col-span-2"
             />
         </SubFormGrid>
     );
@@ -1562,11 +1748,16 @@ export function PGGuestHousesForm({ control, errors }: SubFormProps) {
     return (
         <SubFormGrid>
             <ChoiceChips
-                label="Subtype"
-                name="subtype"
+                label="Property Type"
+                name="subType"
                 control={control}
-                options={["Guest Houses", "PG", "Roommate"]}
-                error={errors.subtype?.message}
+                required
+                options={[
+                    { value: "guest_house", label: "Guest House" },
+                    { value: "pg", label: "PG" },
+                    { value: "roommate", label: "Roommate" },
+                ]}
+                error={errors.subType?.message}
             />
             <ChoiceChips
                 label="Furnishing"

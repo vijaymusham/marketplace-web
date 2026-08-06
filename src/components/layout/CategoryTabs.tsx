@@ -13,7 +13,17 @@ const PANEL_WIDE = 560;
 const PANEL_NARROW = 320;
 const PANEL_MARGIN = 8;
 
-const EASE = "ease-[cubic-bezier(0.2,0.8,0.2,1)]";
+/** Shared shrink/expand motion — keep nav + spacer in sync */
+const SHRINK_MS = 500;
+const COLLAPSED_H = 48; // 3rem / h-12
+const EXPANDED_H_MOBILE = 96; // 6rem / h-24
+const EXPANDED_H_DESKTOP = 112; // 7rem / h-28
+const EASE_CSS = "cubic-bezier(0.22, 1, 0.36, 1)";
+const HEIGHT_STYLE = {
+    transition: `height ${SHRINK_MS}ms ${EASE_CSS}`,
+} as const;
+const FADE_CLASS =
+    "transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 export default function CategoryTabs() {
     const [collapsed, setCollapsed] = useState(false);
@@ -21,10 +31,12 @@ export default function CategoryTabs() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [panel, setPanel] = useState({ left: 0, width: PANEL_NARROW });
     const [isTouch, setIsTouch] = useState(false);
+    const [expandedH, setExpandedH] = useState(EXPANDED_H_DESKTOP);
     const containerRef = useRef<HTMLDivElement>(null);
     const expandedScrollRef = useRef<HTMLDivElement>(null);
     const collapsedScrollRef = useRef<HTMLDivElement>(null);
     const collapsedRef = useRef(false);
+    const animatingRef = useRef(false);
 
     const { data: apiCategories, isPending } = useQuery({
         queryKey: ["categories"],
@@ -35,31 +47,46 @@ export default function CategoryTabs() {
 
     useEffect(() => {
         const mq = window.matchMedia("(hover: none), (pointer: coarse)");
-        const update = () => setIsTouch(mq.matches || window.innerWidth < 1024);
+        const sm = window.matchMedia("(min-width: 640px)");
+        const update = () => {
+            setIsTouch(mq.matches || window.innerWidth < 1024);
+            setExpandedH(sm.matches ? EXPANDED_H_DESKTOP : EXPANDED_H_MOBILE);
+        };
         update();
         mq.addEventListener("change", update);
+        sm.addEventListener("change", update);
         window.addEventListener("resize", update);
         return () => {
             mq.removeEventListener("change", update);
+            sm.removeEventListener("change", update);
             window.removeEventListener("resize", update);
         };
     }, []);
 
     useEffect(() => {
         let raf = 0;
+        let unlockTimer = 0;
         const onScroll = () => {
             cancelAnimationFrame(raf);
             raf = requestAnimationFrame(() => {
+                if (animatingRef.current) return;
+
                 const collapseAt = window.innerHeight * 0.28;
-                const expandAt = Math.max(collapseAt - 140, 40);
+                const expandAt = Math.max(collapseAt - 160, 48);
                 const next = collapsedRef.current
                     ? window.scrollY > expandAt
                     : window.scrollY > collapseAt;
-                if (next !== collapsedRef.current) {
-                    collapsedRef.current = next;
-                    setCollapsed(next);
-                    setOpenIndex(null);
-                }
+
+                if (next === collapsedRef.current) return;
+
+                collapsedRef.current = next;
+                animatingRef.current = true;
+                setCollapsed(next);
+                setOpenIndex(null);
+                window.clearTimeout(unlockTimer);
+                unlockTimer = window.setTimeout(() => {
+                    animatingRef.current = false;
+                }, SHRINK_MS);
             });
         };
         onScroll();
@@ -67,6 +94,7 @@ export default function CategoryTabs() {
         return () => {
             window.removeEventListener("scroll", onScroll);
             cancelAnimationFrame(raf);
+            window.clearTimeout(unlockTimer);
         };
     }, []);
 
@@ -107,13 +135,15 @@ export default function CategoryTabs() {
         el?.scrollBy({ left: 320, behavior: "smooth" });
     };
 
+    const barHeight = collapsed ? COLLAPSED_H : expandedH;
+
     return (
         <>
             <nav
                 onMouseLeave={() => {
                     if (!isTouch) setOpenIndex(null);
                 }}
-                className={`fixed inset-x-0 top-[6.75rem] z-20 border-b transition-[background-color,box-shadow,border-color] duration-300 lg:top-18 ${collapsed
+                className={`fixed inset-x-0 top-[6.75rem] z-20 border-b transition-[background-color,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:top-18 ${collapsed
                     ? "border-slate-200/70 bg-white/85 backdrop-blur-2xl"
                     : "border-slate-200 bg-white/85 backdrop-blur-2xl"
                     }`}
@@ -123,13 +153,13 @@ export default function CategoryTabs() {
                     className="relative mx-auto max-w-7xl px-3 sm:px-6 lg:px-8"
                 >
                     <div
-                        className={`relative transition-[height] duration-300 ${EASE} ${collapsed ? "h-12" : "h-24 sm:h-28"
-                            }`}
+                        className="relative overflow-hidden"
+                        style={{ ...HEIGHT_STYLE, height: barHeight }}
                     >
                         <div
-                            className={`absolute inset-0 transition-[opacity,transform] duration-300 ${EASE} ${collapsed
-                                ? "pointer-events-none -translate-y-3 opacity-0"
-                                : "translate-y-0 opacity-100"
+                            className={`absolute inset-0 ${FADE_CLASS} ${collapsed
+                                ? "pointer-events-none -translate-y-1 scale-[0.98] opacity-0"
+                                : "translate-y-0 scale-100 opacity-100"
                                 }`}
                             aria-hidden={collapsed}
                         >
@@ -180,9 +210,9 @@ export default function CategoryTabs() {
                         </div>
 
                         <div
-                            className={`absolute inset-0 transition-[opacity,transform] duration-300 ${EASE} ${collapsed
-                                ? "translate-y-0 opacity-100"
-                                : "pointer-events-none translate-y-3 opacity-0"
+                            className={`absolute inset-0 ${FADE_CLASS} ${collapsed
+                                ? "translate-y-0 scale-100 opacity-100"
+                                : "pointer-events-none translate-y-1 scale-[0.98] opacity-0"
                                 }`}
                             aria-hidden={!collapsed}
                         >
@@ -211,7 +241,7 @@ export default function CategoryTabs() {
                                                         setActive(index);
                                                     }}
                                                     tabIndex={collapsed ? 0 : -1}
-                                                    className={`relative flex items-center gap-2 text-sm font-semibold whitespace-nowr ap transition-colors ${highlighted
+                                                    className={`relative flex items-center gap-2 text-sm font-semibold whitespace-nowrap transition-colors ${highlighted
                                                         ? "text-primary"
                                                         : "text-slate-600 hover:text-primary"
                                                         }`}
@@ -238,7 +268,7 @@ export default function CategoryTabs() {
                     <button
                         onClick={scrollNext}
                         aria-label="Show more categories"
-                        className={`absolute top-1/2 right-1 flex xl:hidden -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-all duration-300 ${EASE} hover:text-primary ${collapsed ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
+                        className={`absolute top-1/2 right-1 flex xl:hidden -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:text-primary ${collapsed ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
                             }`}
                     >
                         <ChevronRight className={collapsed ? "h-4 w-4" : "h-5 w-5"} />
@@ -294,7 +324,8 @@ export default function CategoryTabs() {
                 />
             )}
             <div
-                className={collapsed ? "h-12" : "h-24 sm:h-28"}
+                className="overflow-hidden"
+                style={{ ...HEIGHT_STYLE, height: barHeight }}
                 aria-hidden="true"
             />
         </>
