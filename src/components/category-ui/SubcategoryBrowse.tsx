@@ -20,9 +20,9 @@ import { getCategoriesAds, getCities } from "../api/apis";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiAd, ApiCategoryAds } from "../types/AllTypes";
 import { scrollToTop } from "@/lib/lenis";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 const PAGE_SIZE = 20;
-const DEFAULT_COORDS = { latitude: 19.076, longitude: 72.8777 };
 
 function adsFromResponse(
     payload: ApiCategoryAds | { items?: ApiAd[] } | null | undefined,
@@ -117,6 +117,7 @@ export default function SubcategoryBrowse({
     activeSubcategory: string;
     listings: Listing[];
 }) {
+    const { latitude, longitude } = useUserLocation();
     const [page, setPage] = useState(1);
     const [filters, setFilters] =
         useState<CategorySidebarFilterState>(EMPTY_SIDEBAR_FILTERS);
@@ -136,10 +137,10 @@ export default function SubcategoryBrowse({
     const selectedCity = cities.find((city) => city.id === filters.cityId);
     const coords = useMemo(
         () => ({
-            latitude: selectedCity?.latitude ?? DEFAULT_COORDS.latitude,
-            longitude: selectedCity?.longitude ?? DEFAULT_COORDS.longitude,
+            latitude: selectedCity?.latitude ?? latitude,
+            longitude: selectedCity?.longitude ?? longitude,
         }),
-        [selectedCity?.latitude, selectedCity?.longitude],
+        [selectedCity?.latitude, selectedCity?.longitude, latitude, longitude],
     );
 
     const adsQuery = useMemo(

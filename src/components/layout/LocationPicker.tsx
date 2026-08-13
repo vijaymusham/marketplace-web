@@ -9,9 +9,10 @@ import { AppDispatch, RootState } from "../redux/store";
 import { setAddress, setLocation } from "../redux/slices/authSlice";
 import { toast } from "react-hot-toast";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
+import { geocodePlace } from "@/lib/geo";
 
 function shortAddress(address: string | null | undefined) {
-    if (!address) return "Select location";
+    if (!address) return "India";
     const part = address.split(",")[0]?.trim();
     return part || address;
 }
@@ -131,7 +132,7 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
                 {compact ? (
                     <>
                         <MapPin className="h-4 w-4 shrink-0 text-slate-800" strokeWidth={2} />
-                        <span className="max-w-[7.5rem] truncate text-sm font-bold text-slate-900 sm:max-w-[9rem]">
+                        <span className="max-w-30 truncate text-sm font-bold text-slate-900 sm:max-w-36">
                             {label}
                         </span>
                         <ChevronDown
@@ -145,7 +146,7 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
                         </span>
                         <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 hover:text-primary">
                             <span className="max-w-28 truncate font-semibold lg:max-w-40">
-                                {address ? address : "Select location"}
+                                {address || "India"}
                             </span>
                             <ChevronDown
                                 className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -225,6 +226,9 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
                                             <Search className="pointer-events-none absolute top-1/2 left-4 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
                                             <GooglePlacesAutocomplete
                                                 apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}
+                                                autocompletionRequest={{
+                                                    componentRestrictions: { country: "in" },
+                                                }}
                                                 selectProps={{
                                                     placeholder: "Search delivery location",
                                                     autoFocus: true,
@@ -364,14 +368,25 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
                                                             fontWeight: 500,
                                                         }),
                                                     },
-                                                    onChange: (place) => {
+                                                    onChange: async (place) => {
                                                         if (!place) return;
                                                         const next =
                                                             typeof place.label === "string"
                                                                 ? place.label
                                                                 : String(place.label ?? "");
                                                         if (!next) return;
+                                                        const placeId =
+                                                            typeof place.value === "object" &&
+                                                                place.value &&
+                                                                "place_id" in place.value
+                                                                ? String(place.value.place_id ?? "")
+                                                                : undefined;
                                                         dispatch(setAddress(next));
+                                                        const coords = await geocodePlace(
+                                                            next,
+                                                            placeId || undefined,
+                                                        );
+                                                        if (coords) dispatch(setLocation(coords));
                                                         setOpen(false);
                                                     },
                                                 }}

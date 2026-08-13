@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import CategoryTabs from "@/components/layout/CategoryTabs";
 import CityExplorer from "@/components/home-ui/CityExplorer";
 import FreshRecommendations from "@/components/home-ui/FreshRecommendations";
@@ -8,6 +8,8 @@ import TestimonialsSection from "@/components/home-ui/TestimonialsSection";
 import { useQuery } from "@tanstack/react-query";
 import { getAdsBySection } from "@/components/api/apis";
 import type { ApiAd, ApiAdsBySectionAd, ApiAdsSection } from "@/components/types/AllTypes";
+import TrustedBrands from "@/components/home-ui/TrustedBrands";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 function toListing(ad: ApiAdsBySectionAd): ApiAd {
     return {
@@ -41,9 +43,11 @@ const SECTION_PLACEHOLDERS = [
 ];
 
 export default function Home() {
+    const { latitude, longitude } = useUserLocation();
+
     const { data, isLoading } = useQuery({
-        queryKey: ["adsBySection"],
-        queryFn: () => getAdsBySection({ latitude: 19.2183, longitude: 72.9781 }),
+        queryKey: ["adsBySection", latitude, longitude],
+        queryFn: () => getAdsBySection({ latitude, longitude }),
     });
 
     return (
@@ -52,6 +56,7 @@ export default function Home() {
             <main className="flex-1 bg-white relative">
                 <CityExplorer />
                 <FreshRecommendations />
+                <TrustedBrands />
                 {isLoading
                     ? SECTION_PLACEHOLDERS.map((item) => (
                         <HorizontalList

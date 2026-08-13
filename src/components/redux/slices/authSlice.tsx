@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { DEFAULT_INDIA_LOCATION } from '@/lib/geo'
 
 export interface userState {
     user: {
@@ -33,8 +34,11 @@ export interface userState {
 
 const initialState: userState = {
     user: null,
-    location: null,
-    address: null,
+    location: {
+        latitude: DEFAULT_INDIA_LOCATION.latitude,
+        longitude: DEFAULT_INDIA_LOCATION.longitude,
+    },
+    address: 'India',
 }
 
 export const userSlice = createSlice({
@@ -54,7 +58,11 @@ export const userSlice = createSlice({
             state.address = action.payload
         },
         clearLocation: (state) => {
-            state.location = null
+            state.location = {
+                latitude: DEFAULT_INDIA_LOCATION.latitude,
+                longitude: DEFAULT_INDIA_LOCATION.longitude,
+            }
+            state.address = 'India'
         },
     },
 })

@@ -1,4 +1,5 @@
 import customAxios, { type ApiError } from "./customAxios";
+import { DEFAULT_INDIA_LOCATION } from "@/lib/geo";
 import type {
     ApiAdsBySection,
     ApiCity,
@@ -173,16 +174,16 @@ export const getCities = async (stateId?: string): Promise<ApiCity[]> => {
 };
 
 export const getPopularCities = async ({
-    latitude,
-    longitude,
+    latitude = DEFAULT_INDIA_LOCATION.latitude,
+    longitude = DEFAULT_INDIA_LOCATION.longitude,
 }: {
-    latitude: number;
-    longitude: number;
-}): Promise<ApiCity[]> => {
+    latitude?: number;
+    longitude?: number;
+} = {}): Promise<ApiCity[]> => {
     try {
-        const { data } = await customAxios.get(
-            `/cities/popular?latitude=${latitude}&longitude=${longitude}`,
-        );
+        const { data } = await customAxios.get("/cities/popular", {
+            params: { latitude, longitude },
+        });
         return unwrapList<ApiCity>(data);
     } catch (error) {
         rethrow("getPopularCities", error);
@@ -190,16 +191,16 @@ export const getPopularCities = async ({
 };
 
 export const getFreshAds = async ({
-    latitude,
-    longitude,
+    latitude = DEFAULT_INDIA_LOCATION.latitude,
+    longitude = DEFAULT_INDIA_LOCATION.longitude,
 }: {
-    latitude: number;
-    longitude: number;
-}): Promise<ApiFreshRecommendation[]> => {
+    latitude?: number;
+    longitude?: number;
+} = {}): Promise<ApiFreshRecommendation[]> => {
     try {
-        const { data } = await customAxios.get(
-            `/ads/fresh?latitude=${latitude}&longitude=${longitude}&count=10`,
-        );
+        const { data } = await customAxios.get("/ads/fresh", {
+            params: { latitude, longitude, count: 12 },
+        });
         return unwrapList<ApiFreshRecommendation>(data);
     } catch (error) {
         rethrow("getFreshAds", error);
@@ -207,16 +208,16 @@ export const getFreshAds = async ({
 };
 
 export const getAdsBySection = async ({
-    latitude,
-    longitude,
+    latitude = DEFAULT_INDIA_LOCATION.latitude,
+    longitude = DEFAULT_INDIA_LOCATION.longitude,
 }: {
-    latitude: number;
-    longitude: number;
-}): Promise<ApiAdsBySection> => {
+    latitude?: number;
+    longitude?: number;
+} = {}): Promise<ApiAdsBySection> => {
     try {
-        const { data } = await customAxios.get(
-            `/ads/sections?latitude=${latitude}&longitude=${longitude}`,
-        );
+        const { data } = await customAxios.get("/ads/sections", {
+            params: { latitude, longitude },
+        });
         const sections = unwrapData<ApiAdsBySection>(data);
         if (!sections) throw { message: "Failed to load ad sections" } satisfies ApiError;
         return sections;
@@ -349,8 +350,8 @@ export const getCategoriesAds = async ({
     cityId,
     stateId,
     locality,
-    latitude,
-    longitude,
+    latitude = DEFAULT_INDIA_LOCATION.latitude,
+    longitude = DEFAULT_INDIA_LOCATION.longitude,
     minPrice,
     maxPrice,
     minKmsDriven,
@@ -371,6 +372,8 @@ export const getCategoriesAds = async ({
             sort,
             page,
             limit,
+            latitude,
+            longitude,
         };
 
         if (subCategoryId) params.subCategoryId = subCategoryId;
@@ -379,8 +382,6 @@ export const getCategoriesAds = async ({
         if (cityId) params.cityId = cityId;
         if (stateId) params.stateId = stateId;
         if (locality) params.locality = locality;
-        if (typeof latitude === "number") params.latitude = latitude;
-        if (typeof longitude === "number") params.longitude = longitude;
         if (typeof minPrice === "number") params.minPrice = minPrice;
         if (typeof maxPrice === "number") params.maxPrice = maxPrice;
         if (typeof minKmsDriven === "number") params.minKmsDriven = minKmsDriven;

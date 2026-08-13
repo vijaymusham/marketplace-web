@@ -9,11 +9,13 @@ import { getPopularCities } from "../api/apis";
 import type { ApiCity } from "../types/AllTypes";
 import { CITY_ROW, WithSkeleton } from "../ui/Skeleton";
 import SectionHeader from "./SectionHeader";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 export default function CityExplorer() {
+    const { latitude, longitude } = useUserLocation();
     const { data, isLoading } = useQuery({
-        queryKey: ["popularCities"],
-        queryFn: () => getPopularCities({ latitude: 19.2183, longitude: 72.9781 }),
+        queryKey: ["popularCities", latitude, longitude],
+        queryFn: () => getPopularCities({ latitude, longitude }),
     });
 
     return (

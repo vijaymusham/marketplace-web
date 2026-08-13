@@ -167,7 +167,6 @@ export default function EditProfileView() {
         const firstName = values.firstName.trim();
         const lastName = values.lastName.trim();
         const email = values.email.trim();
-        const name = [firstName, lastName].filter(Boolean).join(" ");
 
         if (!isDirty && !photoFile) {
             toast("No changes to save");
@@ -189,7 +188,6 @@ export default function EditProfileView() {
             await updateProfile({
                 firstName,
                 lastName,
-                name,
                 email,
                 profilePhoto: profilePhoto ?? null,
             });

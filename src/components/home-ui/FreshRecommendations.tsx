@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/Skeleton";
 import type { ApiAd, ApiFreshRecommendation } from "../types/AllTypes";
 import SectionHeader from "./SectionHeader";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
 function toListingCard(listing: ApiFreshRecommendation): ApiAd {
     return {
@@ -27,9 +28,11 @@ function toListingCard(listing: ApiFreshRecommendation): ApiAd {
 }
 
 export default function FreshRecommendations() {
+    const { latitude, longitude } = useUserLocation();
+
     const { data = [], isLoading } = useQuery({
-        queryKey: ["freshRecommendations"],
-        queryFn: () => getFreshAds({ latitude: 19.2183, longitude: 72.9781 }),
+        queryKey: ["freshRecommendations", latitude, longitude],
+        queryFn: () => getFreshAds({ latitude, longitude }),
     });
 
     return (

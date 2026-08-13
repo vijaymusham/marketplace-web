@@ -16,8 +16,8 @@ import {
 import { listings, type Listing } from "@/lib/listings";
 import { findRouteBySlug } from "@/lib/slug";
 import { CategoryPageSkeleton, Skeleton } from "@/components/ui/Skeleton";
+import { useUserLocation } from "@/hooks/useUserLocation";
 
-const DEFAULT_COORDS = { latitude: 19.2183, longitude: 72.9781 };
 
 const SORT_OPTIONS = [
     { value: "date", label: "Date" },
@@ -54,6 +54,8 @@ export default function CategoryPage() {
     const subcategoryIdParam = searchParams.get("subcategoryId") ?? "";
     const [sort, setSort] = useState<SortValue>("date");
 
+    const { latitude, longitude } = useUserLocation();
+
     const { data: apiCategories, isFetched } = useQuery({
         queryKey: ["categories"],
         queryFn: getCategories,
@@ -76,10 +78,11 @@ export default function CategoryPage() {
         "";
 
     const { data: categoryAds, isPending: isAdsPending, isFetching: isAdsFetching } = useQuery({
-        queryKey: ["categoryAds", resolvedCategoryId, sort],
+        queryKey: ["categoryAds", resolvedCategoryId, sort, latitude, longitude],
         queryFn: () =>
             getCategoriesAds({
-                ...DEFAULT_COORDS,
+                latitude,
+                longitude,
                 page: 1,
                 sort,
                 categoryId: resolvedCategoryId,
