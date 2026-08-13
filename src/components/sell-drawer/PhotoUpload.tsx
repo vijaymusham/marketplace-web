@@ -29,14 +29,6 @@ type CropQueueItem = {
     file: File;
 };
 
-/**
- * Self-contained square-crop photo picker.
- * Import and use — returns cropped `File[]` via `onChange`.
- *
- * @example
- * const [photos, setPhotos] = useState<File[]>([]);
- * <PhotoUpload onChange={setPhotos} error={photoError} />
- */
 export default function PhotoUpload({
     onChange,
     maxPhotos = DEFAULT_MAX_PHOTOS,

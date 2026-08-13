@@ -1,24 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
-const region =
-    process.env.AWS_REGION || process.env.NEXT_PUBLIC_AWS_REGION || "";
-const bucket =
-    process.env.AWS_BUCKET || process.env.NEXT_PUBLIC_AWS_BUCKET || "";
-const accessKeyId =
-    process.env.AWS_ACCESS_KEY_ID ||
-    process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID ||
-    "";
-const secretAccessKey =
-    process.env.AWS_SECRET_ACCESS_KEY ||
-    process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY ||
-    "";
+function firstEnv(...keys: string[]) {
+    for (const key of keys) {
+        const value = process.env[key]?.trim();
+        if (value) return value;
+    }
+    return "";
+}
 
-const s3 = new S3Client({
-    region,
-    credentials: { accessKeyId, secretAccessKey },
-    requestChecksumCalculation: "WHEN_REQUIRED",
-});
+function s3Settings() {
+    // Prefer S3-specific region vars. Generic AWS_REGION is often the host
+    // platform region (e.g. us-east-1 on Vercel) and will 301 this bucket.
+    return {
+        region: firstEnv(
+            "AWS_S3_REGION",
+            "S3_REGION",
+            "NEXT_PUBLIC_AWS_REGION",
+            "AWS_REGION",
+        ),
+        bucket: firstEnv(
+            "AWS_S3_BUCKET",
+            "S3_BUCKET",
+            "AWS_BUCKET",
+            "NEXT_PUBLIC_AWS_BUCKET",
+        ),
+        accessKeyId: firstEnv(
+            "AWS_ACCESS_KEY_ID",
+            "NEXT_PUBLIC_AWS_ACCESS_KEY_ID",
+        ),
+        secretAccessKey: firstEnv(
+            "AWS_SECRET_ACCESS_KEY",
+            "NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY",
+        ),
+    };
+}
+
+function createS3Client(
+    region: string,
+    accessKeyId: string,
+    secretAccessKey: string,
+) {
+    return new S3Client({
+        region,
+        credentials: { accessKeyId, secretAccessKey },
+        requestChecksumCalculation: "WHEN_REQUIRED",
+        responseChecksumValidation: "WHEN_REQUIRED",
+        followRegionRedirects: true,
+    });
+}
 
 const ALLOWED_TYPES = new Set([
     "image/jpeg",
@@ -34,12 +64,15 @@ const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(request: NextRequest) {
     try {
+        const { region, bucket, accessKeyId, secretAccessKey } = s3Settings();
         if (!region || !bucket || !accessKeyId || !secretAccessKey) {
             return NextResponse.json(
                 { success: false, error: "S3 is not configured on the server" },
                 { status: 500 },
             );
         }
+
+        const s3 = createS3Client(region, accessKeyId, secretAccessKey);
 
         const formData = await request.formData();
         const file = formData.get("file");
@@ -92,8 +125,15 @@ export async function POST(request: NextRequest) {
         console.error("S3 upload failed:", error);
         const message =
             error instanceof Error ? error.message : "Upload failed";
+        const endpointHint =
+            error &&
+            typeof error === "object" &&
+            "Endpoint" in error &&
+            typeof error.Endpoint === "string"
+                ? ` Use endpoint ${error.Endpoint}.`
+                : "";
         return NextResponse.json(
-            { success: false, error: message },
+            { success: false, error: `${message}${endpointHint}` },
             { status: 500 },
         );
     }
