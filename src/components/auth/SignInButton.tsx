@@ -158,7 +158,7 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
     ] as const;
 
     const menuBody = profile ? (
-        <div className="flex relative min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-6 sm:pt-3.5">
+        <div className="flex relative min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-6 sm:pt-3.5 bg-white">
             <div className="absolute top-0 left-0 h-20 w-full bg-white/90 bg-linear-to-b from-primary/15 via-primary/8 to-white" />
             {/* Header */}
             <div className="flex items-center gap-3 px-0.5 pb-0.5">

@@ -283,12 +283,12 @@ export default function EditProfileView() {
 
     return (
         <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 md:py-10">
-            <header className="mb-6 flex flex-col-reverse  gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+            <header className="mb-2 flex flex-col-reverse  gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="font-heading text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+                    <h1 className="font-heading text-xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
                         Edit profile
                     </h1>
-                    <p className="mt-1.5 text-sm font-medium text-slate-500 md:text-sm">
+                    <p className="mt-0.5 sm:mt-1.5 text-xs font-medium text-slate-500 md:text-sm">
                         Update your photo and personal details
                     </p>
                 </div>
@@ -380,7 +380,7 @@ export default function EditProfileView() {
                                     </AuthField>
                                 </div>
                             </div>
-                            <div className="mt-5  hidden sm:flex flex-wrap gap-2.5 justify-end">
+                            <div className="mt-5  flex flex-wrap gap-2.5 justify-end">
                                 <button
                                     type="submit"
                                     disabled={saving || !hasChanges}
