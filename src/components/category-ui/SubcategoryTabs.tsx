@@ -81,7 +81,7 @@ export default function SubcategoryTabs({
 
     return (
         <nav className="border-b border-slate-200 bg-white/85 backdrop-blur-2xl">
-            <div className="relative mx-auto flex max-w-7xl flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-8">
+            <div className="relative mx-auto flex flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-12">
                 <Link
                     href={categoryHref}
                     className="flex shrink-0 items-center gap-2.5 py-3 pr-2 transition-opacity hover:opacity-80 sm:pr-6"

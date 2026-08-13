@@ -33,7 +33,7 @@ export default function FreshRecommendations() {
     });
 
     return (
-        <section className="mx-auto max-w-7xl px-4 pt-6 pb-10 sm:px-6 sm:pt-8 sm:pb-12 lg:px-8 lg:pt-9">
+        <section className="mx-auto px-4 pt-6 pb-10 sm:px-6 sm:pt-8 sm:pb-12 lg:px-12 lg:pt-9">
             <SectionHeader
                 eyebrow="Just listed"
                 title="Fresh recommendations"

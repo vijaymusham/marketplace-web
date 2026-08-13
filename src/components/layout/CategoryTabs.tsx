@@ -150,7 +150,7 @@ export default function CategoryTabs() {
             >
                 <div
                     ref={containerRef}
-                    className="relative mx-auto max-w-7xl px-3 sm:px-6 lg:px-8"
+                    className="relative mx-auto px-3 sm:px-6 lg:px-12"
                 >
                     <div
                         className="relative overflow-hidden"

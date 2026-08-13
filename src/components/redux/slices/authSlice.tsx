@@ -20,6 +20,8 @@ export interface userState {
             emailVerified: boolean
             status: string
             createdAt: string
+            /** Optional until API ships a dedicated plan field */
+            isPro?: boolean
         }
     } | null
     location: {

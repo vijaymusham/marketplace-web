@@ -4,9 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { Camera, Loader2, User } from "lucide-react";
+import {
+    Camera,
+    Check,
+    Loader2,
+    Mail,
+    Phone,
+    ShieldCheck,
+    User,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { getUser, updateProfile } from "@/components/api/apis";
 import type { ApiError } from "@/components/api/customAxios";
@@ -36,9 +44,9 @@ function AuthField({
 }) {
     return (
         <div className="flex flex-col gap-1.5">
-            <label className="group flex items-center gap-3 rounded-2xl border border-transparent bg-slate-100 px-4 py-3 transition-colors duration-150 focus-within:border-slate-400">
+            <label className="group flex items-center gap-3 rounded-2xl border border-transparent bg-slate-100 px-4 py-3 transition-colors duration-150 focus-within:border-slate-300 focus-within:bg-white focus-within:ring-1 focus-within:ring-slate-200">
                 <span className="flex flex-1 flex-col gap-0.5">
-                    <span className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
+                    <span className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
                         {label}
                     </span>
                     {children}
@@ -49,6 +57,30 @@ function AuthField({
                     {error}
                 </p>
             ) : null}
+        </div>
+    );
+}
+
+function InfoChip({
+    label,
+    value,
+    hint,
+}: {
+    label: string;
+    value: string;
+    hint?: string;
+}) {
+    return (
+        <div className="flex min-h-17 flex-col justify-between rounded-2xl bg-slate-100/90 px-3.5 py-3">
+            <div className="flex items-start justify-between gap-2">
+                <span className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
+                    {label}
+                </span>
+                {hint ? (
+                    <span className="text-[11px] font-semibold text-slate-400">{hint}</span>
+                ) : null}
+            </div>
+            <p className="mt-2 truncate text-sm font-bold text-slate-900">{value}</p>
         </div>
     );
 }
@@ -69,6 +101,7 @@ export default function EditProfileView() {
         register,
         handleSubmit,
         reset,
+        control,
         formState: { errors, isDirty },
     } = useForm<ProfileFormValues>({
         defaultValues: {
@@ -77,6 +110,10 @@ export default function EditProfileView() {
             email: "",
         },
     });
+
+    const watchedFirst = useWatch({ control, name: "firstName" });
+    const watchedLast = useWatch({ control, name: "lastName" });
+    const watchedEmail = useWatch({ control, name: "email" });
 
     useEffect(() => {
         if (!isLoggedIn) requestSignIn();
@@ -89,8 +126,14 @@ export default function EditProfileView() {
             lastName: profile.lastName ?? "",
             email: profile.email ?? "",
         });
-        setPhotoPreview(profile.profilePhoto);
-        setPhotoFile(null);
+        if (profile.profilePhoto) {
+            setTimeout(() => {
+                setPhotoPreview(profile.profilePhoto);
+            }, 100);
+        }
+        setTimeout(() => {
+            setPhotoFile(null);
+        }, 100);
     }, [profile, reset]);
 
     useEffect(() => {
@@ -236,142 +279,224 @@ export default function EditProfileView() {
     }
 
     const displayPhoto = photoPreview || profile.profilePhoto;
+    const displayName =
+        [watchedFirst, watchedLast].map((v) => v?.trim()).filter(Boolean).join(" ") ||
+        profile.username ||
+        "Your profile";
+    const phoneDigits = profile.phone?.replace(/^\+?91/, "") || "—";
+    const memberSince = profile.createdAt
+        ? new Date(profile.createdAt).toLocaleDateString("en-IN", {
+            month: "short",
+            year: "numeric",
+        })
+        : "—";
+    const hasChanges = isDirty || !!photoFile;
 
     return (
-        <div className="mx-auto max-w-lg px-4 py-8 sm:px-6 md:py-10">
-            <header className="mb-8">
-                <p className="text-sm font-semibold text-primary">Account</p>
-                <h1 className="mt-1 font-heading text-3xl font-extrabold tracking-tight text-slate-900">
-                    Edit profile
-                </h1>
-                <p className="mt-1.5 text-sm font-medium text-slate-500">
-                    Update your photo and personal details
-                </p>
-                <span className="mt-4 block h-1 w-10 rounded-full bg-primary" />
-            </header>
-
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
-                <div className="mb-2 flex flex-col items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="group relative cursor-pointer"
-                        aria-label="Change profile photo"
-                    >
-                        <span className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-4 ring-slate-100 transition-all duration-200 group-hover:ring-primary/25">
-                            {displayPhoto ? (
-                                <Image
-                                    src={displayPhoto}
-                                    alt=""
-                                    width={112}
-                                    height={112}
-                                    unoptimized
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <span className="flex h-full w-full items-center justify-center bg-linear-to-br from-primary/15 to-indigo-500/10 text-primary">
-                                    <User className="h-12 w-12" strokeWidth={1.5} />
-                                </span>
-                            )}
-                        </span>
-                        <span className="absolute right-0.5 bottom-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white shadow-md transition-transform duration-200 group-hover:scale-105">
-                            <Camera className="h-4 w-4" strokeWidth={2.2} />
-                        </span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="cursor-pointer text-sm font-semibold text-primary hover:text-primary-hover"
-                    >
-                        {displayPhoto ? "Change photo" : "Add photo"}
-                    </button>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                            onPickPhoto(e.target.files?.[0]);
-                            e.target.value = "";
-                        }}
-                    />
+        <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 md:py-10">
+            <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 className="font-heading text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+                        Edit profile
+                    </h1>
+                    <p className="mt-1.5 text-sm font-medium text-slate-500 md:text-sm">
+                        Update your photo and personal details
+                    </p>
                 </div>
-
-                <AuthField label="Phone number">
-                    <span className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-slate-500">+91</span>
-                        <span className="text-base font-semibold text-slate-900">
-                            {profile.phone?.replace(/^\+?91/, "") || "—"}
-                        </span>
-                    </span>
-                </AuthField>
-
-                <AuthField label="First name" error={errors.firstName?.message}>
-                    <input
-                        type="text"
-                        autoComplete="given-name"
-                        placeholder="First name"
-                        className={authInputClass}
-                        aria-invalid={!!errors.firstName}
-                        {...register("firstName", {
-                            required: "First name is required",
-                            minLength: { value: 2, message: "At least 2 characters" },
-                            maxLength: { value: 50, message: "Too long" },
-                        })}
-                    />
-                </AuthField>
-
-                <AuthField label="Last name" error={errors.lastName?.message}>
-                    <input
-                        type="text"
-                        autoComplete="family-name"
-                        placeholder="Last name"
-                        className={authInputClass}
-                        aria-invalid={!!errors.lastName}
-                        {...register("lastName", {
-                            maxLength: { value: 50, message: "Too long" },
-                        })}
-                    />
-                </AuthField>
-
-                <AuthField label="Email" error={errors.email?.message}>
-                    <input
-                        type="email"
-                        autoComplete="email"
-                        placeholder="you@example.com"
-                        className={authInputClass}
-                        aria-invalid={!!errors.email}
-                        {...register("email", {
-                            required: "Email is required",
-                            pattern: {
-                                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                message: "Enter a valid email",
-                            },
-                        })}
-                    />
-                </AuthField>
-
-                <button
-                    type="submit"
-                    disabled={saving || (!isDirty && !photoFile)}
-                    className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold tracking-wide text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300"
-                >
-                    {saving ? (
-                        <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Saving...
-                        </>
-                    ) : (
-                        "Save changes"
-                    )}
-                </button>
-
                 <Link
                     href="/"
-                    className="text-center text-sm font-semibold text-slate-500 transition-colors hover:text-slate-800"
+                    className="inline-flex w-fit items-center rounded-full px-4 py-2 text-sm font-bold text-primary transition-colors bg-primary/10 hover:bg-primary hover:text-white duration-300"
                 >
-                    Cancel
+                    Go back
                 </Link>
+            </header>
+
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                <div className="overflow-hidden rounded-[1.75rem]  bg-white p-4  sm:p-5 md:rounded-4xl md:p-6">
+                    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+                        {/* Left: identity + form */}
+                        <div className="flex min-w-0 flex-col">
+                            <div className="flex items-center gap-3">
+                                <div className="min-w-0">
+                                    <p className="truncate  capitalize text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                                        {displayName}
+                                    </p>
+                                    <p className="truncate text-sm font-medium text-slate-500">
+                                        {watchedEmail?.trim() || profile.email || "Add your email"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 flex flex-wrap items-end gap-x-8 gap-y-4">
+                                <div>
+                                    <p className="text-base font-bold tracking-tight text-slate-900 ">
+                                        +91 {phoneDigits}
+                                    </p>
+                                    <p className="mt-1 text-xs font-medium text-slate-400">
+                                        Phone number
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-base font-bold text-slate-900 ">
+                                        {memberSince}
+                                    </p>
+                                    <p className="mt-1 text-xs font-medium text-slate-400">
+                                        Member since
+                                    </p>
+                                </div>
+                            </div>
+
+
+                            <div className="mt-7">
+                                <p className="mb-3 text-sm font-bold text-slate-900">Details</p>
+                                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                                    <InfoChip
+                                        label="Username"
+                                        value={profile.username || "—"}
+                                        hint="Fixed"
+                                    />
+                                    <InfoChip
+                                        label="Phone"
+                                        value={`+91 ${phoneDigits}`}
+                                        hint={profile.phoneVerified ? "Verified" : undefined}
+                                    />
+                                    <InfoChip
+                                        label="Email"
+                                        value={
+                                            profile.emailVerified ? "Verified" : "Unverified"
+                                        }
+                                        hint={profile.emailVerified ? "✓" : "—"}
+                                    />
+                                    <InfoChip
+                                        label="Status"
+                                        value={profile.status || "Active"}
+                                        hint="Account"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                                <AuthField label="First name" error={errors.firstName?.message}>
+                                    <input
+                                        type="text"
+                                        autoComplete="given-name"
+                                        placeholder="First name"
+                                        className={authInputClass}
+                                        aria-invalid={!!errors.firstName}
+                                        {...register("firstName", {
+                                            required: "First name is required",
+                                            minLength: {
+                                                value: 2,
+                                                message: "At least 2 characters",
+                                            },
+                                            maxLength: { value: 50, message: "Too long" },
+                                        })}
+                                    />
+                                </AuthField>
+
+                                <AuthField label="Last name" error={errors.lastName?.message}>
+                                    <input
+                                        type="text"
+                                        autoComplete="family-name"
+                                        placeholder="Last name"
+                                        className={authInputClass}
+                                        aria-invalid={!!errors.lastName}
+                                        {...register("lastName", {
+                                            maxLength: { value: 50, message: "Too long" },
+                                        })}
+                                    />
+                                </AuthField>
+
+                                <div className="sm:col-span-2">
+                                    <AuthField label="Email" error={errors.email?.message}>
+                                        <input
+                                            type="email"
+                                            autoComplete="email"
+                                            placeholder="you@example.com"
+                                            className={authInputClass}
+                                            aria-invalid={!!errors.email}
+                                            {...register("email", {
+                                                required: "Email is required",
+                                                pattern: {
+                                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                                    message: "Enter a valid email",
+                                                },
+                                            })}
+                                        />
+                                    </AuthField>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: large photo preview */}
+                        <div className="order-first lg:order-0">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="group relative aspect-square w-full cursor-pointer overflow-hidden rounded-3xl bg-slate-100 outline-none ring-offset-2 transition-shadow focus-visible:ring-2 focus-visible:ring-primary md:rounded-[1.75rem] border border-slate-200/80"
+                                aria-label="Change profile photo"
+                            >
+                                {displayPhoto ? (
+                                    <Image
+                                        src={displayPhoto}
+                                        alt="Profile preview"
+                                        fill
+                                        unoptimized
+                                        sizes="(max-width: 1024px) 100vw, 416px"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                    />
+                                ) : (
+                                    <span className="flex h-full w-full flex-col items-center justify-center gap-3 bg-linear-to-br from-slate-100 via-slate-50 to-primary/10 text-slate-400">
+                                        <User className="h-16 w-16" strokeWidth={1.25} />
+                                        <span className="text-sm font-semibold">
+                                            Add a profile photo
+                                        </span>
+                                    </span>
+                                )}
+                                <span className="absolute inset-0 bg-slate-900/0 transition-colors duration-200 group-hover:bg-slate-900/25" />
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    onPickPhoto(e.target.files?.[0]);
+                                    e.target.value = "";
+                                }}
+                            />
+                            <div className="mt-5 flex flex-wrap gap-2.5 justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 h group"
+                                >
+                                    <Camera className="h-4 w-4" strokeWidth={2.2} />
+                                    {displayPhoto ? "Change photo" : "Add photo"}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={saving || !hasChanges}
+                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 group"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check className="h-4 w-4" strokeWidth={2.5} />
+                                            Save changes
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </form>
         </div>
     );

@@ -78,9 +78,9 @@ export function CategoryTabsSkeleton() {
     return (
         <>
             <nav className="fixed inset-x-0 top-[6.75rem] z-20 border-b border-slate-200 bg-white/85 backdrop-blur-2xl lg:top-18" aria-busy>
-                <div className="relative mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+                <div className="relative mx-auto px-3 sm:px-6 lg:px-12">
                     <div className="flex h-24 items-center gap-1 overflow-hidden sm:h-28 sm:gap-2">
-                        {Array.from({ length: 8 }, (_, i) => (
+                        {Array.from({ length: 12 }, (_, i) => (
                             <CategoryTabSkeleton key={i} />
                         ))}
                     </div>
@@ -95,7 +95,7 @@ export function CategoryTabsSkeleton() {
 export function SubcategoryTabsSkeleton() {
     return (
         <nav className="border-b border-slate-200 bg-white/85 backdrop-blur-2xl" aria-busy>
-            <div className="relative mx-auto flex max-w-7xl flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-8">
+            <div className="relative mx-auto flex flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-12">
                 <div className="flex shrink-0 items-center gap-2.5 py-3 pr-2 sm:pr-6">
                     <Skeleton className="h-9 w-9 rounded-xl sm:h-11 sm:w-11 md:h-13 md:w-13" />
                     <div className="min-w-0">
@@ -237,7 +237,7 @@ export function HomePageSkeleton() {
         <div className="flex-1 bg-white" aria-busy>
             <CategoryTabsSkeleton />
 
-            <div className="mx-auto max-w-7xl px-4 pt-4 pb-2 sm:px-6 sm:pt-5 lg:px-8 lg:pt-6">
+            <div className="mx-auto px-4 pt-4 pb-2 sm:px-6 sm:pt-5 lg:px-12 lg:pt-6">
                 <Skeleton className="h-7 w-56 rounded sm:h-8 sm:w-72" />
                 <Skeleton className="mt-2 h-3.5 w-72 max-w-full rounded sm:h-4 sm:w-96" />
                 <div className={`${CITY_ROW} mt-3 sm:mt-4`}>
@@ -247,7 +247,7 @@ export function HomePageSkeleton() {
                 </div>
             </div>
 
-            <div className="mx-auto max-w-7xl px-4 pt-5 pb-8 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
+            <div className="mx-auto px-4 pt-5 pb-8 sm:px-6 sm:pt-6 lg:px-12 lg:pt-7">
                 <Skeleton className="h-7 w-52 rounded sm:h-8 sm:w-64" />
                 <Skeleton className="mt-2 h-3.5 w-64 max-w-full rounded" />
                 <div className={`${HOME_LISTINGS_GRID} mt-6`}>
@@ -257,7 +257,7 @@ export function HomePageSkeleton() {
                 </div>
             </div>
 
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto px-4 py-8 sm:px-6 lg:px-12">
                 <Skeleton className="h-7 w-44 rounded sm:h-8 sm:w-56" />
                 <Skeleton className="mt-2 h-3.5 w-48 max-w-full rounded" />
                 <div className={`${HOME_LISTINGS_GRID} mt-6`}>
@@ -276,7 +276,7 @@ export function CategoryPageSkeleton() {
         <>
             <SubcategoryTabsSkeleton />
             <main className="flex-1 bg-white" aria-busy>
-                <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+                <div className="mx-auto px-4 py-8 sm:px-6 md:py-10 lg:px-12">
                     <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between md:mb-9">
                         <div className="min-w-0 flex-1">
                             <Skeleton className="h-8 w-56 rounded md:h-9 md:w-72" />
@@ -300,7 +300,7 @@ export function CategoryPageSkeleton() {
 export function ListingDetailSkeleton() {
     return (
         <div className="bg-white pb-24 lg:pb-12" aria-busy>
-            <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <div className="mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-12">
                 <Skeleton className="h-5 w-16 rounded" />
                 <div className="flex items-center gap-2">
                     <Skeleton className="h-10 w-10 rounded-full" />
@@ -393,10 +393,10 @@ export const LISTINGS_GRID =
     "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-7 lg:grid-cols-3 xl:grid-cols-4 lg:gap-x-5 lg:gap-y-8";
 
 export const HOME_LISTINGS_GRID =
-    "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 xl:grid-cols-5";
+    "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 xl:grid-cols-6";
 
 export const PAGINATED_LISTINGS_GRID =
-    "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-7 lg:grid-cols-3 xl:grid-cols-4 lg:gap-x-6";
+    "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-7 lg:grid-cols-3 xl:grid-cols-5 lg:gap-x-6";
 
 export const WISHLIST_GRID =
     "grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2";

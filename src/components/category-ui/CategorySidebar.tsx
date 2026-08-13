@@ -10,6 +10,8 @@ import {
     Fuel,
     Gauge,
     IndianRupee,
+    Layers,
+    List,
     type LucideIcon,
     MapPin,
     Percent,
@@ -22,44 +24,41 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { slugify } from "@/lib/slug";
 import { normalizeApiCategories } from "@/lib/apiCategories";
-import { fuelTypeOptions } from "@/components/data/FormOptions";
-import { getCategories, getCategoryListingFilters, getCities, getStates } from "../api/apis";
+import { getCategories, getCategoryListingFilters } from "../api/apis";
 import type {
     ApiCategoryFilterOption,
     ApiCategoryFilterSection,
 } from "../types/AllTypes";
 import { FilterSkeleton } from "@/components/ui/Skeleton";
 
-export const PRICE_MIN = 0;
-export const PRICE_MAX = 500_000;
-export const KMS_MIN = 0;
-export const KMS_MAX = 500_000;
-export const YEAR_MIN = 1990;
-export const YEAR_MAX = new Date().getFullYear();
-
 const FILTER_LIST_MAX_HEIGHT = "max-h-52";
-const SKIP_FILTER_KEYS = new Set(["all_product", "subCategoryId"]);
+/** Skip sections already covered by the category tree above the filters. */
+const SKIP_FILTER_KEYS = new Set(["all_product", "categories", "subCategoryId"]);
+
+export type SidebarRangeFilter = {
+    min: number;
+    max: number;
+    minKey: string;
+    maxKey: string;
+    boundMin: number;
+    boundMax: number;
+    step: number;
+};
 
 export type CategorySidebarFilterState = {
     selected: Record<string, string[]>;
-    priceRange: { min: number; max: number };
-    kmsRange: { min: number; max: number };
-    yearRange: { min: number; max: number };
+    ranges: Record<string, SidebarRangeFilter>;
     stateId: string;
     cityId: string;
     locality: string;
-    type: string;
 };
 
 export const EMPTY_SIDEBAR_FILTERS: CategorySidebarFilterState = {
     selected: {},
-    priceRange: { min: PRICE_MIN, max: PRICE_MAX },
-    kmsRange: { min: KMS_MIN, max: KMS_MAX },
-    yearRange: { min: YEAR_MIN, max: YEAR_MAX },
+    ranges: {},
     stateId: "",
     cityId: "",
     locality: "",
-    type: "",
 };
 
 function useContainWheelScroll(ref: RefObject<HTMLElement | null>) {
@@ -110,18 +109,48 @@ function ScrollContain({
 }
 
 const filterIcons: Record<string, LucideIcon> = {
+    list: List,
+    "map-pin": MapPin,
+    mappin: MapPin,
+    "indian-rupee": IndianRupee,
+    indianrupee: IndianRupee,
+    tag: Tag,
+    layers: Layers,
+    gauge: Gauge,
+    calendar: Calendar,
+    fuel: Fuel,
     search: Search,
     sparkles: Sparkles,
     percent: Percent,
-    tag: Tag,
     sliders: SlidersHorizontal,
     brand: Tag,
+    model: Layers,
     condition: SlidersHorizontal,
-    price: Percent,
+    price: IndianRupee,
+    budget: IndianRupee,
     discount: Percent,
+    location: MapPin,
+    year: Calendar,
+    kms_driven: Gauge,
+    kms: Gauge,
+    categories: List,
     "shopping-bag": ShoppingBag,
     "magnifying-glass": Search,
 };
+
+function resolveFilterIcon(group: ApiCategoryFilterSection): LucideIcon {
+    if (group.queryKey === "verifiedSeller" || group.key === "best_seller") {
+        return group.key === "best_seller" ? Sparkles : BadgeCheck;
+    }
+    const iconKey = group.icon?.toLowerCase().replace(/\s+/g, "-") ?? "";
+    const sectionKey = group.key?.toLowerCase() ?? "";
+    return (
+        filterIcons[iconKey] ??
+        filterIcons[sectionKey] ??
+        filterIcons[group.queryKey?.toLowerCase() ?? ""] ??
+        SlidersHorizontal
+    );
+}
 
 function formatPrice(value: number) {
     return new Intl.NumberFormat("en-IN", {
@@ -133,6 +162,47 @@ function formatPrice(value: number) {
 
 function formatKms(value: number) {
     return `${value.toLocaleString("en-IN")} km`;
+}
+
+function formatRangeValue(group: ApiCategoryFilterSection, value: number) {
+    const key = group.key.toLowerCase();
+    if (key === "budget" || key === "price" || group.queryKey.toLowerCase().includes("price")) {
+        return formatPrice(value);
+    }
+    if (key.includes("kms") || group.queryKey.toLowerCase().includes("kms")) {
+        return formatKms(value);
+    }
+    if (key === "year" || group.queryKey.toLowerCase().includes("year")) {
+        return String(value);
+    }
+    return value.toLocaleString("en-IN");
+}
+
+function isLocationSection(group: ApiCategoryFilterSection) {
+    if (group.key === "location" || group.queryKey === "cityId" || group.queryKey === "stateId") {
+        return true;
+    }
+    return group.items.some((item) => (item.children?.length ?? 0) > 0);
+}
+
+function buildRangesFromSections(
+    sections: ApiCategoryFilterSection[],
+): Record<string, SidebarRangeFilter> {
+    const next: Record<string, SidebarRangeFilter> = {};
+    for (const section of sections) {
+        if (section.selectionType !== "range" || !section.range) continue;
+        const { min, max, step, minQueryKey, maxQueryKey } = section.range;
+        next[section.key] = {
+            min,
+            max,
+            minKey: minQueryKey,
+            maxKey: maxQueryKey,
+            boundMin: min,
+            boundMax: max,
+            step: step || 1,
+        };
+    }
+    return next;
 }
 
 export default function CategorySidebar({
@@ -155,19 +225,10 @@ export default function CategorySidebar({
     const [mobileOpen, setMobileOpen] = useState(false);
     const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
     const [selected, setSelected] = useState<Record<string, string[]>>({});
-    const [priceRange, setPriceRange] = useState(EMPTY_SIDEBAR_FILTERS.priceRange);
-    const [kmsRange, setKmsRange] = useState(EMPTY_SIDEBAR_FILTERS.kmsRange);
-    const [yearRange, setYearRange] = useState(EMPTY_SIDEBAR_FILTERS.yearRange);
+    const [ranges, setRanges] = useState<Record<string, SidebarRangeFilter>>({});
     const [stateId, setStateId] = useState("");
     const [cityId, setCityId] = useState("");
     const [locality, setLocality] = useState("");
-    const [type, setType] = useState("");
-    const [priceOpen, setPriceOpen] = useState(false);
-    const [locationOpen, setLocationOpen] = useState(false);
-    const [typeOpen, setTypeOpen] = useState(false);
-    const [fuelOpen, setFuelOpen] = useState(false);
-    const [yearOpen, setYearOpen] = useState(false);
-    const [kmsOpen, setKmsOpen] = useState(false);
     const onFiltersChangeRef = useRef(onFiltersChange);
 
     useEffect(() => {
@@ -186,17 +247,6 @@ export default function CategorySidebar({
     const { data: apiCategories } = useQuery({
         queryKey: ["categories"],
         queryFn: getCategories,
-    });
-
-    const { data: apiStates = [] } = useQuery({
-        queryKey: ["states"],
-        queryFn: getStates,
-    });
-
-    const { data: apiCities = [] } = useQuery({
-        queryKey: ["cities", stateId],
-        queryFn: () => getCities(stateId || undefined),
-        enabled: Boolean(stateId),
     });
 
     const normalized = normalizeApiCategories(apiCategories);
@@ -224,13 +274,10 @@ export default function CategorySidebar({
         overrides: Partial<CategorySidebarFilterState> = {},
     ): CategorySidebarFilterState => ({
         selected,
-        priceRange,
-        kmsRange,
-        yearRange,
+        ranges,
         stateId,
         cityId,
         locality,
-        type,
         ...overrides,
     });
 
@@ -238,19 +285,10 @@ export default function CategorySidebar({
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setOpenFilters({});
         setSelected({});
-        setPriceRange(EMPTY_SIDEBAR_FILTERS.priceRange);
-        setKmsRange(EMPTY_SIDEBAR_FILTERS.kmsRange);
-        setYearRange(EMPTY_SIDEBAR_FILTERS.yearRange);
+        setRanges({});
         setStateId("");
         setCityId("");
         setLocality("");
-        setType("");
-        setPriceOpen(true);
-        setLocationOpen(true);
-        setTypeOpen(true);
-        setFuelOpen(true);
-        setYearOpen(true);
-        setKmsOpen(true);
         onFiltersChangeRef.current?.(EMPTY_SIDEBAR_FILTERS);
     }, [activeSubcategory, resolvedCategoryId, resolvedSubCategoryId]);
 
@@ -274,6 +312,20 @@ export default function CategorySidebar({
             !SKIP_FILTER_KEYS.has(section.queryKey),
     );
 
+    useEffect(() => {
+        if (!filtersData?.sections?.length) return;
+        const nextRanges = buildRangesFromSections(filtersData.sections);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setRanges(nextRanges);
+        onFiltersChangeRef.current?.({
+            selected: {},
+            ranges: nextRanges,
+            stateId: "",
+            cityId: "",
+            locality: "",
+        });
+    }, [filtersData]);
+
     const toggleFilter = (key: string) => {
         setOpenFilters((prev) => ({
             ...prev,
@@ -289,7 +341,9 @@ export default function CategorySidebar({
         if (!queryKey) return;
         const current = selected[queryKey] ?? [];
         let nextValues: string[];
-        if (selectionType === "single") {
+        const isSingle =
+            selectionType === "single" || selectionType === "dropdown";
+        if (isSingle) {
             nextValues = current.includes(optionValue) ? [] : [optionValue];
         } else {
             nextValues = current.includes(optionValue)
@@ -299,6 +353,17 @@ export default function CategorySidebar({
         const nextSelected = { ...selected, [queryKey]: nextValues };
         setSelected(nextSelected);
         emitFilters(snapshot({ selected: nextSelected }));
+    };
+
+    const updateRange = (key: string, next: { min: number; max: number }) => {
+        const current = ranges[key];
+        if (!current) return;
+        const nextRanges = {
+            ...ranges,
+            [key]: { ...current, min: next.min, max: next.max },
+        };
+        setRanges(nextRanges);
+        emitFilters(snapshot({ ranges: nextRanges }));
     };
 
     return (
@@ -343,206 +408,162 @@ export default function CategorySidebar({
                         </button>
                     </div>
                 ) : null}
-            <h2 className="text-lg font-bold text-slate-900">Category</h2>
+                <h2 className="text-lg font-bold text-slate-900">Category</h2>
 
-            <Link
-                href={
-                    resolvedCategoryId
-                        ? `/category/${slugify(categoryName)}?categoryId=${resolvedCategoryId}`
-                        : `/category/${slugify(categoryName)}`
-                }
-                className="mt-5 flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-                <ShoppingBag className="h-4.5 w-4.5 text-slate-500" strokeWidth={1.75} />
-                <span className="flex-1">All Product</span>
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">
-                    {totalCount}
-                </span>
-            </Link>
+                <Link
+                    href={
+                        resolvedCategoryId
+                            ? `/category/${slugify(categoryName)}?categoryId=${resolvedCategoryId}`
+                            : `/category/${slugify(categoryName)}`
+                    }
+                    className="mt-5 flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                    <ShoppingBag className="h-4.5 w-4.5 text-slate-500" strokeWidth={1.75} />
+                    <span className="flex-1">All Product</span>
+                </Link>
 
-            <ScrollContain className="relative mt-1 ml-4 max-h-52 overflow-y-auto border-l border-slate-200 pl-4">
-                {subcategories.map((sub, index) => {
-                    const active = sub === activeSubcategory;
-                    const isLast = index === subcategories.length - 1;
-                    const subId = apiCategory?.subcategoryItems.find(
-                        (item) => item.name === sub || slugify(item.name) === slugify(sub),
-                    )?.id;
-                    const hrefParams = new URLSearchParams();
-                    if (resolvedCategoryId) hrefParams.set("categoryId", resolvedCategoryId);
-                    if (subId) hrefParams.set("subcategoryId", subId);
-                    const query = hrefParams.toString();
-                    return (
-                        <li key={sub} className="relative">
-                            <span
-                                className="absolute top-4 -left-4 h-px w-4 bg-slate-200"
-                                aria-hidden
-                            />
-                            {isLast && (
+                <ScrollContain className="relative mt-1 ml-4 max-h-52 overflow-y-auto border-l border-slate-200 pl-4">
+                    {subcategories.map((sub, index) => {
+                        const active = sub === activeSubcategory;
+                        const isLast = index === subcategories.length - 1;
+                        const subId = apiCategory?.subcategoryItems.find(
+                            (item) => item.name === sub || slugify(item.name) === slugify(sub),
+                        )?.id;
+                        const hrefParams = new URLSearchParams();
+                        if (resolvedCategoryId) hrefParams.set("categoryId", resolvedCategoryId);
+                        if (subId) hrefParams.set("subcategoryId", subId);
+                        const query = hrefParams.toString();
+                        return (
+                            <li key={sub} className="relative">
                                 <span
-                                    className="absolute top-4 -left-px h-[calc(100%-1rem)] w-px bg-white"
+                                    className="absolute top-4 -left-4 h-px w-4 bg-slate-200"
                                     aria-hidden
                                 />
-                            )}
-                            <Link
-                                href={`/category/${slugify(sub)}${query ? `?${query}` : ""}`}
-                                className={`flex items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-medium transition-colors ${
-                                    active
+                                {isLast && (
+                                    <span
+                                        className="absolute top-4 -left-px h-[calc(100%-1rem)] w-px bg-white"
+                                        aria-hidden
+                                    />
+                                )}
+                                <Link
+                                    href={`/category/${slugify(sub)}${query ? `?${query}` : ""}`}
+                                    className={`flex items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-medium transition-colors ${active
                                         ? "bg-slate-100 font-semibold text-slate-900"
                                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                                }`}
-                            >
-                                <Folder
-                                    className={`h-4 w-4 shrink-0 ${active ? "text-primary" : "text-slate-400"}`}
-                                    strokeWidth={1.75}
+                                        }`}
+                                >
+                                    <Folder
+                                        className={`h-4 w-4 shrink-0 ${active ? "text-primary" : "text-slate-400"}`}
+                                        strokeWidth={1.75}
+                                    />
+                                    <span className="truncate">{sub}</span>
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ScrollContain>
+
+                <div className="mt-6 space-y-1 border-t border-slate-100 pt-5">
+                    {isLoadingFilters && <FilterSkeleton count={4} />}
+
+                    {!isLoadingFilters &&
+                        filters.map((group) => {
+                            const open = openFilters[group.key] ?? true;
+                            const icon = resolveFilterIcon(group);
+
+                            if (group.selectionType === "range" && group.range) {
+                                const rangeState = ranges[group.key];
+                                if (!rangeState) return null;
+                                return (
+                                    <NumberRangeAccordion
+                                        key={`${resolvedSubCategoryId}-${group.key}`}
+                                        title={group.title}
+                                        icon={icon}
+                                        open={open}
+                                        min={rangeState.min}
+                                        max={rangeState.max}
+                                        boundMin={rangeState.boundMin}
+                                        boundMax={rangeState.boundMax}
+                                        step={rangeState.step}
+                                        formatValue={(value) => formatRangeValue(group, value)}
+                                        onToggle={() => toggleFilter(group.key)}
+                                        onChange={(next) => updateRange(group.key, next)}
+                                    />
+                                );
+                            }
+
+                            if (isLocationSection(group)) {
+                                return (
+                                    <LocationAccordion
+                                        key={`${resolvedSubCategoryId}-${group.key}`}
+                                        title={group.title}
+                                        icon={icon}
+                                        items={group.items}
+                                        open={open}
+                                        stateId={stateId}
+                                        cityId={cityId}
+                                        locality={locality}
+                                        onToggle={() => toggleFilter(group.key)}
+                                        onStateChange={(nextStateId) => {
+                                            setStateId(nextStateId);
+                                            setCityId("");
+                                            emitFilters(
+                                                snapshot({
+                                                    stateId: nextStateId,
+                                                    cityId: "",
+                                                }),
+                                            );
+                                        }}
+                                        onCityChange={(nextCityId) => {
+                                            setCityId(nextCityId);
+                                            emitFilters(snapshot({ cityId: nextCityId }));
+                                        }}
+                                        onLocalityChange={(nextLocality) => {
+                                            setLocality(nextLocality);
+                                            emitFilters(snapshot({ locality: nextLocality }));
+                                        }}
+                                    />
+                                );
+                            }
+
+                            return (
+                                <FilterAccordion
+                                    key={`${resolvedSubCategoryId}-${group.key}`}
+                                    group={group}
+                                    icon={icon}
+                                    open={open}
+                                    selected={selected}
+                                    onToggle={() => toggleFilter(group.key)}
+                                    onToggleOption={(queryKey, value) =>
+                                        toggleOption(queryKey, value, group.selectionType)
+                                    }
                                 />
-                                <span className="truncate">{sub}</span>
-                            </Link>
-                        </li>
-                    );
-                })}
-            </ScrollContain>
-
-            <div className="mt-6 space-y-1 border-t border-slate-100 pt-5">
-                {isLoadingFilters && <FilterSkeleton count={4} />}
-
-                {filters.map((group) => (
-                    <FilterAccordion
-                        key={`${resolvedSubCategoryId}-${group.key}`}
-                        group={group}
-                        open={openFilters[group.key] ?? false}
-                        selected={selected}
-                        onToggle={() => toggleFilter(group.key)}
-                        onToggleOption={(queryKey, value) =>
-                            toggleOption(queryKey, value, group.selectionType)
-                        }
-                    />
-                ))}
-
-                <NumberRangeAccordion
-                    title="Price Range"
-                    icon={IndianRupee}
-                    open={priceOpen}
-                    min={priceRange.min}
-                    max={priceRange.max}
-                    boundMin={PRICE_MIN}
-                    boundMax={PRICE_MAX}
-                    step={1000}
-                    formatValue={formatPrice}
-                    onToggle={() => setPriceOpen((prev) => !prev)}
-                    onChange={(next) => {
-                        setPriceRange(next);
-                        emitFilters(snapshot({ priceRange: next }));
-                    }}
-                />
-
-                <LocationAccordion
-                    open={locationOpen}
-                    stateId={stateId}
-                    cityId={cityId}
-                    locality={locality}
-                    states={apiStates}
-                    cities={apiCities}
-                    onToggle={() => setLocationOpen((prev) => !prev)}
-                    onStateChange={(nextStateId) => {
-                        setStateId(nextStateId);
-                        setCityId("");
-                        emitFilters(snapshot({ stateId: nextStateId, cityId: "" }));
-                    }}
-                    onCityChange={(nextCityId) => {
-                        setCityId(nextCityId);
-                        emitFilters(snapshot({ cityId: nextCityId }));
-                    }}
-                    onLocalityChange={(nextLocality) => {
-                        setLocality(nextLocality);
-                        emitFilters(snapshot({ locality: nextLocality }));
-                    }}
-                />
-
-                <TextFilterAccordion
-                    title="Type"
-                    icon={Tag}
-                    open={typeOpen}
-                    value={type}
-                    placeholder="e.g. Laptop"
-                    onToggle={() => setTypeOpen((prev) => !prev)}
-                    onChange={(nextType) => {
-                        setType(nextType);
-                        emitFilters(snapshot({ type: nextType }));
-                    }}
-                />
-
-                <StaticOptionsAccordion
-                    title="Fuel"
-                    icon={Fuel}
-                    open={fuelOpen}
-                    queryKey="fuel"
-                    selectionType="multi"
-                    options={fuelTypeOptions}
-                    selected={selected.fuel ?? []}
-                    onToggle={() => setFuelOpen((prev) => !prev)}
-                    onToggleOption={(value) => toggleOption("fuel", value, "multi")}
-                />
-
-                <NumberRangeAccordion
-                    title="Year"
-                    icon={Calendar}
-                    open={yearOpen}
-                    min={yearRange.min}
-                    max={yearRange.max}
-                    boundMin={YEAR_MIN}
-                    boundMax={YEAR_MAX}
-                    step={1}
-                    formatValue={(value) => String(value)}
-                    onToggle={() => setYearOpen((prev) => !prev)}
-                    onChange={(next) => {
-                        setYearRange(next);
-                        emitFilters(snapshot({ yearRange: next }));
-                    }}
-                />
-
-                <NumberRangeAccordion
-                    title="KMs Driven"
-                    icon={Gauge}
-                    open={kmsOpen}
-                    min={kmsRange.min}
-                    max={kmsRange.max}
-                    boundMin={KMS_MIN}
-                    boundMax={KMS_MAX}
-                    step={1000}
-                    formatValue={formatKms}
-                    onToggle={() => setKmsOpen((prev) => !prev)}
-                    onChange={(next) => {
-                        setKmsRange(next);
-                        emitFilters(snapshot({ kmsRange: next }));
-                    }}
-                />
-            </div>
-        </aside>
+                            );
+                        })}
+                </div>
+            </aside>
         </>
     );
 }
 
 function FilterAccordion({
     group,
+    icon: Icon,
     open,
     selected,
     onToggle,
     onToggleOption,
 }: {
     group: ApiCategoryFilterSection;
+    icon: LucideIcon;
     open: boolean;
     selected: Record<string, string[]>;
     onToggle: () => void;
     onToggleOption: (queryKey: string, value: string) => void;
 }) {
     const options = flattenOptions(group.items);
-    const iconKey = group.icon.toLowerCase();
-    const Icon =
-        group.queryKey === "verifiedSeller" || group.key === "best_seller"
-            ? group.key === "best_seller"
-                ? Sparkles
-                : BadgeCheck
-            : (filterIcons[iconKey] ?? SlidersHorizontal);
+    const isSingle =
+        group.selectionType === "single" || group.selectionType === "dropdown";
 
     return (
         <div>
@@ -560,9 +581,8 @@ function FilterAccordion({
             </button>
 
             <div
-                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                    open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
+                className={`grid transition-[grid-template-rows] duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
             >
                 <div className="overflow-hidden">
                     <ScrollContain
@@ -577,11 +597,7 @@ function FilterAccordion({
                                 <li key={`${optionQueryKey}-${option.value}`}>
                                     <label className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
                                         <input
-                                            type={
-                                                group.selectionType === "single"
-                                                    ? "radio"
-                                                    : "checkbox"
-                                            }
+                                            type={isSingle ? "radio" : "checkbox"}
                                             name={`${group.key}-${optionQueryKey}`}
                                             checked={checked}
                                             onChange={() =>
@@ -601,27 +617,33 @@ function FilterAccordion({
     );
 }
 
-function StaticOptionsAccordion({
+function LocationAccordion({
     title,
     icon: Icon,
+    items,
     open,
-    queryKey,
-    selectionType,
-    options,
-    selected,
+    stateId,
+    cityId,
+    locality,
     onToggle,
-    onToggleOption,
+    onStateChange,
+    onCityChange,
+    onLocalityChange,
 }: {
     title: string;
     icon: LucideIcon;
+    items: ApiCategoryFilterOption[];
     open: boolean;
-    queryKey: string;
-    selectionType: "single" | "multi";
-    options: { value: string; label: string }[];
-    selected: string[];
+    stateId: string;
+    cityId: string;
+    locality: string;
     onToggle: () => void;
-    onToggleOption: (value: string) => void;
+    onStateChange: (stateId: string) => void;
+    onCityChange: (cityId: string) => void;
+    onLocalityChange: (locality: string) => void;
 }) {
+    const cities = items.find((state) => state.value === stateId)?.children ?? [];
+
     return (
         <div>
             <button
@@ -638,80 +660,8 @@ function StaticOptionsAccordion({
             </button>
 
             <div
-                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                    open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
-            >
-                <div className="overflow-hidden">
-                    <ScrollContain
-                        className={`space-y-1 overflow-y-auto pb-2 pl-9 ${FILTER_LIST_MAX_HEIGHT}`}
-                    >
-                        {options.map((option) => {
-                            const checked = selected.includes(option.value);
-                            return (
-                                <li key={option.value}>
-                                    <label className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
-                                        <input
-                                            type={selectionType === "single" ? "radio" : "checkbox"}
-                                            name={queryKey}
-                                            checked={checked}
-                                            onChange={() => onToggleOption(option.value)}
-                                            className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary/30"
-                                        />
-                                        <span className="flex-1 font-medium">{option.label}</span>
-                                    </label>
-                                </li>
-                            );
-                        })}
-                    </ScrollContain>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function LocationAccordion({
-    open,
-    stateId,
-    cityId,
-    locality,
-    states,
-    cities,
-    onToggle,
-    onStateChange,
-    onCityChange,
-    onLocalityChange,
-}: {
-    open: boolean;
-    stateId: string;
-    cityId: string;
-    locality: string;
-    states: { id: string; name: string }[];
-    cities: { id: string; name: string }[];
-    onToggle: () => void;
-    onStateChange: (stateId: string) => void;
-    onCityChange: (cityId: string) => void;
-    onLocalityChange: (locality: string) => void;
-}) {
-    return (
-        <div>
-            <button
-                type="button"
-                onClick={onToggle}
-                aria-expanded={open}
-                className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2.5 text-left text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-                <MapPin className="h-4 w-4 shrink-0 text-slate-500" strokeWidth={1.75} />
-                <span className="flex-1">Location</span>
-                <ChevronDown
-                    className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                />
-            </button>
-
-            <div
-                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                    open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
+                className={`grid transition-[grid-template-rows] duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
             >
                 <div className="overflow-hidden">
                     <div className="space-y-2.5 px-2 pb-3 pt-1">
@@ -723,9 +673,9 @@ function LocationAccordion({
                                 className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                             >
                                 <option value="">All states</option>
-                                {states.map((state) => (
-                                    <option key={state.id} value={state.id}>
-                                        {state.name}
+                                {items.map((state) => (
+                                    <option key={state.value} value={state.value}>
+                                        {state.label}
                                     </option>
                                 ))}
                             </select>
@@ -741,8 +691,8 @@ function LocationAccordion({
                             >
                                 <option value="">All cities</option>
                                 {cities.map((city) => (
-                                    <option key={city.id} value={city.id}>
-                                        {city.name}
+                                    <option key={city.value} value={city.value}>
+                                        {city.label}
                                     </option>
                                 ))}
                             </select>
@@ -758,59 +708,6 @@ function LocationAccordion({
                                 className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-700 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                             />
                         </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function TextFilterAccordion({
-    title,
-    icon: Icon,
-    open,
-    value,
-    placeholder,
-    onToggle,
-    onChange,
-}: {
-    title: string;
-    icon: LucideIcon;
-    open: boolean;
-    value: string;
-    placeholder: string;
-    onToggle: () => void;
-    onChange: (value: string) => void;
-}) {
-    return (
-        <div>
-            <button
-                type="button"
-                onClick={onToggle}
-                aria-expanded={open}
-                className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2.5 text-left text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-                <Icon className="h-4 w-4 shrink-0 text-slate-500" strokeWidth={1.75} />
-                <span className="flex-1">{title}</span>
-                <ChevronDown
-                    className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                />
-            </button>
-
-            <div
-                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                    open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
-            >
-                <div className="overflow-hidden">
-                    <div className="px-2 pb-3 pt-1">
-                        <input
-                            type="text"
-                            value={value}
-                            onChange={(e) => onChange(e.target.value)}
-                            placeholder={placeholder}
-                            className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-700 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
-                        />
                     </div>
                 </div>
             </div>
@@ -843,8 +740,9 @@ function NumberRangeAccordion({
     onToggle: () => void;
     onChange: (range: { min: number; max: number }) => void;
 }) {
-    const minPercent = ((min - boundMin) / (boundMax - boundMin)) * 100;
-    const maxPercent = ((max - boundMin) / (boundMax - boundMin)) * 100;
+    const span = Math.max(boundMax - boundMin, 1);
+    const minPercent = ((min - boundMin) / span) * 100;
+    const maxPercent = ((max - boundMin) / span) * 100;
     const gap = Math.max(step, 1);
 
     const handleMinChange = (value: number) => {
@@ -871,9 +769,8 @@ function NumberRangeAccordion({
             </button>
 
             <div
-                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                    open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
+                className={`grid transition-[grid-template-rows] duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
             >
                 <div className="overflow-hidden">
                     <div className="space-y-4 px-2 pb-3 pt-1">

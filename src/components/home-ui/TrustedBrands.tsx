@@ -64,7 +64,7 @@ function BrandIcon({ type }: { type: string }) {
 export default function TrustedBrands() {
     return (
         <section className="pt-8 md:pt-10 pb-8 md:pb-10">
-            <div className="mx-auto max-w-7xl px-5 md:px-6">
+            <div className="mx-auto px-5 md:px-12">
                 <Reveal>
                     <div className=" px-6 md:px-10 py-7 md:py-9 flex flex-col md:flex-row items-center gap-5 md:gap-10">
                         <div

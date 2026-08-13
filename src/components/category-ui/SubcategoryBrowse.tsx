@@ -4,12 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CategorySidebar, {
     EMPTY_SIDEBAR_FILTERS,
-    KMS_MAX,
-    KMS_MIN,
-    PRICE_MAX,
-    PRICE_MIN,
-    YEAR_MAX,
-    YEAR_MIN,
     type CategorySidebarFilterState,
 } from "@/components/category-ui/CategorySidebar";
 import SubcategoryTabs from "@/components/category-ui/SubcategoryTabs";
@@ -86,22 +80,21 @@ function buildAdsQueryParams(
     filters: CategorySidebarFilterState,
     coords: { latitude: number; longitude: number },
 ) {
-    const { selected, priceRange, kmsRange, yearRange, stateId, cityId, locality, type } =
-        filters;
+    const { selected, ranges, stateId, cityId, locality } = filters;
+
+    const rangeParams: Record<string, number> = {};
+    for (const range of Object.values(ranges)) {
+        if (range.min > range.boundMin) rangeParams[range.minKey] = range.min;
+        if (range.max < range.boundMax) rangeParams[range.maxKey] = range.max;
+    }
 
     return {
-        type: type.trim() || undefined,
         cityId: cityId || undefined,
         stateId: stateId || undefined,
         locality: locality.trim() || undefined,
         latitude: coords.latitude,
         longitude: coords.longitude,
-        minPrice: priceRange.min > PRICE_MIN ? priceRange.min : undefined,
-        maxPrice: priceRange.max < PRICE_MAX ? priceRange.max : undefined,
-        minKmsDriven: kmsRange.min > KMS_MIN ? kmsRange.min : undefined,
-        maxKmsDriven: kmsRange.max < KMS_MAX ? kmsRange.max : undefined,
-        minYear: yearRange.min > YEAR_MIN ? yearRange.min : undefined,
-        maxYear: yearRange.max < YEAR_MAX ? yearRange.max : undefined,
+        ...rangeParams,
         sort: selected.sort?.[0] || "date",
         filters: Object.fromEntries(
             Object.entries(selected).filter(([, values]) => values.length > 0),
@@ -214,7 +207,7 @@ export default function SubcategoryBrowse({
                 activeSubcategory={activeSubcategory}
             />
 
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+            <div className="mx-auto px-4 py-8 sm:px-6 md:py-10 lg:px-12">
                 <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
                     <CategorySidebar
                         categoryName={categoryName}

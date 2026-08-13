@@ -6,12 +6,12 @@ export const formContainer = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
-        transition: { staggerChildren: 0.055, delayChildren: 0.12 },
+        transition: { staggerChildren: 0.045, delayChildren: 0.08 },
     },
 };
 
 export const formItem = {
-    hidden: { opacity: 0, y: 14 },
+    hidden: { opacity: 0, y: 10 },
     show: {
         opacity: 1,
         y: 0,
@@ -26,40 +26,48 @@ export function Field({
     children,
     required = false,
     className = "",
+    hint,
 }: {
     label: string;
     error?: string;
     required?: boolean;
     children: React.ReactNode;
     className?: string;
+    hint?: string;
 }) {
     return (
         <motion.div
             variants={formItem}
             className={`flex flex-col gap-1.5 ${className}`}
         >
-            <label className="text-[15px] font-semibold text-black">{label}{required && "*"}</label>
+            <div className="flex items-baseline justify-between gap-2">
+                <label className="text-sm font-semibold text-slate-700">
+                    {label}
+                    {required ? (
+                        <span className="ml-0.5 text-primary" aria-hidden>
+                            *
+                        </span>
+                    ) : null}
+                </label>
+                {hint ? (
+                    <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-slate-500">
+                        {hint}
+                    </span>
+                ) : null}
+            </div>
             {children}
             <AnimatePresence mode="wait">
                 {error ? (
                     <motion.p
                         key={error}
                         role="alert"
-                        initial={{ opacity: 0, y: -6, height: 0 }}
+                        initial={{ opacity: 0, y: -4, height: 0 }}
                         animate={{ opacity: 1, y: 0, height: "auto" }}
-                        exit={{ opacity: 0, y: -4, height: 0 }}
-                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        exit={{ opacity: 0, y: -2, height: 0 }}
+                        transition={{ duration: 0.18 }}
                         className="flex items-start gap-1 overflow-hidden text-xs font-semibold text-red-500"
                     >
-                        <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 18 }}
-                            className="mt-px leading-none"
-                            aria-hidden
-                        >
-                            <AlertCircle className="size-3" strokeWidth={2.2} />
-                        </motion.span>
+                        <AlertCircle className="mt-px size-3.5 shrink-0" strokeWidth={2.2} />
                         <span>{error}</span>
                     </motion.p>
                 ) : null}
@@ -75,7 +83,7 @@ export function FormSection({
     children,
     action,
 }: {
-    step: string;
+    step?: string;
     title: string;
     hint?: string;
     children: React.ReactNode;
@@ -84,23 +92,25 @@ export function FormSection({
     return (
         <motion.section
             variants={formItem}
-            className="relative border-b border-slate-100 pb-6 last:border-b-0 last:pb-0"
+            className="border-b border-slate-100 pb-6 last:border-b-0 last:pb-0"
         >
             <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                    <div className="flex items-center gap-2.5">
-                        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-heading text-xs font-extrabold text-primary">
+                <div className="flex min-w-0 items-start gap-3">
+                    {step ? (
+                        <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-heading text-[11px] font-extrabold tracking-wide text-primary">
                             {step}
                         </span>
+                    ) : null}
+                    <div className="min-w-0">
                         <h3 className="font-heading text-base font-bold tracking-tight text-slate-900">
                             {title}
                         </h3>
+                        {hint ? (
+                            <p className="mt-0.5 text-sm font-medium text-slate-500">
+                                {hint}
+                            </p>
+                        ) : null}
                     </div>
-                    {/* {hint ? (
-                        <p className="pl-9.5 text-sm font-semibold text-slate-400">
-                            {hint}
-                        </p>
-                    ) : null} */}
                 </div>
                 {action}
             </div>

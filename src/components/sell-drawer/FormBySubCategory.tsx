@@ -75,9 +75,13 @@ function ChoiceChips({
 
     return (
         <motion.div variants={formItem} className="flex flex-col gap-1.5 sm:col-span-2">
-            <label className="text-[15px] font-semibold text-black">
+            <label className="text-sm font-semibold text-slate-700">
                 {label}
-                {required && "*"}
+                {required ? (
+                    <span className="ml-0.5 text-primary" aria-hidden>
+                        *
+                    </span>
+                ) : null}
             </label>
             <Controller
                 name={name}
@@ -92,10 +96,11 @@ function ChoiceChips({
                                     key={option.value}
                                     type="button"
                                     onClick={() => field.onChange(option.value)}
-                                    className={`cursor-pointer rounded-xl border px-3.5 py-2 text-sm font-semibold transition-colors ${active
-                                        ? "border-primary bg-primary/10 text-primary"
-                                        : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300"
-                                        }`}
+                                    className={`cursor-pointer rounded-xl px-3.5 py-2.5 text-sm font-bold transition-colors ${
+                                        active
+                                            ? "bg-primary text-white"
+                                            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:text-slate-900"
+                                    }`}
                                 >
                                     {option.label}
                                 </button>
@@ -187,7 +192,7 @@ function TextInput({
 
 function SubFormGrid({ children }: { children: ReactNode }) {
     return (
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {children}
         </div>
     );

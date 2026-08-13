@@ -41,7 +41,7 @@ export default function PaginatedListings({
         <div>
             <WithSkeleton
                 loading={loading}
-                count={8}
+                count={10}
                 variant="listing"
                 gridClassName={PAGINATED_LISTINGS_GRID}
             >

@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Check } from "lucide-react";
+import { AlertCircle, ChevronDown, Check } from "lucide-react";
 
 export type SelectOption = {
     value: string | number;
@@ -58,7 +58,14 @@ export default function SelectDropdown({
 
     return (
         <div ref={rootRef} className="relative flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-black sm:text-[15px]">{label}{required && "*"}</label>
+            <label className="text-sm font-semibold text-slate-700">
+                {label}
+                {required ? (
+                    <span className="ml-0.5 text-primary" aria-hidden>
+                        *
+                    </span>
+                ) : null}
+            </label>
 
             <motion.button
                 type="button"
@@ -67,23 +74,24 @@ export default function SelectDropdown({
                 aria-expanded={open}
                 aria-controls={listId}
                 aria-invalid={!!error}
-                whileTap={disabled ? undefined : { scale: 0.985 }}
+                whileTap={disabled ? undefined : { scale: 0.99 }}
                 onClick={() => !disabled && setOpen((v) => !v)}
-                className={`flex w-full cursor-pointer items-center gap-2 rounded-xl border bg-slate-100 px-3 py-2.5 text-left text-sm font-semibold outline-none transition-[border-color,box-shadow,background-color] duration-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60 sm:py-3 sm:text-[15px] ${className} ${error
-                    ? "border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-400/15"
-                    : open
-                        ? "border-slate-300"
-                        : "border-slate-200 hover:border-slate-300"
-                    }`}
+                className={`flex w-full cursor-pointer items-center gap-2 rounded-xl border bg-slate-50 px-4 py-3.5 text-left text-sm font-semibold outline-none transition-all duration-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60 sm:text-[15px] ${className ?? ""} ${
+                    error
+                        ? "border-red-400 bg-red-50/80 ring-2 ring-red-400/20"
+                        : open
+                            ? "border-primary bg-white ring-2 ring-primary/25"
+                            : "border-slate-200 hover:border-slate-300 hover:bg-white"
+                }`}
             >
                 <AnimatePresence mode="wait" initial={false}>
                     {selected?.icon ? (
                         <motion.span
                             key={selected.value + "-icon"}
-                            initial={{ opacity: 0, scale: 0.7 }}
+                            initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.7 }}
-                            transition={{ duration: 0.15 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.12 }}
                             className="flex h-5 w-5 shrink-0 items-center justify-center text-primary [&_svg]:h-5 [&_svg]:w-5"
                         >
                             {selected.icon}
@@ -93,11 +101,11 @@ export default function SelectDropdown({
                 <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                         key={selected?.value ?? "placeholder"}
-                        initial={{ opacity: 0, y: 4 }}
+                        initial={{ opacity: 0, y: 3 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.15 }}
-                        className={`min-w-0 flex-1 truncate text-sm font-semibold sm:text-[15px] ${selected ? "text-slate-900" : "font-semibold text-slate-400"
+                        exit={{ opacity: 0, y: -3 }}
+                        transition={{ duration: 0.12 }}
+                        className={`min-w-0 flex-1 truncate ${selected ? "text-slate-900" : "font-medium text-slate-400"
                             }`}
                     >
                         {selected?.label ?? placeholder}
@@ -105,10 +113,10 @@ export default function SelectDropdown({
                 </AnimatePresence>
                 <motion.span
                     animate={{ rotate: open ? 180 : 0 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                    className="flex shrink-0"
+                    transition={{ type: "spring", stiffness: 400, damping: 24 }}
+                    className="shrink-0 text-slate-400"
                 >
-                    <ChevronDown className="size-4 text-slate-400 sm:size-5" strokeWidth={2.25} />
+                    <ChevronDown className="size-4" strokeWidth={2.25} />
                 </motion.span>
             </motion.button>
 
@@ -117,27 +125,24 @@ export default function SelectDropdown({
                     <motion.ul
                         id={listId}
                         role="listbox"
-                        initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                        transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                        className="absolute inset-x-0 top-[calc(100%+4px)] z-30 max-h-52 origin-top overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-sm font-semibold shadow-lg shadow-slate-200/60 sm:text-[15px]"
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -2 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute inset-x-0 top-[calc(100%+6px)] z-30 max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1.5 text-sm font-semibold sm:text-[15px]"
                     >
                         {options.length === 0 ? (
-                            <li className="px-3 py-2 text-sm font-semibold text-slate-400 sm:text-[15px]">
+                            <li className="px-3.5 py-2.5 font-medium text-slate-400">
                                 No options
                             </li>
                         ) : (
-                            options.map((option, i) => {
+                            options.map((option) => {
                                 const isSelected = option.value === value;
                                 return (
-                                    <motion.li
+                                    <li
                                         key={option.value}
                                         role="option"
                                         aria-selected={isSelected}
-                                        initial={{ opacity: 0, x: -6 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: Math.min(i * 0.02, 0.16), duration: 0.15 }}
                                     >
                                         <button
                                             type="button"
@@ -145,33 +150,27 @@ export default function SelectDropdown({
                                                 onChange(String(option.value));
                                                 setOpen(false);
                                             }}
-                                            className={`flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left transition-colors ${isSelected
-                                                ? "bg-primary/8 text-primary"
-                                                : "text-slate-700 hover:bg-slate-100"
+                                            className={`flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors ${isSelected
+                                                    ? "bg-primary/8 text-primary"
+                                                    : "text-slate-700 hover:bg-slate-50"
                                                 }`}
                                         >
                                             {option.icon && (
-                                                <span className={`flex h-4 w-4 shrink-0 items-center justify-center sm:h-5 sm:w-5 [&_svg]:h-full [&_svg]:w-full ${isSelected ? "text-primary" : "text-slate-700"}`}>
+                                                <span className="flex h-5 w-5 shrink-0 items-center justify-center [&_svg]:h-full [&_svg]:w-full">
                                                     {option.icon}
                                                 </span>
                                             )}
-                                            <span className="min-w-0 flex-1 truncate text-sm font-bold">
+                                            <span className="min-w-0 flex-1 truncate">
                                                 {option.label}
                                             </span>
                                             {isSelected && (
-                                                <motion.span
-                                                    initial={{ scale: 0 }}
-                                                    animate={{ scale: 1 }}
-                                                    transition={{ type: "spring", stiffness: 500, damping: 18 }}
-                                                >
-                                                    <Check
-                                                        className="size-3.5 shrink-0 text-primary"
-                                                        strokeWidth={2.5}
-                                                    />
-                                                </motion.span>
+                                                <Check
+                                                    className="size-3.5 shrink-0 text-primary"
+                                                    strokeWidth={2.5}
+                                                />
                                             )}
                                         </button>
-                                    </motion.li>
+                                    </li>
                                 );
                             })
                         )}
@@ -184,15 +183,13 @@ export default function SelectDropdown({
                     <motion.p
                         key={error}
                         role="alert"
-                        initial={{ opacity: 0, y: -6, height: 0 }}
+                        initial={{ opacity: 0, y: -4, height: 0 }}
                         animate={{ opacity: 1, y: 0, height: "auto" }}
-                        exit={{ opacity: 0, y: -4, height: 0 }}
-                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                        className="flex items-start gap-1 overflow-hidden text-xs font-medium text-red-500"
+                        exit={{ opacity: 0, y: -2, height: 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="flex items-start gap-1 overflow-hidden text-xs font-semibold text-red-500"
                     >
-                        <span className="mt-px leading-none" aria-hidden>
-                            •
-                        </span>
+                        <AlertCircle className="mt-px size-3.5 shrink-0" strokeWidth={2.2} />
                         <span>{error}</span>
                     </motion.p>
                 ) : null}

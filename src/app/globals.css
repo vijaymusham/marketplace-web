@@ -63,8 +63,31 @@ html.intro-pending {
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
-.marquee-track { animation: marquee 32s linear infinite; }
-@keyframes marquee { from { transform: translateX(0);} to { transform: translateX(-50%);} }
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+  will-change: transform;
+}
+.marquee-track-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-reverse 32s linear infinite;
+  will-change: transform;
+}
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes marquee-reverse {
+  from { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+.group\/marquee:hover .marquee-track,
+.group\/marquee:hover .marquee-track-reverse {
+  animation-play-state: paused;
+}
 
 @keyframes dot-fill { from { width: 0%; } to { width: 100%; } }
 

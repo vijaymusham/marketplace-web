@@ -76,12 +76,12 @@ function mapApiAds(payload: unknown): MyAd[] {
             const status = hasSoldAt
                 ? "sold"
                 : normalizeStatus(
-                      typeof ad.status === "string"
-                          ? ad.status
-                          : typeof ad.adStatus === "string"
+                    typeof ad.status === "string"
+                        ? ad.status
+                        : typeof ad.adStatus === "string"
                             ? ad.adStatus
                             : undefined,
-                  );
+                );
 
             const created =
                 (typeof ad.createdAt === "string" && ad.createdAt) ||
@@ -167,7 +167,6 @@ export default function MyAdsPage() {
             <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
                 <header className="mb-8 flex flex-col gap-5 border-b border-slate-200 pb-0 sm:flex-row sm:items-end sm:justify-between">
                     <div className="pb-5">
-                        <p className="text-sm font-semibold text-primary">Seller dashboard</p>
                         <h1 className="mt-1 font-heading text-3xl font-extrabold tracking-tight text-slate-900">
                             My Ads
                         </h1>
@@ -175,6 +174,7 @@ export default function MyAdsPage() {
                             {sourceAds.length} listing{sourceAds.length === 1 ? "" : "s"} total
                         </p>
                     </div>
+
 
                     <nav
                         aria-label="Ad status"

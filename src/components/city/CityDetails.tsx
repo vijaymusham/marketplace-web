@@ -60,7 +60,7 @@ const CityDetails = () => {
     if (!city) {
         return (
             <main className="flex-1 bg-white">
-                <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+                <div className="mx-auto px-4 py-10 sm:px-6 lg:px-12">
                     <p className="text-sm font-medium text-slate-500">
                         City not found{slug ? ` for “${slug}”` : ''}.
                     </p>
@@ -78,7 +78,7 @@ const CityDetails = () => {
 
     return (
         <main className="flex-1 bg-white">
-            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:py-10 lg:px-8">
+            <div className="mx-auto px-4 py-6 sm:px-6 md:py-10 lg:px-12">
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                     <Link
                         href="/"

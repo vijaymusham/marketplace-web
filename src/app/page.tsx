@@ -1,10 +1,10 @@
-"use client";
-
+"use client";;
 import CategoryTabs from "@/components/layout/CategoryTabs";
 import CityExplorer from "@/components/home-ui/CityExplorer";
 import FreshRecommendations from "@/components/home-ui/FreshRecommendations";
 import HorizontalList from "@/components/home-ui/HorizontalList";
 import BannerSection from "@/components/home-ui/BannerSection";
+import TestimonialsSection from "@/components/home-ui/TestimonialsSection";
 import { useQuery } from "@tanstack/react-query";
 import { getAdsBySection } from "@/components/api/apis";
 import type { ApiAd, ApiAdsBySectionAd, ApiAdsSection } from "@/components/types/AllTypes";
@@ -77,6 +77,7 @@ export default function Home() {
                         );
                     })}
                 <BannerSection />
+                <TestimonialsSection />
             </main>
         </>
     );

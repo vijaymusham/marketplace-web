@@ -71,7 +71,7 @@ export default function Navbar() {
                         </div>
                     </div>
                 ) : (
-                    <div className="mx-auto flex h-18 min-w-0 max-w-[100vw] items-center gap-4 px-6 py-3.5 lg:px-8">
+                    <div className="mx-auto flex h-18 min-w-0 items-center gap-4 px-6 py-3.5 lg:px-12">
                         <Link
                             href="/"
                             scroll={false}

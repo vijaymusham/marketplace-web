@@ -63,7 +63,7 @@ export default function SupportShell({
 
     return (
         <main className="relative flex-1 bg-slate-50">
-            <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 md:py-10 lg:px-8">
+            <div className="mx-auto px-4 py-7 sm:px-6 sm:py-10 md:py-10 lg:px-12">
                 <motion.header
                     initial={reduce ? false : { opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -105,8 +105,8 @@ export default function SupportShell({
                                     type="button"
                                     onClick={() => scrollToSection(id)}
                                     className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-bold whitespace-nowrap transition-colors duration-200 ${active
-                                            ? "bg-primary text-white"
-                                            : "bg-white text-slate-600 active:bg-primary/10"
+                                        ? "bg-primary text-white"
+                                        : "bg-white text-slate-600 active:bg-primary/10"
                                         }`}
                                 >
                                     {label}
@@ -135,8 +135,8 @@ export default function SupportShell({
                                                 type="button"
                                                 onClick={() => scrollToSection(id)}
                                                 className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors duration-200 ${active
-                                                        ? "bg-primary/10 text-primary"
-                                                        : "text-slate-500 hover:bg-[#f4f5f8] hover:text-slate-800"
+                                                    ? "bg-primary/10 text-primary"
+                                                    : "text-slate-500 hover:bg-[#f4f5f8] hover:text-slate-800"
                                                     }`}
                                             >
                                                 <span

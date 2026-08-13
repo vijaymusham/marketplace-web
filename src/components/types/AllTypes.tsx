@@ -432,6 +432,14 @@ export type ApiCategoryFilters = {
     sections: ApiCategoryFilterSection[];
 };
 
+export type ApiCategoryFilterRange = {
+    minQueryKey: string;
+    maxQueryKey: string;
+    min: number;
+    max: number;
+    step: number;
+};
+
 export type ApiCategoryFilterSection = {
     key: string;
     title: string;
@@ -439,6 +447,7 @@ export type ApiCategoryFilterSection = {
     selectionType: string;
     queryKey: string;
     items: ApiCategoryFilterOption[];
+    range?: ApiCategoryFilterRange;
 };
 
 export type ApiCategoryFilterOption = {

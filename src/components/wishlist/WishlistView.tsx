@@ -47,7 +47,7 @@ export default function WishlistView() {
     }
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+        <div className="mx-auto px-4 py-8 sm:px-6 md:py-12 lg:px-12">
             <Enter>
                 <header className="mb-8 flex flex-col gap-5 border-b border-slate-100 pb-8 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
                     <div>

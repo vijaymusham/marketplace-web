@@ -24,7 +24,7 @@ const HorizontalList = ({
     loading?: boolean;
 }) => {
     return (
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="mx-auto px-4 sm:px-6 lg:px-12">
             <div className={`rounded-2xl px-4 py-8 sm:rounded-3xl sm:px-6 sm:py-9 lg:px-8 lg:py-10 ${className ?? ""}`}>
                 <Reveal>
                     <div className="flex items-start justify-between gap-4">
@@ -59,7 +59,7 @@ const HorizontalList = ({
                 <div className="mt-7 sm:mt-8">
                     <WithSkeleton
                         loading={loading}
-                        count={5}
+                        count={6}
                         variant="listing"
                         gridClassName={HOME_LISTINGS_GRID}
                     >
