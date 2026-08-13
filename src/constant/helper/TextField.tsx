@@ -38,6 +38,7 @@ export function Field({
     return (
         <motion.div
             variants={formItem}
+            data-invalid={error ? "true" : undefined}
             className={`flex flex-col gap-1.5 ${className}`}
         >
             <div className="flex items-baseline justify-between gap-2">

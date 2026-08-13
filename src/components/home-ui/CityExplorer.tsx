@@ -30,11 +30,11 @@ export default function CityExplorer() {
                 <div className="relative mt-5 sm:mt-6">
                     <div
                         aria-hidden
-                        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-white to-transparent"
+                        className="pointer-events-none hidden sm:block absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-white to-transparent"
                     />
                     <div
                         aria-hidden
-                        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-linear-to-l from-white to-transparent sm:w-12"
+                        className="pointer-events-none  absolute inset-y-0 right-0 z-10 w-8 bg-linear-to-l from-white to-transparent sm:w-12"
                     />
 
                     <WithSkeleton

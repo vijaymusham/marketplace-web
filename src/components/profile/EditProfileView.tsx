@@ -6,15 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import {
-    Camera,
-    Check,
-    Loader2,
-    Mail,
-    Phone,
-    ShieldCheck,
-    User,
-} from "lucide-react";
+import { Camera, Check, Loader2, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { getUser, updateProfile } from "@/components/api/apis";
 import type { ApiError } from "@/components/api/customAxios";
@@ -113,7 +105,6 @@ export default function EditProfileView() {
 
     const watchedFirst = useWatch({ control, name: "firstName" });
     const watchedLast = useWatch({ control, name: "lastName" });
-    const watchedEmail = useWatch({ control, name: "email" });
 
     useEffect(() => {
         if (!isLoggedIn) requestSignIn();
@@ -292,7 +283,7 @@ export default function EditProfileView() {
 
     return (
         <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 md:py-10">
-            <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+            <header className="mb-6 flex flex-col-reverse  gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="font-heading text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
                         Edit profile
@@ -320,58 +311,11 @@ export default function EditProfileView() {
                                         {displayName}
                                     </p>
                                     <p className="truncate text-sm font-medium text-slate-500">
-                                        {watchedEmail?.trim() || profile.email || "Add your email"}
+                                        Member since {memberSince ? `on ${memberSince}` : "—"}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="mt-6 flex flex-wrap items-end gap-x-8 gap-y-4">
-                                <div>
-                                    <p className="text-base font-bold tracking-tight text-slate-900 ">
-                                        +91 {phoneDigits}
-                                    </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-400">
-                                        Phone number
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-base font-bold text-slate-900 ">
-                                        {memberSince}
-                                    </p>
-                                    <p className="mt-1 text-xs font-medium text-slate-400">
-                                        Member since
-                                    </p>
-                                </div>
-                            </div>
-
-
-                            <div className="mt-7">
-                                <p className="mb-3 text-sm font-bold text-slate-900">Details</p>
-                                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                                    <InfoChip
-                                        label="Username"
-                                        value={profile.username || "—"}
-                                        hint="Fixed"
-                                    />
-                                    <InfoChip
-                                        label="Phone"
-                                        value={`+91 ${phoneDigits}`}
-                                        hint={profile.phoneVerified ? "Verified" : undefined}
-                                    />
-                                    <InfoChip
-                                        label="Email"
-                                        value={
-                                            profile.emailVerified ? "Verified" : "Unverified"
-                                        }
-                                        hint={profile.emailVerified ? "✓" : "—"}
-                                    />
-                                    <InfoChip
-                                        label="Status"
-                                        value={profile.status || "Active"}
-                                        hint="Account"
-                                    />
-                                </div>
-                            </div>
 
                             <div className="mt-6 grid gap-3 sm:grid-cols-2">
                                 <AuthField label="First name" error={errors.firstName?.message}>
@@ -423,6 +367,37 @@ export default function EditProfileView() {
                                         />
                                     </AuthField>
                                 </div>
+                                <div className="sm:col-span-2">
+                                    <AuthField label="Phone (Verified)">
+                                        <input
+                                            type="tel"
+                                            autoComplete="tel"
+                                            placeholder={`+91 ${phoneDigits}`}
+                                            className={authInputClass}
+                                            aria-invalid={!!errors.email}
+                                            disabled
+                                        />
+                                    </AuthField>
+                                </div>
+                            </div>
+                            <div className="mt-5  hidden sm:flex flex-wrap gap-2.5 justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={saving || !hasChanges}
+                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 group"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check className="h-4 w-4" strokeWidth={2.5} />
+                                            Save changes
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
 
@@ -451,7 +426,12 @@ export default function EditProfileView() {
                                         </span>
                                     </span>
                                 )}
-                                <span className="absolute inset-0 bg-slate-900/0 transition-colors duration-200 group-hover:bg-slate-900/25" />
+                                <span className="absolute inset-0 bg-slate-900/0 transition-colors duration-200 group-hover:bg-slate-900/25 hidden sm:flex justify-center items-center text-sm font-bold text-transparent hover:text-white flex-col" >
+                                    <Camera className="h-10 w-10 mr-2" strokeWidth={2.2} />
+                                </span>
+                                <div className="absolute h-6 w-20 bg-green-500 rounded-full flex items-center justify-center top-3 right-3">
+                                    <p className="text-sm font-bold text-white">Verified</p>
+                                </div>
                             </button>
                             <input
                                 ref={fileInputRef}
@@ -463,33 +443,6 @@ export default function EditProfileView() {
                                     e.target.value = "";
                                 }}
                             />
-                            <div className="mt-5 flex flex-wrap gap-2.5 justify-end">
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 h group"
-                                >
-                                    <Camera className="h-4 w-4" strokeWidth={2.2} />
-                                    {displayPhoto ? "Change photo" : "Add photo"}
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={saving || !hasChanges}
-                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 group"
-                                >
-                                    {saving ? (
-                                        <>
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Check className="h-4 w-4" strokeWidth={2.5} />
-                                            Save changes
-                                        </>
-                                    )}
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>

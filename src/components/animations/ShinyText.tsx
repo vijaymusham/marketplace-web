@@ -120,7 +120,7 @@ export default function ShinyText({
             onMouseLeave={handleMouseLeave}
         >
             {icon}
-            <motion.span className="shiny-text font-semibold tracking-tight text-sm" style={{ ...gradientStyle, backgroundPosition }}>
+            <motion.span className="shiny-text font-semibold tracking-tight text-xs sm:text-sm" style={{ ...gradientStyle, backgroundPosition }}>
                 {text}
             </motion.span>
         </span>

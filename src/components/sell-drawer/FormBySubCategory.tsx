@@ -74,7 +74,11 @@ function ChoiceChips({
     const normalized = normalizeChipOptions(options);
 
     return (
-        <motion.div variants={formItem} className="flex flex-col gap-1.5 sm:col-span-2">
+        <motion.div
+            variants={formItem}
+            data-invalid={error ? "true" : undefined}
+            className="flex flex-col gap-1.5 sm:col-span-2"
+        >
             <label className="text-sm font-semibold text-slate-700">
                 {label}
                 {required ? (

@@ -97,6 +97,32 @@ function useIsClient() {
     return useSyncExternalStore(emptySubscribe, () => true, () => false);
 }
 
+function scrollToFirstInvalidField(root: HTMLElement | null) {
+    if (!root) return;
+
+    const field = root.querySelector<HTMLElement>("[data-invalid='true']");
+    if (!field) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    field.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "center",
+    });
+
+    const focusable = field.matches("input, textarea, select, button")
+        ? field
+        : field.querySelector<HTMLElement>(
+            "input:not([disabled]):not([type='hidden']), textarea:not([disabled]), select:not([disabled]), button:not([disabled])",
+        );
+    focusable?.focus({ preventScroll: true });
+}
+
+function scheduleScrollToFirstInvalidField() {
+    window.setTimeout(() => {
+        scrollToFirstInvalidField(document.getElementById("sell-form-scroll"));
+    }, 50);
+}
+
 
 
 export default function SellForm({
@@ -146,6 +172,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
         formState: { errors },
     } = useForm<SellFormValues>({
         defaultValues: emptySellFormValues,
+        shouldFocusError: false,
     });
 
     useEffect(() => {
@@ -156,6 +183,11 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
             mobile: user.user.phone ?? prev.mobile,
         }));
     }, [user, reset]);
+
+    useEffect(() => {
+        if (!photoError) return;
+        scrollToFirstInvalidField(document.getElementById("sell-form-scroll"));
+    }, [photoError]);
 
     const selectedCategory = useWatch({ control, name: "category" });
     const selectedSubcategory = useWatch({ control, name: "subcategory" });
@@ -633,9 +665,12 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                 <form
                     id="sell-form"
                     className="relative z-10 flex min-h-0 flex-1 flex-col"
-                    onSubmit={handleSubmit(onSubmit)}
+                    onSubmit={handleSubmit(onSubmit, scheduleScrollToFirstInvalidField)}
                 >
-                    <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-8 sm:py-5">
+                    <div
+                        id="sell-form-scroll"
+                        className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-8 sm:py-5"
+                    >
                         <motion.div
                             variants={formContainer}
                             initial="hidden"
@@ -788,7 +823,11 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                                 </span>
                                             ) : null}
                                         </Field>
-                                        <motion.div variants={formItem} className="flex flex-col gap-1.5">
+                                        <motion.div
+                                            variants={formItem}
+                                            data-invalid={errors.isNegotiable ? "true" : undefined}
+                                            className="flex flex-col gap-1.5"
+                                        >
                                             <label className="text-sm font-semibold text-slate-700">
                                                 Negotiable
                                                 <span className="ml-0.5 text-primary" aria-hidden>*</span>
@@ -958,7 +997,16 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         </AnimatePresence>
                                     </div>
                                 ) : (
-                                    <div className="flex items-start gap-3 rounded-xl bg-slate-50 px-3.5 py-3.5 ring-1 ring-slate-100">
+                                    <div
+                                        data-invalid={
+                                            errors.neighbourhood?.message ||
+                                            errors.city?.message ||
+                                            errors.state?.message
+                                                ? "true"
+                                                : undefined
+                                        }
+                                        className="flex items-start gap-3 rounded-xl bg-slate-50 px-3.5 py-3.5 ring-1 ring-slate-100"
+                                    >
                                         <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                             {detecting ? (
                                                 <Loader2 className="size-4 animate-spin" strokeWidth={2.25} />
@@ -1056,7 +1104,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                             <button
                                 type="submit"
                                 disabled={isPosting}
-                                className="group flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#ff5a1f] px-5 py-3 text-[15px] font-bold text-white transition-colors hover:bg-[#f04e14] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none "
+                                className="group flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#ff5a1f] px-5 py-2.5 text-[15px] font-bold text-white transition-colors hover:bg-[#f04e14] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none "
                             >
                                 <span>{isPosting ? "Posting…" : "Post Now"}</span>
                                 {isPosting ? (

@@ -158,7 +158,7 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
     ] as const;
 
     const menuBody = profile ? (
-        <div className="flex relative min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))]">
+        <div className="flex relative min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-6 sm:pt-3.5">
             <div className="absolute top-0 left-0 h-20 w-full bg-white/90 bg-linear-to-b from-primary/15 via-primary/8 to-white" />
             {/* Header */}
             <div className="flex items-center gap-3 px-0.5 pb-0.5">
@@ -435,16 +435,6 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                                         className="fixed inset-y-0 right-0 z-101 flex w-[min(100vw,17rem)] flex-col bg-white "
                                         data-lenis-prevent
                                     >
-                                        <div className="flex items-center justify-end px-3 pt-3">
-                                            <button
-                                                type="button"
-                                                aria-label="Close"
-                                                onClick={() => setMenuOpen(false)}
-                                                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                                            >
-                                                <X className="h-5 w-5" />
-                                            </button>
-                                        </div>
                                         {menuBody}
                                     </motion.aside>
                                 </>

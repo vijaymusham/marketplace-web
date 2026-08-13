@@ -148,7 +148,10 @@ export default function PhotoUpload({
     }, []);
 
     return (
-        <div className={className}>
+        <div
+            className={className}
+            data-invalid={displayError ? "true" : undefined}
+        >
             <div className="mb-2 flex items-baseline justify-between gap-2">
                 <label className="text-sm font-semibold text-slate-700">{label}</label>
                 <span className="text-[11px] font-medium text-slate-400">
@@ -170,8 +173,13 @@ export default function PhotoUpload({
                 {photos.length < maxPhotos && (
                     <button
                         type="button"
+                        aria-invalid={!!displayError}
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-200 bg-white text-slate-500 transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition-colors ${
+                            displayError
+                                ? "border-red-400 bg-red-50/80 text-red-500"
+                                : "border-slate-200 bg-white text-slate-500 hover:border-primary hover:bg-primary/5 hover:text-primary"
+                        }`}
                     >
                         <ImagePlus className="size-5" strokeWidth={1.75} />
                         <span className="text-[10px] font-bold">Add</span>
