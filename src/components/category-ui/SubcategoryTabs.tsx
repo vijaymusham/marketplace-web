@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { normalizeApiCategories } from "@/lib/apiCategories";
 import { slugify } from "@/lib/slug";
@@ -81,14 +81,22 @@ export default function SubcategoryTabs({
 
     return (
         <nav className="border-b border-slate-200 bg-white/85 backdrop-blur-2xl">
-            <div className="relative mx-auto flex flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-12">
+            <div className="relative mx-auto flex flex-col items-stretch px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-12">
+                <Link
+                    href="/"
+                    className="inline-flex w-fit items-center gap-1.5 pt-3 pb-0.5 text-[13px] font-semibold text-slate-500 transition-colors hover:text-primary sm:hidden"
+                >
+                    <ArrowLeft className="h-4 w-4" strokeWidth={2.25} />
+                    Go back
+                </Link>
+
                 <Link
                     href={categoryHref}
-                    className="flex shrink-0 items-center gap-2.5 py-3 pr-2 transition-opacity hover:opacity-80 sm:pr-6"
+                    className="flex shrink-0 items-center gap-2 py-2.5 pr-2 transition-opacity hover:opacity-80 sm:gap-2.5 sm:py-3 sm:pr-6"
                 >
-                    <CategoryIcon className="h-9 w-9 shrink-0 text-slate-800 sm:h-11 sm:w-11 md:h-13 md:w-13" />
+                    <CategoryIcon className="h-8 w-8 shrink-0 text-slate-800 sm:h-11 sm:w-11 md:h-13 md:w-13" />
                     <div className="min-w-0">
-                        <p className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase">
+                        <p className="text-[10px] hidden sm:block font-semibold tracking-wide text-slate-400 uppercase sm:text-[11px]">
                             Category
                         </p>
                         <h2 className="truncate font-heading text-sm font-extrabold text-slate-900 sm:text-base">
@@ -99,9 +107,9 @@ export default function SubcategoryTabs({
 
                 <div
                     ref={scrollRef}
-                    className="h-24 overflow-x-auto scroll-smooth scrollbar-hide sm:h-28"
+                    className="overflow-x-auto scroll-smooth scrollbar-hide sm:h-28"
                 >
-                    <ul className="mx-auto flex h-full w-max items-stretch gap-1 sm:gap-2">
+                    <ul className="flex w-max items-center gap-2 pb-3 sm:mx-auto sm:h-full sm:items-stretch sm:gap-2 sm:pb-0">
                         {category.subcategoryItems.map((sub) => {
                             const Icon = getSubcategoryIcon(sub.name);
                             const active = sub.name === activeSubcategory;
@@ -114,17 +122,17 @@ export default function SubcategoryTabs({
                                     <Link
                                         href={`/category/${slugify(sub.name)}${query ? `?${query}` : ""}`}
                                         aria-current={active ? "page" : undefined}
-                                        className={`group relative flex w-20 flex-col items-center justify-center gap-1 transition-colors sm:w-24 sm:gap-1.5 ${active
-                                            ? "text-primary"
-                                            : "text-slate-800 hover:text-primary"
+                                        className={`group relative flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 transition-colors sm:w-24 sm:flex-col sm:justify-center sm:gap-1.5 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 ${active
+                                            ? "border-primary/25 bg-primary/8 text-primary sm:border-0 sm:bg-transparent"
+                                            : "border-slate-200 bg-white text-slate-800 hover:text-primary sm:border-0 sm:bg-transparent"
                                             }`}
                                     >
-                                        <Icon className="h-9 w-9 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 sm:h-10 sm:w-10 md:h-11 md:w-11" />
-                                        <span className="line-clamp-2 text-center text-[11px] leading-tight font-semibold sm:text-xs">
+                                        <Icon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 sm:h-10 sm:w-10 md:h-11 md:w-11" />
+                                        <span className="max-w-[9.5rem] truncate text-[11px] leading-tight font-semibold sm:max-w-none sm:line-clamp-2 sm:text-center sm:whitespace-normal sm:text-xs">
                                             {sub.name}
                                         </span>
                                         <span
-                                            className={`absolute inset-x-3 bottom-0 h-1 rounded-t-full bg-primary transition-opacity duration-200 ${active ? "opacity-100" : "opacity-0"
+                                            className={`absolute inset-x-3 bottom-0 hidden h-1 rounded-t-full bg-primary transition-opacity duration-200 sm:block ${active ? "opacity-100" : "opacity-0"
                                                 }`}
                                         />
                                     </Link>
@@ -139,9 +147,9 @@ export default function SubcategoryTabs({
                         type="button"
                         onClick={scrollNext}
                         aria-label="Show more subcategories"
-                        className="absolute top-1/2 right-1 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-colors hover:text-primary sm:h-9 sm:w-9"
+                        className="absolute right-1 bottom-3.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white text-slate-600 shadow-md ring-1 ring-slate-900/10 transition-colors hover:text-primary sm:top-1/2 sm:bottom-auto sm:h-9 sm:w-9 sm:-translate-y-1/2"
                     >
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
                 )}
             </div>

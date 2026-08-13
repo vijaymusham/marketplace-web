@@ -208,28 +208,42 @@ export default function SubcategoryBrowse({
                 activeSubcategory={activeSubcategory}
             />
 
-            <div className="mx-auto px-4 py-8 sm:px-6 md:py-10 lg:px-12">
-                <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
-                    <CategorySidebar
-                        categoryName={categoryName}
-                        categoryId={categoryId}
-                        subCategoryId={subCategoryId || ""}
-                        subcategories={subcategories || []}
-                        activeSubcategory={activeSubcategory}
-                        totalCount={totalCount}
-                        onFiltersChange={handleFiltersChange}
-                    />
+            <div className="mx-auto px-4 py-4 sm:px-6 sm:py-8 md:py-10 lg:px-12">
+                <div className="flex flex-col gap-4 lg:flex-row lg:gap-10">
+                    <div className="flex items-center justify-between gap-3 lg:contents">
+                        <header className="min-w-0 flex-1 lg:hidden">
+                            <h1 className="text-balance font-heading text-lg font-extrabold leading-snug tracking-tight text-slate-900">
+                                {activeSubcategory}
+                            </h1>
+                            {showSkeleton ? (
+                                <Skeleton className="mt-1 h-3.5 w-36 rounded" />
+                            ) : (
+                                <p className="mt-0.5 text-[12px] font-medium leading-relaxed text-slate-500">
+                                    {`${totalCount} products in ${categoryName}`}
+                                </p>
+                            )}
+                        </header>
+                        <CategorySidebar
+                            categoryName={categoryName}
+                            categoryId={categoryId}
+                            subCategoryId={subCategoryId || ""}
+                            subcategories={subcategories || []}
+                            activeSubcategory={activeSubcategory}
+                            totalCount={totalCount}
+                            onFiltersChange={handleFiltersChange}
+                        />
+                    </div>
 
                     <div className="min-w-0 flex-1">
                         <Enter>
-                            <header className="mb-6 md:mb-8">
-                                <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
+                            <header className="mb-8 hidden lg:block">
+                                <h1 className="text-balance font-heading text-2xl font-extrabold leading-snug tracking-tight text-slate-900 md:text-3xl">
                                     {activeSubcategory}
                                 </h1>
                                 {showSkeleton ? (
                                     <Skeleton className="mt-2 h-4 w-40 rounded" />
                                 ) : (
-                                    <p className="mt-1.5 text-sm font-medium text-slate-500">
+                                    <p className="mt-1.5 text-sm font-medium leading-relaxed text-slate-500">
                                         {`${totalCount} products in ${categoryName}`}
                                     </p>
                                 )}

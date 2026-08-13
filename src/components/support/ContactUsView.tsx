@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { Field } from "@/constant/helper/TextField";
 import { inputClassName } from "@/constant/helper/classesHelper";
 import SupportShell, { SupportSection, SupportTile } from "./SupportShell";
+import GlowButton from "@/components/ui/GlowButton";
 
 const LINKS = [
     { id: "channels", label: "Contact Channels" },
@@ -151,13 +152,14 @@ export default function ContactUsView() {
                             />
                         </Field>
                         <div className="sm:col-span-2">
-                            <button
+                            <GlowButton
                                 type="submit"
                                 disabled={submitting}
-                                className="w-full rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-primary-hover active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+                                className="w-full sm:w-auto"
+                                size="lg"
                             >
                                 {submitting ? "Sending…" : "Send message"}
-                            </button>
+                            </GlowButton>
                         </div>
                     </form>
                 )}

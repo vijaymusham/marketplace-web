@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatSoldAtTimestamp, getMyAds, updateAds } from "@/components/api/apis";
 import MyAdsCard, { type MyAd, type MyAdStatus } from "@/components/my-ads/MyAdsCard";
 import { MyAdCardSkeleton } from "@/components/ui/Skeleton";
+import GlowButton from "@/components/ui/GlowButton";
 
 type Filter = "all" | "active" | "inactive" | "pending" | "moderated";
 
@@ -164,42 +166,53 @@ export default function MyAdsPage() {
 
     return (
         <main className="flex-1 bg-white">
-            <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
-                <header className="mb-8 flex flex-col gap-5 border-b border-slate-200 pb-0 sm:flex-row sm:items-end sm:justify-between">
-                    <div className="pb-5">
-                        <h1 className="mt-1 font-heading text-3xl font-extrabold tracking-tight text-slate-900">
-                            My Ads
-                        </h1>
-                        <p className="mt-1.5 text-sm font-medium text-slate-500">
-                            {sourceAds.length} listing{sourceAds.length === 1 ? "" : "s"} total
-                        </p>
+            <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-8 md:py-10 lg:px-8">
+                <Link
+                    href="/"
+                    className="mb-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-slate-500 transition-colors hover:text-primary sm:hidden"
+                >
+                    <ArrowLeft className="h-4 w-4" strokeWidth={2.25} />
+                    Go back
+                </Link>
+
+                <header className="mb-5 border-b border-slate-200 sm:mb-8">
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between">
+                        <div className="pb-3 sm:pb-5">
+                            <h1 className="font-heading text-xl font-extrabold tracking-tight text-slate-900 sm:mt-1 sm:text-3xl">
+                                My Ads
+                            </h1>
+                            <p className="mt-1 text-[12px] font-medium text-slate-500 sm:mt-1.5 sm:text-sm">
+                                {sourceAds.length} listing{sourceAds.length === 1 ? "" : "s"} total
+                            </p>
+                        </div>
+
+                        <nav
+                            aria-label="Ad status"
+                            className="min-w-0 -mx-4 overflow-x-auto overscroll-x-contain px-4 scrollbar-hide sm:mx-0 sm:overflow-visible sm:px-0 sm:flex sm:justify-end"
+                        >
+                            <div className="flex w-max gap-1.5 pb-3 sm:gap-1 sm:pb-px">
+                                {TABS.map(({ key, label }) => {
+                                    const active = filter === key;
+                                    return (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={() => setFilter(key)}
+                                            className={`relative shrink-0 rounded-full px-3 py-1.5 text-[13px] font-semibold transition-colors sm:rounded-none sm:px-3.5 sm:py-3 sm:text-sm ${active
+                                                ? "bg-primary/10 text-primary sm:bg-transparent"
+                                                : "bg-slate-100 text-slate-500 hover:text-slate-700 sm:bg-transparent sm:text-slate-400"
+                                                }`}
+                                        >
+                                            {label}
+                                            {active && (
+                                                <span className="absolute inset-x-2 bottom-0 hidden h-0.5 rounded-full bg-primary sm:block" />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </nav>
                     </div>
-
-
-                    <nav
-                        aria-label="Ad status"
-                        className="flex gap-1 overflow-x-auto pb-px scrollbar-hide sm:justify-end"
-                    >
-                        {TABS.map(({ key, label }) => {
-                            const active = filter === key;
-                            return (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => setFilter(key)}
-                                    className={`relative shrink-0 px-3.5 py-3 text-sm font-semibold transition-colors ${active
-                                        ? "text-primary"
-                                        : "text-slate-400 hover:text-slate-700"
-                                        }`}
-                                >
-                                    {label}
-                                    {active && (
-                                        <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-primary" />
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </nav>
                 </header>
 
                 {isLoading ? (
@@ -219,12 +232,9 @@ export default function MyAdsPage() {
                                 : "Post a listing with Sell Now to see it here."}
                         </p>
                         {sourceAds.length === 0 && (
-                            <Link
-                                href="/"
-                                className="mt-6 inline-flex rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
-                            >
+                            <GlowButton href="/" className="mt-6">
                                 Go to home
-                            </Link>
+                            </GlowButton>
                         )}
                     </div>
                 ) : (

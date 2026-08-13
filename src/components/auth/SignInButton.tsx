@@ -452,7 +452,7 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                             className="fixed inset-0 z-40 cursor-default"
                             onClick={() => setMenuOpen(false)}
                         />
-                        <div className="absolute top-full right-0 z-50 mt-2.5 flex max-h-[min(85vh,36rem)] w-[min(18rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl  bg-white shadow-xl">
+                        <div className="absolute top-full right-0 z-50 mt-5 flex max-h-[min(85vh,36rem)] w-[min(18rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl  bg-white shadow-xl">
                             {menuBody}
                         </div>
                     </>

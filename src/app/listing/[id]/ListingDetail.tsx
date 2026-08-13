@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { useIsLoggedIn, useWishlistQuery } from "@/hooks/useWishlistQuery";
 import { requestSignIn } from "@/lib/auth-events";
 import { ListingDetailSkeleton } from "@/components/ui/Skeleton";
+import GlowButton from "@/components/ui/GlowButton";
 
 function formatPrice(price: number) {
     return `₹${Number.isFinite(price) ? price.toLocaleString("en-IN") : "0"}`;
@@ -215,13 +216,10 @@ export default function ListingDetail({ id }: { id: string }) {
                 <p className="mt-2 text-sm font-medium text-slate-500">
                     This ad may have been removed or the link is invalid.
                 </p>
-                <Link
-                    href="/"
-                    className="mt-6 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
-                >
+                <GlowButton href="/" className="mt-6">
                     <ArrowLeft className="h-4 w-4" />
                     Back to home
-                </Link>
+                </GlowButton>
             </div>
         );
     }
@@ -404,15 +402,17 @@ export default function ListingDetail({ id }: { id: string }) {
                     </div>
 
                     <div className="mt-5 hidden gap-2.5 lg:flex">
-                        <button
+                        <GlowButton
                             type="button"
                             onClick={() => createNewChat.mutate(id)}
                             disabled={isSold || createNewChat.isPending}
-                            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex-1"
+                            size="lg"
+                            fullWidth
                         >
                             <MessageCircle className="h-4 w-4" />
                             Chat
-                        </button>
+                        </GlowButton>
                         <a
                             href={isSold || !ad.mobileNumber ? undefined : `tel:${ad.mobileNumber}`}
                             aria-disabled={isSold || !ad.mobileNumber}
@@ -469,15 +469,17 @@ export default function ListingDetail({ id }: { id: string }) {
 
             <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-100 bg-white/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
                 <div className="mx-auto flex max-w-lg gap-2">
-                    <button
+                    <GlowButton
                         type="button"
                         onClick={() => createNewChat.mutate(id)}
                         disabled={isSold || createNewChat.isPending}
-                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1"
+                        size="lg"
+                        fullWidth
                     >
                         <MessageCircle className="h-4 w-4" />
                         Chat
-                    </button>
+                    </GlowButton>
                     <a
                         href={isSold || !ad.mobileNumber ? undefined : `tel:${ad.mobileNumber}`}
                         aria-disabled={isSold || !ad.mobileNumber}

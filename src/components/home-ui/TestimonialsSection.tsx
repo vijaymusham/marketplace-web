@@ -71,27 +71,29 @@ const ROW_TWO: Testimonial[] = [
     },
 ];
 
+const ALL_TESTIMONIALS = [...ROW_ONE, ...ROW_TWO];
+
 function TestimonialCard({ item }: { item: Testimonial }) {
     return (
-        <article className="relative flex h-[11.5rem] w-[min(85vw,20.5rem)] shrink-0 flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:h-[12.5rem] sm:w-80 sm:rounded-[1.25rem] sm:p-6 md:h-[13rem] md:w-88">
+        <article className="relative flex h-full flex-col rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:rounded-2xl sm:p-5 md:p-6">
             <span
-                className="pointer-events-none absolute top-4 right-5 font-heading text-3xl leading-none text-primary/80 sm:top-5 sm:right-6 sm:text-4xl"
+                className="pointer-events-none absolute top-2.5 right-3 font-heading text-2xl leading-none text-primary/65 sm:top-4 sm:right-5 sm:text-4xl"
                 aria-hidden
             >
                 &ldquo;
             </span>
-            <p className="line-clamp-4 flex-1 pr-8 text-[15px] leading-relaxed text-slate-600 sm:text-base sm:leading-[1.6]">
+            <p className="pr-6 text-[12.5px] leading-relaxed text-slate-600 sm:pr-8 sm:text-[15px] sm:leading-[1.6]">
                 {item.quote}
             </p>
-            <div className="mt-auto flex items-center gap-3 pt-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-heading text-xs font-extrabold tracking-wide text-primary sm:size-11 sm:text-[13px]">
+            <div className="mt-3 flex items-center gap-2 sm:mt-5 sm:gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 font-heading text-[10px] font-extrabold tracking-wide text-primary sm:size-11 sm:text-[13px]">
                     {item.initials}
                 </div>
                 <div className="min-w-0">
-                    <p className="truncate font-heading text-sm font-bold tracking-tight text-slate-900 sm:text-[15px]">
+                    <p className="truncate font-heading text-xs font-bold tracking-tight text-slate-900 sm:text-[15px]">
                         {item.name}
                     </p>
-                    <p className="truncate text-xs text-slate-400 sm:text-[13px]">{item.detail}</p>
+                    <p className="truncate text-[10px] text-slate-400 sm:text-[13px]">{item.detail}</p>
                 </div>
             </div>
         </article>
@@ -114,15 +116,12 @@ function MarqueeRow({
             className="group/marquee relative overflow-hidden"
             style={{
                 maskImage:
-                    "linear-gradient(90deg, transparent, black 8%, black 92%, transparent)",
+                    "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
                 WebkitMaskImage:
-                    "linear-gradient(90deg, transparent, black 8%, black 92%, transparent)",
+                    "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
             }}
         >
-            <div
-                className={trackClass}
-                style={{ animationDuration: duration }}
-            >
+            <div className={trackClass} style={{ animationDuration: duration }}>
                 {[0, 1].map((copy) => (
                     <div
                         key={copy}
@@ -130,7 +129,12 @@ function MarqueeRow({
                         aria-hidden={copy === 1}
                     >
                         {items.map((item) => (
-                            <TestimonialCard key={`${copy}-${item.initials}`} item={item} />
+                            <div
+                                key={`${copy}-${item.initials}`}
+                                className="w-[min(78vw,20.5rem)] shrink-0 sm:w-80 md:w-88"
+                            >
+                                <TestimonialCard item={item} />
+                            </div>
                         ))}
                     </div>
                 ))}
@@ -141,24 +145,47 @@ function MarqueeRow({
 
 export default function TestimonialsSection() {
     return (
-        <section className="relative overflow-hidden bg-slate-50/70 py-14 sm:py-16 lg:py-20">
+        <section className="relative overflow-hidden bg-slate-50/70 py-8 sm:py-16 lg:py-20">
             <Reveal y={18} delay={0.06}>
-                <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-12">
-                    <p className="text-[11px] font-semibold tracking-[0.18em] text-primary uppercase sm:text-xs">
+                <div className="mx-auto max-w-3xl px-5 text-center sm:px-6 lg:px-12">
+                    <p className="text-[9px] font-semibold tracking-[0.16em] text-primary uppercase sm:text-xs sm:tracking-[0.18em]">
                         Social Proof
                     </p>
-                    <h2 className="mt-3 font-heading text-[1.65rem] font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-[2.35rem] md:leading-[1.15]">
+                    <h2 className="mt-1.5 text-balance font-heading text-[1.15rem] font-extrabold leading-snug tracking-tight text-slate-900 sm:mt-3 sm:text-3xl md:text-[2.35rem] md:leading-[1.15]">
                         Feedback from buyers &{" "}
                         <span className="text-primary">sellers</span>
                     </h2>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
-                        Real notes from people using DealPokket every day — scrolling by with
-                        subtle motion so you can skim what locals are saying.
+                    <p className="mx-auto mt-1.5 max-w-[17.5rem] text-pretty text-[12px] leading-relaxed text-slate-500 sm:mt-3 sm:max-w-xl sm:text-base">
+                        Real notes from people using DealPokket every day.
                     </p>
                 </div>
             </Reveal>
 
-            <div className="mt-10 flex flex-col gap-4 sm:mt-12 sm:gap-5 md:mt-14">
+            <div
+                className="relative mt-5 md:hidden"
+                style={{
+                    maskImage:
+                        "linear-gradient(90deg, transparent, black 18px, black calc(100% - 36px), transparent)",
+                    WebkitMaskImage:
+                        "linear-gradient(90deg, transparent, black 18px, black calc(100% - 36px), transparent)",
+                }}
+            >
+                <div
+                    className="scrollbar-hide flex snap-x snap-mandatory gap-2.5 overflow-x-auto overscroll-x-contain px-5 pb-0.5"
+                    aria-label="Customer testimonials"
+                >
+                    {ALL_TESTIMONIALS.map((item) => (
+                        <div
+                            key={item.initials}
+                            className="w-[min(68vw,16.5rem)] shrink-0 snap-start"
+                        >
+                            <TestimonialCard item={item} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="mt-10 hidden flex-col gap-5 sm:mt-12 md:mt-14 md:flex">
                 <MarqueeRow items={ROW_ONE} duration="42s" />
                 <MarqueeRow items={ROW_TWO} reverse duration="48s" />
             </div>

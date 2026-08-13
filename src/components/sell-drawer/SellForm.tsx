@@ -16,6 +16,7 @@ import { normalizeApiCategories } from "@/lib/apiCategories";
 import { locationTree } from "@/lib/locations";
 import SelectDropdown from "./SelectDropdown";
 import PhotoUpload from "./PhotoUpload";
+import GlowButton from "@/components/ui/GlowButton";
 import type { ApiCity, CreateAdPayload, SellFormValues } from "../types/AllTypes";
 import { emptySellFormValues, SELL_FORM_COMMON_KEYS } from "../types/AllTypes";
 import { inputClassName } from "@/constant/helper/classesHelper";
@@ -1101,10 +1102,11 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                             >
                                 Cancel
                             </button>
-                            <button
+                            <GlowButton
                                 type="submit"
                                 disabled={isPosting}
-                                className="group flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#ff5a1f] px-5 py-2.5 text-[15px] font-bold text-white transition-colors hover:bg-[#f04e14] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none "
+                                variant="sell"
+                                className="group flex-1 sm:flex-none"
                             >
                                 <span>{isPosting ? "Posting…" : "Post Now"}</span>
                                 {isPosting ? (
@@ -1115,7 +1117,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         strokeWidth={2.5}
                                     />
                                 )}
-                            </button>
+                            </GlowButton>
                         </div>
                     </motion.footer>
                 </form>

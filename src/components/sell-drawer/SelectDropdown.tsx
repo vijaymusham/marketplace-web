@@ -60,16 +60,18 @@ export default function SelectDropdown({
         <div
             ref={rootRef}
             data-invalid={error ? "true" : undefined}
-            className="relative flex flex-col gap-1.5"
+            className={`relative flex flex-col ${label ? "gap-1.5" : ""}`}
         >
-            <label className="text-sm font-semibold text-slate-700">
-                {label}
-                {required ? (
-                    <span className="ml-0.5 text-primary" aria-hidden>
-                        *
-                    </span>
-                ) : null}
-            </label>
+            {label ? (
+                <label className="text-sm font-semibold text-slate-700">
+                    {label}
+                    {required ? (
+                        <span className="ml-0.5 text-primary" aria-hidden>
+                            *
+                        </span>
+                    ) : null}
+                </label>
+            ) : null}
 
             <motion.button
                 type="button"

@@ -12,6 +12,7 @@ import {
 import { pushNotification } from "@/hooks/useNotifications";
 import { syncDeviceTokenToServer } from "@/lib/fcmDeviceToken";
 import type { RootState } from "@/components/redux/store";
+import GlowButton from "@/components/ui/GlowButton";
 
 const DISMISS_KEY = "DealPokket-fcm-prompt-dismissed";
 const PROMPT_DELAY_MS = 5 * 60 * 1000;
@@ -154,14 +155,16 @@ export default function FcmProvider({ children }: { children: ReactNode }) {
                         </p>
 
                         <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse">
-                            <button
+                            <GlowButton
                                 type="button"
                                 disabled={asking}
                                 onClick={() => void handleAllow()}
-                                className="flex-1 rounded-2xl bg-primary py-3 text-sm font-bold text-white transition hover:bg-primary-hover disabled:opacity-60"
+                                className="flex-1"
+                                size="lg"
+                                fullWidth
                             >
                                 {asking ? "Asking..." : "Allow"}
-                            </button>
+                            </GlowButton>
                             <button
                                 type="button"
                                 disabled={asking}

@@ -366,16 +366,30 @@ export default function CategorySidebar({
         emitFilters(snapshot({ ranges: nextRanges }));
     };
 
+    const activeCount =
+        Object.values(selected).reduce((n, values) => n + values.length, 0) +
+        (stateId ? 1 : 0) +
+        (cityId ? 1 : 0) +
+        (locality.trim() ? 1 : 0) +
+        Object.values(ranges).filter(
+            (range) => range.min !== range.boundMin || range.max !== range.boundMax,
+        ).length;
+
     return (
         <>
-            <div className="mb-4 flex items-center lg:hidden">
+            <div className="flex shrink-0 items-center lg:hidden">
                 <button
                     type="button"
                     onClick={() => setMobileOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
+                    className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-[13px] font-semibold text-slate-800  transition-colors hover:border-primary/40 hover:text-primary"
                 >
-                    <SlidersHorizontal className="h-4 w-4" strokeWidth={1.85} />
-                    Filters & categories
+                    <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.85} />
+                    Filters
+                    {activeCount > 0 ? (
+                        <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+                            {activeCount}
+                        </span>
+                    ) : null}
                 </button>
             </div>
 

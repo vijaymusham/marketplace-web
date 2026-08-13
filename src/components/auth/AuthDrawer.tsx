@@ -22,6 +22,7 @@ import { authApi, authPhoneCheck, getUser } from "@/components/api/apis";
 import type { ApiError } from "@/components/api/customAxios";
 import { setUser } from "@/components/redux/slices/authSlice";
 import type { AppDispatch } from "@/components/redux/store";
+import GlowButton from "@/components/ui/GlowButton";
 
 type View = "phone" | "otp" | "details";
 
@@ -500,13 +501,15 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                 <div id={RECAPTCHA_ID} />
                             </div>
 
-                            <button
+                            <GlowButton
                                 type="submit"
                                 disabled={!phoneValid || sending}
-                                className="mt-1 w-full cursor-pointer rounded-full bg-primary py-3 text-sm font-bold tracking-wide text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300"
+                                fullWidth
+                                size="lg"
+                                className="mt-1"
                             >
                                 {sending ? "Sending OTP..." : "Continue"}
-                            </button>
+                            </GlowButton>
                         </form>
 
                         <p className="mx-auto mt-4 max-w-80 text-center text-xs leading-relaxed font-semibold text-slate-400">
@@ -551,14 +554,16 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                     ))}
                                 </div>
 
-                                <button
+                                <GlowButton
                                     type="button"
                                     onClick={() => void handleVerify()}
                                     disabled={!otpFilled || verifying}
-                                    className="mt-6 w-full cursor-pointer rounded-full bg-primary py-3 text-sm font-bold tracking-wide text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300"
+                                    fullWidth
+                                    size="lg"
+                                    className="mt-6"
                                 >
                                     {verifying ? "Verifying..." : "Verify OTP"}
-                                </button>
+                                </GlowButton>
 
                                 <p className="mt-5 text-center text-sm font-medium text-slate-500">
                                     Didn&apos;t receive it?{" "}
@@ -643,13 +648,15 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                         </button>
                                     )}
 
-                                    <button
+                                    <GlowButton
                                         type="submit"
                                         disabled={!name.trim() || !emailValid || savingProfile}
-                                        className="mt-1 w-full cursor-pointer rounded-full bg-primary py-3 text-sm font-bold tracking-wide text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300"
+                                        fullWidth
+                                        size="lg"
+                                        className="mt-1"
                                     >
                                         {savingProfile ? "Saving..." : "Finish"}
-                                    </button>
+                                    </GlowButton>
                                 </form>
                             </motion.div>
                         )}

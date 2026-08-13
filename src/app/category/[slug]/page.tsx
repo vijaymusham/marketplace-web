@@ -111,32 +111,37 @@ export default function CategoryPage() {
                     activeSubcategory=""
                 />
                 <main className="flex-1 bg-white">
-                    <div className="mx-auto px-4 py-8 sm:px-6 md:py-10 lg:px-12">
-                        <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between md:mb-9">
+                    <div className="mx-auto px-4 py-4 sm:px-6 sm:py-8 md:py-10 lg:px-12">
+                        <header className="mb-5 flex items-start justify-between gap-3 sm:mb-7 sm:gap-4 md:mb-9">
                             <div className="min-w-0 flex-1">
-                                <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
+                                <h1 className="text-balance font-heading text-lg font-extrabold leading-snug tracking-tight text-slate-900 sm:text-2xl md:text-3xl">
                                     {category.name} for Sale
                                 </h1>
                                 {showAdsSkeleton ? (
-                                    <div className="mt-2 space-y-2">
-                                        <Skeleton className="h-4 w-full max-w-xl rounded" />
-                                        <Skeleton className="h-4 w-2/3 max-w-md rounded" />
+                                    <div className="mt-1.5 space-y-2 sm:mt-2">
+                                        <Skeleton className="h-3.5 w-full max-w-xl rounded sm:h-4" />
+                                        <Skeleton className="hidden h-4 w-2/3 max-w-md rounded sm:block" />
                                     </div>
                                 ) : (
-                                    <p className="mt-2 max-w-2xl text-sm text-slate-500 md:text-sm">
-                                        Browse all {category.name.toLowerCase()} listings near you.
-                                        Verified sellers, great prices and {ads.length}+ fresh ads
-                                        posted every day.
+                                    <p className="mt-1 max-w-2xl text-pretty text-[12px] leading-relaxed text-slate-500 sm:mt-2 sm:text-sm">
+                                        <span className="sm:hidden">
+                                            {ads.length}+ listings near you
+                                        </span>
+                                        <span className="hidden sm:inline">
+                                            Browse all {category.name.toLowerCase()} listings near you.
+                                            Verified sellers, great prices and {ads.length}+ fresh ads
+                                            posted every day.
+                                        </span>
                                     </p>
                                 )}
                             </div>
-                            <div className="w-full shrink-0 sm:w-48">
+                            <div className="w-[8.25rem] shrink-0 sm:mt-0.5 sm:w-48">
                                 <SelectDropdown
                                     label=""
                                     value={sort}
                                     onChange={(value) => setSort(value as SortValue)}
                                     options={[...SORT_OPTIONS]}
-                                    className="mt-3 max-w-full bg-white! py-2.5! sm:max-w-48"
+                                    className="rounded-full! bg-white! px-3! py-2! text-xs sm:max-w-48 sm:rounded-xl! sm:px-4! sm:py-2.5! sm:text-sm"
                                 />
                             </div>
                         </header>

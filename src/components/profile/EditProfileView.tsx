@@ -15,6 +15,7 @@ import type { AppDispatch, RootState } from "@/components/redux/store";
 import { useIsLoggedIn } from "@/hooks/useWishlistQuery";
 import { requestSignIn } from "@/lib/auth-events";
 import { uploadToS3 } from "@/constant/helper/s3Upload";
+import GlowButton from "@/components/ui/GlowButton";
 
 type ProfileFormValues = {
     firstName: string;
@@ -256,13 +257,14 @@ export default function EditProfileView() {
                 <p className="mt-2 text-sm font-medium text-slate-500">
                     Your name, email, and photo stay with your DealPokket account.
                 </p>
-                <button
+                <GlowButton
                     type="button"
                     onClick={() => requestSignIn()}
-                    className="mt-6 rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98]"
+                    size="lg"
+                    className="mt-6"
                 >
                     Sign in
-                </button>
+                </GlowButton>
             </div>
         );
     }
@@ -381,10 +383,9 @@ export default function EditProfileView() {
                                 </div>
                             </div>
                             <div className="mt-5  flex flex-wrap gap-2.5 justify-end">
-                                <button
+                                <GlowButton
                                     type="submit"
                                     disabled={saving || !hasChanges}
-                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 group"
                                 >
                                     {saving ? (
                                         <>
@@ -397,7 +398,7 @@ export default function EditProfileView() {
                                             Save changes
                                         </>
                                     )}
-                                </button>
+                                </GlowButton>
                             </div>
                         </div>
 

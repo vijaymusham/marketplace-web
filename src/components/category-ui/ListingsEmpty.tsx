@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import GlowButton from "@/components/ui/GlowButton";
 
 export default function ListingsEmpty({
     title = "Oops! No deals found",
@@ -34,13 +34,10 @@ export default function ListingsEmpty({
                 {description}
             </p>
 
-            <Link
-                href={ctaHref}
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] hover:bg-primary-hover active:scale-[0.98] sm:mt-7"
-            >
+            <GlowButton href={ctaHref} className="mt-6 sm:mt-7" size="lg">
                 {ctaLabel}
                 <ArrowRight className="h-4 w-4" />
-            </Link>
+            </GlowButton>
         </section>
     );
 }

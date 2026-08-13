@@ -22,13 +22,13 @@ export default function SectionHeader({
                 <div className={showDivider ? "min-w-0" : undefined}>
                     <ShinyText
                         text={eyebrow}
-                        className="text-[8px] tracking-[0.14em] sm:text-xs"
+                        className="text-[10px] tracking-[0.14em] sm:text-xs"
                     />
-                    <h2 className="mt-0.5 sm:mt-1 font-heading text-[1.35rem] font-extrabold tracking-tight text-slate-900 sm:text-2xl md:text-[1.75rem]">
+                    <h2 className="mt-0.5 text-balance font-heading text-[1.2rem] font-extrabold leading-snug tracking-tight text-slate-900 sm:mt-1 sm:text-2xl md:text-[1.75rem]">
                         {title}
                     </h2>
                     {description ? (
-                        <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-slate-500 sm:mt-1.5 sm:text-sm md:text-[15px]">
+                        <p className="mt-1 max-w-xl text-pretty text-[13px] leading-relaxed text-slate-500 sm:mt-1.5 sm:text-sm md:text-[15px]">
                             {description}
                         </p>
                     ) : null}

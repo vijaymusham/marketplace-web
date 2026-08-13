@@ -56,8 +56,10 @@ export default function ListingCard({
         try {
             if (inWishlist) {
                 await removeFromWishlist(id);
+                toast.success("Removed from Wishlist");
             } else {
                 await addToWishlist(id);
+                toast.success("Added to Wishlist");
             }
             await queryClient.invalidateQueries({ queryKey: ["wishlist"] });
         } catch {

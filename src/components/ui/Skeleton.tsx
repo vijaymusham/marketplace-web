@@ -51,8 +51,8 @@ export function WishlistCardSkeleton() {
             className="grid grid-cols-1 overflow-hidden rounded-3xl bg-slate-50 sm:grid-cols-[11rem_1fr]"
             aria-hidden
         >
-            <Skeleton className="aspect-4/3 sm:aspect-auto sm:min-h-40" />
-            <div className="flex flex-col p-5 sm:p-6">
+            <Skeleton className="aspect-16/10 sm:aspect-auto sm:min-h-40" />
+            <div className="flex flex-col p-3.5 sm:p-6">
                 <Skeleton className="h-5 w-16 rounded-full" />
                 <Skeleton className="mt-3 h-5 w-3/4 rounded" />
                 <Skeleton className="mt-2 h-4 w-full rounded" />
@@ -95,18 +95,31 @@ export function CategoryTabsSkeleton() {
 export function SubcategoryTabsSkeleton() {
     return (
         <nav className="border-b border-slate-200 bg-white/85 backdrop-blur-2xl" aria-busy>
-            <div className="relative mx-auto flex flex-col items-stretch gap-1 px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-12">
-                <div className="flex shrink-0 items-center gap-2.5 py-3 pr-2 sm:pr-6">
-                    <Skeleton className="h-9 w-9 rounded-xl sm:h-11 sm:w-11 md:h-13 md:w-13" />
+            <div className="relative mx-auto flex flex-col items-stretch px-3 sm:flex-row sm:gap-0 sm:space-x-4 sm:px-6 lg:px-12">
+                <Skeleton className="mt-3 h-4 w-20 rounded sm:hidden" />
+                <div className="flex shrink-0 items-center gap-2 py-2.5 pr-2 sm:gap-2.5 sm:py-3 sm:pr-6">
+                    <Skeleton className="h-8 w-8 rounded-xl sm:h-11 sm:w-11 md:h-13 md:w-13" />
                     <div className="min-w-0">
                         <Skeleton className="h-2.5 w-14 rounded" />
                         <Skeleton className="mt-1.5 h-4 w-24 rounded" />
                     </div>
                 </div>
-                <div className="flex h-24 items-center gap-1 overflow-hidden sm:h-28 sm:gap-2">
+                <div className="flex items-center gap-2 overflow-hidden pb-3 sm:h-28 sm:gap-2 sm:pb-0">
                     {Array.from({ length: 7 }, (_, i) => (
-                        <CategoryTabSkeleton key={i} />
+                        <div
+                            key={i}
+                            className="flex shrink-0 items-center gap-1.5 rounded-full sm:hidden"
+                            aria-hidden
+                        >
+                            <Skeleton className="h-4 w-4 rounded" />
+                            <Skeleton className="h-7 w-24 rounded-full" />
+                        </div>
                     ))}
+                    <div className="hidden items-center gap-2 sm:flex">
+                        {Array.from({ length: 7 }, (_, i) => (
+                            <CategoryTabSkeleton key={i} />
+                        ))}
+                    </div>
                 </div>
             </div>
         </nav>
@@ -135,8 +148,8 @@ export function MyAdCardSkeleton() {
             aria-hidden
         >
             <div className="grid grid-cols-1 md:grid-cols-[9.5rem_1fr]">
-                <Skeleton className="aspect-4/3 md:aspect-auto md:min-h-36" />
-                <div className="flex min-w-0 flex-col p-4 sm:p-5">
+                <Skeleton className="aspect-16/10 md:aspect-auto md:min-h-36" />
+                <div className="flex min-w-0 flex-col p-3.5 sm:p-5">
                     <div className="flex flex-wrap items-center gap-2">
                         <Skeleton className="h-5 w-16 rounded-md" />
                         <Skeleton className="h-3.5 w-28 rounded" />
@@ -276,14 +289,14 @@ export function CategoryPageSkeleton() {
         <>
             <SubcategoryTabsSkeleton />
             <main className="flex-1 bg-white" aria-busy>
-                <div className="mx-auto px-4 py-8 sm:px-6 md:py-10 lg:px-12">
-                    <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between md:mb-9">
+                <div className="mx-auto px-4 py-4 sm:px-6 sm:py-8 md:py-10 lg:px-12">
+                    <div className="mb-5 flex items-start justify-between gap-3 sm:mb-7 md:mb-9">
                         <div className="min-w-0 flex-1">
-                            <Skeleton className="h-8 w-56 rounded md:h-9 md:w-72" />
-                            <Skeleton className="mt-3 h-4 w-full max-w-xl rounded" />
-                            <Skeleton className="mt-2 h-4 w-2/3 max-w-md rounded" />
+                            <Skeleton className="h-6 w-40 rounded sm:h-8 sm:w-56 md:h-9 md:w-72" />
+                            <Skeleton className="mt-2 h-3.5 w-36 rounded sm:mt-3 sm:h-4 sm:w-full sm:max-w-xl" />
+                            <Skeleton className="mt-2 hidden h-4 w-2/3 max-w-md rounded sm:block" />
                         </div>
-                        <Skeleton className="h-11 w-full rounded-xl sm:w-48" />
+                        <Skeleton className="h-9 w-[8.25rem] rounded-full sm:h-11 sm:w-48 sm:rounded-xl" />
                     </div>
                     <div className={PAGINATED_LISTINGS_GRID}>
                         {Array.from({ length: 8 }, (_, i) => (

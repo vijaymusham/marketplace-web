@@ -85,7 +85,9 @@ html.intro-pending {
 }
 
 .group\/marquee:hover .marquee-track,
-.group\/marquee:hover .marquee-track-reverse {
+.group\/marquee:hover .marquee-track-reverse,
+.group\/marquee:active .marquee-track,
+.group\/marquee:active .marquee-track-reverse {
   animation-play-state: paused;
 }
 
@@ -96,6 +98,108 @@ html.intro-pending {
     100% {
         transform: rotate(1turn);
     }
+}
+
+@property --spin {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+@keyframes glow-spin {
+    to { --spin: 360deg; }
+}
+
+.glow-btn {
+    --glow: var(--color-primary);
+    --beam: #ffffff;
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    text-decoration: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    background:
+        linear-gradient(var(--glow), var(--glow)) padding-box,
+        conic-gradient(
+            from var(--spin),
+            var(--glow) 0deg,
+            color-mix(in srgb, var(--beam) 45%, var(--glow)) 58deg,
+            var(--beam) 74deg,
+            color-mix(in srgb, var(--beam) 45%, var(--glow)) 90deg,
+            var(--glow) 112deg,
+            var(--glow) 180deg,
+            color-mix(in srgb, var(--beam) 45%, var(--glow)) 238deg,
+            var(--beam) 254deg,
+            color-mix(in srgb, var(--beam) 45%, var(--glow)) 270deg,
+            var(--glow) 292deg,
+            var(--glow) 360deg
+        ) border-box;
+    animation: glow-spin 2.2s linear infinite;
+    animation-play-state: paused;
+}
+
+.glow-btn:hover:not(:disabled):not(.is-disabled) {
+    animation-play-state: running;
+}
+
+.glow-btn--sell {
+    --glow: #ff5a1f;
+    --beam: #fff7ed;
+}
+
+.glow-btn--sm {
+    min-height: 2.25rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+}
+
+.glow-btn--md {
+    min-height: 2.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+}
+
+.glow-btn--lg {
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+}
+
+.glow-btn--block {
+    width: 100%;
+}
+
+.glow-btn__label {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.glow-btn:focus-visible {
+    outline: 2px solid var(--glow);
+    outline-offset: 3px;
+}
+
+.glow-btn:disabled,
+.glow-btn.is-disabled {
+    cursor: not-allowed;
+    animation: none;
+    color: #fff;
+    background: #cbd5e1;
+    border-color: #cbd5e1;
 }
 
 .rainbow::before {

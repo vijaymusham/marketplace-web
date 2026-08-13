@@ -24,39 +24,41 @@ const HorizontalList = ({
     loading?: boolean;
 }) => {
     return (
-        <section className="mx-auto px-4 sm:px-6 lg:px-12">
-            <div className={`rounded-2xl px-4 py-8 sm:rounded-3xl sm:px-6 sm:py-9 lg:px-8 lg:py-10 ${className ?? ""}`}>
+        <section className="mx-auto px-3 sm:px-6 lg:px-12">
+            <div className={`rounded-2xl px-3.5 py-6 sm:rounded-3xl sm:px-6 sm:py-9 lg:px-8 lg:py-10 ${className ?? ""}`}>
                 <Reveal>
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                            <div className="mb-2 flex items-center gap-2.5">
-                                <span className="h-1 w-6 rounded-full bg-primary sm:w-7" />
-                                <span className="text-[11px] font-semibold tracking-[0.12em] text-slate-400 uppercase sm:text-xs">
+                    <div className="flex flex-col gap-3 sm:gap-0">
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-2">
+                                <span className="h-1 w-5 shrink-0 rounded-full bg-primary sm:w-7" />
+                                <span className="truncate text-[10px] font-semibold tracking-[0.14em] text-slate-400 uppercase sm:text-xs sm:tracking-[0.12em]">
                                     Collection
                                 </span>
                             </div>
-                            <h2 className="font-heading text-[1.35rem] font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+                            <button
+                                type="button"
+                                className="group flex shrink-0 cursor-pointer items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-2.5 py-1 text-[12px] font-semibold text-slate-800 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-primary/25 hover:text-primary hover:shadow-md sm:gap-1.5 sm:px-4 sm:py-2 sm:text-sm"
+                            >
+                                View all
+                                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
+                            </button>
+                        </div>
+                        <div className="min-w-0 sm:mt-2">
+                            <h2 className="text-balance font-heading text-[1.2rem] font-extrabold leading-snug tracking-tight text-slate-900 sm:text-2xl">
                                 {title}
                             </h2>
                             {loading ? (
                                 <Skeleton className="mt-2 h-3.5 w-48 max-w-full rounded" />
                             ) : description ? (
-                                <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-slate-500 sm:text-sm md:text-[15px]">
+                                <p className="mt-1.5 max-w-xl text-pretty text-[13px] leading-relaxed text-slate-500 sm:text-sm md:text-[15px]">
                                     {description}
                                 </p>
                             ) : null}
                         </div>
-                        <button
-                            type="button"
-                            className="group mt-1 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-primary/25 hover:text-primary hover:shadow-md sm:mt-0 sm:gap-2 sm:px-4 sm:py-2"
-                        >
-                            View all
-                            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-                        </button>
                     </div>
                 </Reveal>
 
-                <div className="mt-7 sm:mt-8">
+                <div className="mt-5 sm:mt-8">
                     <WithSkeleton
                         loading={loading}
                         count={6}

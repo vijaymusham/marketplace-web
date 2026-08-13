@@ -6,6 +6,7 @@ import "react-easy-crop/react-easy-crop.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, X, ZoomIn } from "lucide-react";
 import { getCroppedImageFile } from "./cropImage";
+import GlowButton from "@/components/ui/GlowButton";
 
 type ImageCropModalProps = {
     imageSrc: string;
@@ -136,15 +137,16 @@ export default function ImageCropModal({
                             >
                                 Skip
                             </button>
-                            <button
+                            <GlowButton
                                 type="button"
                                 onClick={handleConfirm}
                                 disabled={saving || !croppedAreaPixels}
-                                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-white transition-colors hover:bg-primary-hover disabled:opacity-50"
+                                className="flex-1"
+                                fullWidth
                             >
                                 <Check className="size-4" strokeWidth={2.5} />
                                 {saving ? "Saving…" : "Use photo"}
-                            </button>
+                            </GlowButton>
                         </div>
                     </div>
                 </motion.div>

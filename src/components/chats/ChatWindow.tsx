@@ -63,6 +63,7 @@ import {
 } from "./chatCache";
 import { useSocket } from "@/components/socket/SocketProvider";
 import { ChatMessagesSkeleton } from "@/components/ui/Skeleton";
+import GlowButton from "@/components/ui/GlowButton";
 
 const QUICK_REPLIES = [
     "Is this still available?",
@@ -616,14 +617,14 @@ export default function ChatWindow({
                                     </button>
                                 ))}
                             </div>
-                            <button
+                            <GlowButton
                                 type="button"
                                 onClick={() => setOfferOpen(true)}
-                                className="mt-3 flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-hover active:scale-95"
+                                className="mt-3"
                             >
                                 <Tag className="h-4 w-4" />
                                 Offer to Sell
-                            </button>
+                            </GlowButton>
                         </div>
                     )}
 
@@ -1318,13 +1319,14 @@ function OfferComposer({
                         className="w-full rounded-xl bg-[#F4F6FB] py-3 pr-3.5 pl-8 text-sm font-medium text-[#334155] outline-none placeholder:text-[#8B95A8] focus:ring-2 focus:ring-primary/25 sm:py-2.5"
                     />
                 </div>
-                <button
+                <GlowButton
                     type="submit"
                     disabled={busy || !price}
-                    className="min-h-11 rounded-xl bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-hover disabled:opacity-50 sm:min-h-0"
+                    size="sm"
+                    className="min-h-11 sm:min-h-0"
                 >
                     Send Offer
-                </button>
+                </GlowButton>
             </form>
         </div>
     );

@@ -10,6 +10,7 @@ import { setAddress, setLocation } from "../redux/slices/authSlice";
 import { toast } from "react-hot-toast";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { geocodePlace } from "@/lib/geo";
+import GlowButton from "@/components/ui/GlowButton";
 
 function shortAddress(address: string | null | undefined) {
     if (!address) return "India";
@@ -205,14 +206,15 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
                                     </div>
 
                                     <div className="mt-6 flex flex-col gap-4">
-                                        <button
+                                        <GlowButton
                                             type="button"
                                             onClick={() => getLocation()}
-                                            className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+                                            fullWidth
+                                            size="lg"
                                         >
                                             <LocateFixed className="h-4 w-4" />
                                             Detect my location
-                                        </button>
+                                        </GlowButton>
 
                                         <div className="flex items-center gap-3">
                                             <span className="h-px flex-1 bg-slate-200" />
