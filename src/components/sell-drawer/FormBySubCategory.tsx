@@ -100,11 +100,10 @@ function ChoiceChips({
                                     key={option.value}
                                     type="button"
                                     onClick={() => field.onChange(option.value)}
-                                    className={`cursor-pointer rounded-xl px-3.5 py-2.5 text-sm font-bold transition-colors ${
-                                        active
+                                    className={`cursor-pointer rounded-xl px-3.5 py-2.5 text-sm font-bold transition-colors ${active
                                             ? "bg-primary text-white"
                                             : "bg-white text-slate-600 ring-1 ring-slate-200 hover:text-slate-900"
-                                    }`}
+                                        }`}
                                 >
                                     {option.label}
                                 </button>
@@ -1093,7 +1092,14 @@ export function ForSaleHousesApartmentsForm({ control, register, errors }: SubFo
                 control={control}
                 required
                 options={[
-                    "apartment", "independent_house", "villa", "plot", "farmhouse", "pg", "office", "shop"
+                    { value: "apartment", label: "Apartment" },
+                    { value: "independent_house", label: "Independent House" },
+                    { value: "villa", label: "Villa" },
+                    { value: "plot", label: "Plot" },
+                    { value: "farmhouse", label: "Farmhouse" },
+                    { value: "pg", label: "PG" },
+                    { value: "office", label: "Office" },
+                    { value: "shop", label: "Shop" },
                 ]}
                 error={errors.propertyType?.message}
             />

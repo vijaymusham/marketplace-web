@@ -71,7 +71,7 @@ export default function CityExplorer() {
                                     >
                                         <div className="relative aspect-square w-full overflow-hidden rounded-full bg-white/70">
                                             <Image
-                                                src={city.imageUrl || "/images/city-placeholder.png"}
+                                                src={`${process.env.NEXT_PUBLIC_API_IMAGE_URL}${city.imageUrl}` || "/images/city-placeholder.png"}
                                                 alt={`Deals in ${city.name || "No name"}`}
                                                 fill
                                                 sizes="(max-width: 640px) 76px, (max-width: 768px) 112px, 144px"

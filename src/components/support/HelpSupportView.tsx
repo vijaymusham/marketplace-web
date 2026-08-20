@@ -109,8 +109,8 @@ export default function HelpSupportView() {
                                     </span>
                                     <span
                                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${isOpen
-                                                ? "bg-primary text-white"
-                                                : "bg-white text-slate-400"
+                                            ? "bg-primary text-white"
+                                            : "bg-white text-slate-400"
                                             }`}
                                     >
                                         <ChevronDown
