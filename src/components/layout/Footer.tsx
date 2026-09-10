@@ -3,6 +3,7 @@ import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { scrollToTop } from "@/lib/lenis";
+import Image from "next/image";
 
 function FacebookLogo(props: SVGProps<SVGSVGElement>) {
     return (
@@ -146,14 +147,11 @@ export default function Footer() {
                             onClick={() => {
                                 if (window.location.pathname === "/") scrollToTop();
                             }}
-                            className="flex items-center gap-2.5"
+                            className="group flex shrink-0 items-center"
                         >
-                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-indigo-500 text-white">
-                                <ShoppingBag className="h-4.5 w-4.5" strokeWidth={2} />
-                            </span>
-                            <span className="font-heading text-lg font-extrabold tracking-tight text-white">
-                                Deal<span className="text-indigo-400">Pokket</span>
-                                <sup className="ml-0.5 text-[10px]">®</sup>
+                            <Image src="/logo-white.png" alt="DealPokket" width={100} height={100} className="w-16 h-16" />
+                            <span className="font-heading text-3xl font-black tracking-tight text-[#2340FD]">
+                                Deal<span className="text-white">Pokket</span>
                             </span>
                         </Link>
 
@@ -226,7 +224,7 @@ export default function Footer() {
                 <p className="mt-14 mb-5 text-center text-sm text-slate-500">
                     © {new Date().getFullYear()} Deal Pokket Limited  |  All rights reserved.
                 </p>
-                <div className="flex flex-col items-center justify-center gap-5 border-t border-white/10 py-8 sm:flex-row sm:gap-8">
+                <div className="flex flex-col items-center justify-center gap-5 border-t border-white/5 py-8 sm:flex-row sm:gap-8">
                     <p className="px-2 text-center text-sm font-semibold text-white sm:text-base">
                         For better experience, download the Deal Pokket app now
                     </p>

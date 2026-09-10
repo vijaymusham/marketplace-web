@@ -14,6 +14,7 @@ import { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
 import { scrollToTop } from "@/lib/lenis";
+import Image from "next/image";
 
 function useIsLargeScreen(minWidth = 1024) {
     const [isLarge, setIsLarge] = useState(false);
@@ -78,13 +79,11 @@ export default function Navbar() {
                             onClick={() => {
                                 if (pathname === "/") scrollToTop();
                             }}
-                            className="group flex shrink-0 items-center gap-2.5"
+                            className="group flex shrink-0 items-center"
                         >
-                            {/* <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-indigo-500 text-white shadow-sm shadow-primary/25">
-                                <ShoppingBag className="h-4.5 w-4.5" strokeWidth={2} />
-                            </span> */}
-                            <span className="font-heading text-3xl font-extrabold tracking-tight text-slate-900">
-                                Deal<span className="text-primary">Pokket</span>
+                            <Image src="/logo.png" alt="DealPokket" width={100} height={100} className="w-16 h-16" />
+                            <span className="font-heading text-3xl font-black tracking-tight text-[#2340FD]">
+                                Deal<span className="text-black">Pokket</span>
                             </span>
                         </Link>
 

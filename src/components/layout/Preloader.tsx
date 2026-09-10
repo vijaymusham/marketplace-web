@@ -1,6 +1,7 @@
 "use client";
 
 import { animate, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import Image from "next/image";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useMarkIntroReady } from "@/components/layout/IntroContext";
 
@@ -14,7 +15,7 @@ const EXIT_DELAY = 0.18;
 const EXIT_DURATION = 0.88;
 const HOME_READY_AT = 0.12;
 
-const RING_R = 52;
+const RING_R = 54;
 const RING_C = 2 * Math.PI * RING_R;
 
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -30,11 +31,9 @@ export default function Preloader() {
         restDelta: 0.05,
     });
     const dashOffset = useTransform(smooth, (v) => RING_C - (v / 100) * RING_C);
-    const displayText = useTransform(smooth, (v) => String(Math.round(v)).padStart(3, "0"));
+    const displayText = useTransform(smooth, (v) => String(Math.round(v)).padStart(2, "0"));
+    const barScale = useTransform(smooth, [0, 100], [0, 1]);
     const fillY = useTransform(smooth, [0, 100], ["100%", "0%"]);
-    const lineScale = useTransform(smooth, [0, 100], [0, 1]);
-    const dotX = useTransform(smooth, (v) => 64 + RING_R * Math.cos((v / 100) * Math.PI * 2));
-    const dotY = useTransform(smooth, (v) => 64 + RING_R * Math.sin((v / 100) * Math.PI * 2));
     const markIntroReady = useMarkIntroReady();
 
     useIsomorphicLayoutEffect(() => {
@@ -113,125 +112,91 @@ export default function Preloader() {
                 transition={{ duration: EXIT_DURATION, ease: easeDoor }}
             />
 
+            <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.18),transparent_58%)]"
+            />
+
             <motion.div
                 className="absolute inset-0 z-10 flex items-center justify-center px-6"
                 animate={exiting ? { opacity: 0 } : { opacity: 1 }}
                 transition={{ duration: 0.42, ease: easeFade }}
             >
-                <span
-                    aria-hidden
-                    className="pointer-events-none absolute h-64 w-64 rounded-full bg-white/20 blur-[90px] sm:h-80 sm:w-80"
-                />
-
                 <motion.div
                     className="relative z-10 flex w-full flex-col items-center"
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={springIn}
                 >
-                    <div className="relative mb-7 grid size-28 place-items-center sm:mb-8 sm:size-32">
+                    <div className="relative mb-8 grid size-36 place-items-center sm:mb-9 sm:size-40">
                         <svg viewBox="0 0 128 128" className="absolute inset-0 size-full -rotate-90" fill="none">
                             <circle
                                 cx="64"
                                 cy="64"
                                 r={RING_R}
-                                stroke="rgba(255,255,255,0.18)"
-                                strokeWidth="3"
+                                stroke="rgba(255,255,255,0.2)"
+                                strokeWidth="2.5"
                             />
                             <motion.circle
                                 cx="64"
                                 cy="64"
                                 r={RING_R}
                                 stroke="white"
-                                strokeWidth="3"
+                                strokeWidth="2.5"
                                 strokeLinecap="round"
                                 strokeDasharray={RING_C}
                                 style={{ strokeDashoffset: dashOffset }}
                             />
-                            <motion.circle
-                                r="4.5"
-                                fill="white"
-                                style={{ cx: dotX, cy: dotY }}
-                            />
                         </svg>
-                        <motion.span
-                            initial={{ opacity: 0, scale: 0.88 }}
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.82 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={springIn}
-                            className="font-heading text-[1.25rem] font-extrabold tracking-tight text-white sm:text-[1.4rem]"
+                            className="relative grid size-24 place-items-center overflow-hidden rounded-full bg-white shadow-[0_12px_40px_rgba(8,18,80,0.28)] sm:size-28"
                         >
-                            DP
-                        </motion.span>
+                            <Image
+                                src="/logo.png"
+                                alt=""
+                                width={112}
+                                height={112}
+                                priority
+                                className="size-18 object-contain sm:size-20"
+                            />
+                        </motion.div>
                     </div>
 
                     <h1 className="relative font-heading text-4xl font-extrabold tracking-tight sm:text-5xl">
                         <span className="flex items-baseline justify-center">
-                            <motion.span
-                                initial={{ x: -20, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                transition={{
-                                    x: { ...springIn, delay: 0.06 },
-                                    opacity: { duration: 0.5, ease: easeFade, delay: 0.06 },
-                                }}
-                                className="select-none text-transparent"
-                            >
-                                Deal
-                            </motion.span>
-                            <motion.span
-                                initial={{ x: 20, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                transition={{
-                                    x: { ...springIn, delay: 0.12 },
-                                    opacity: { duration: 0.5, ease: easeFade, delay: 0.12 },
-                                }}
-                                className="select-none text-transparent"
-                            >
-                                &nbsp;Pokket
-                            </motion.span>
+                            <span className="select-none text-transparent">Deal Pokket</span>
                         </span>
                         <span className="pointer-events-none absolute inset-0 overflow-hidden">
                             <motion.span
                                 className="flex h-full items-baseline justify-center text-white will-change-transform"
                                 style={{ y: fillY }}
                             >
-                                Deal&nbsp;Pokket
+                                Deal <span className="text-black">Pokket</span>
                             </motion.span>
                         </span>
                     </h1>
 
-                    <motion.div
-                        className="mt-4 h-px w-32 origin-center bg-white sm:w-40"
-                        style={{ scaleX: lineScale }}
-                    />
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ ...springIn, delay: 0.28 }}
-                        className="mt-3 text-[11px] font-semibold tracking-[0.24em] text-white/55 uppercase sm:text-xs"
-                    >
+                    <p className="mt-3 text-[11px] font-semibold tracking-[0.28em] text-white/60 uppercase sm:text-xs">
                         Finding nearby deals
-                    </motion.p>
-                </motion.div>
+                    </p>
 
-                <div className="pointer-events-none absolute inset-x-6 bottom-7 flex items-end justify-between sm:inset-x-10 sm:bottom-10 md:inset-x-14">
-                    <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ ...springIn, delay: 0.12 }}
-                        className="font-heading text-4xl font-extrabold tracking-tight text-white/90 tabular-nums sm:text-5xl md:text-6xl"
-                    >
-                        {displayText}
-                    </motion.p>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.5 }}
-                        transition={{ duration: 0.45, ease: easeOut, delay: 0.22 }}
-                        className="mb-1 text-[10px] font-semibold tracking-[0.22em] text-white uppercase sm:text-[11px]"
-                    >
-                        Loading
-                    </motion.p>
-                </div>
+                    <div className="mt-8 flex w-full max-w-56 flex-col items-center gap-2.5 sm:max-w-64">
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
+                            <motion.div
+                                className="h-full origin-left rounded-full bg-white"
+                                style={{ scaleX: barScale }}
+                            />
+                        </div>
+                        <p className="font-heading text-sm font-bold tracking-widest text-white/80 tabular-nums">
+                            <motion.span>{displayText}</motion.span>
+                            <span className="ml-0.5 text-white/50">%</span>
+                        </p>
+                    </div>
+                </motion.div>
             </motion.div>
         </div>
     );

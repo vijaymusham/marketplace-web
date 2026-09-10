@@ -186,7 +186,7 @@ export default function TestimonialsSection() {
             </div>
 
             <div className="mt-10 hidden flex-col gap-5 sm:mt-12 md:mt-14 md:flex">
-                <MarqueeRow items={ROW_TWO} reverse duration="48s" />
+                <MarqueeRow items={ROW_TWO} duration="48s" />
             </div>
         </section>
     );

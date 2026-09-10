@@ -439,7 +439,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                             ) : null}
                             <h2
                                 id="auth-modal-title"
-                                className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 sm:text-[1.75rem]"
+                                className="font-heading text-2xl font-extrabold tracking-tight text-primary sm:text-[1.75rem]"
                             >
                                 {heading.title}
                             </h2>
