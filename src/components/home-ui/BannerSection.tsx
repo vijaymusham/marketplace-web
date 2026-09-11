@@ -9,7 +9,7 @@ export default function BannerSection() {
             <Reveal y={20}>
                 <div className="relative isolate w-full overflow-hidden rounded-xl aspect-2/1 sm:aspect-21/8 sm:rounded-2xl lg:aspect-11/4 lg:rounded-3xl">
                     <Image
-                        src="/comingsooon.png"
+                        src="/comingsoon.png"
                         alt="Seller packing an order to ship"
                         fill
                         sizes="100vw"
