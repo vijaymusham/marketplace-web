@@ -370,7 +370,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
             latitude,
             longitude,
             sellerName: data.sellerName,
-            mobileNumber: data.mobile,
+            mobileNumber: data.mobile || "",
             images: imageUrls
                 .filter(Boolean)
                 .map((url, index) => ({
@@ -1001,8 +1001,8 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                     <div
                                         data-invalid={
                                             errors.neighbourhood?.message ||
-                                            errors.city?.message ||
-                                            errors.state?.message
+                                                errors.city?.message ||
+                                                errors.state?.message
                                                 ? "true"
                                                 : undefined
                                         }
@@ -1071,7 +1071,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         <input
                                             type="tel"
                                             inputMode="tel"
-                                            disabled
+                                            // disabled
                                             placeholder="+91 XXXXX XXXXX"
                                             className={inputClassName}
                                             aria-invalid={!!errors.mobile}
