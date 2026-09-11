@@ -643,7 +643,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                         <div className="min-w-0">
                             <h2
                                 id="sell-modal-title"
-                                className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 sm:text-[1.75rem]"
+                                className="font-heading text-2xl font-extrabold tracking-tight text-primary sm:text-[1.75rem]"
                             >
                                 Create New Post
                             </h2>
@@ -1098,7 +1098,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                                className="cursor-pointer rounded-full px-8 py-2.5 text-sm font-semibold text-slate-500 transition-colors bg-slate-100 hover:text-slate-900"
                             >
                                 Cancel
                             </button>

@@ -150,13 +150,13 @@ export default function Footer() {
                             className="group flex shrink-0 items-center"
                         >
                             <Image src="/logo-white.png" alt="DealPokket" width={100} height={100} className="w-16 h-16" />
-                            <span className="font-heading text-3xl font-black tracking-tight text-[#2340FD]">
+                            <span className="font-heading text-3xl font-black tracking-tight text-primary">
                                 Deal<span className="text-white">Pokket</span>
                             </span>
                         </Link>
 
                         <h3 className="mt-6 font-heading text-lg font-extrabold text-white">
-                            Buy and sell anything.
+                            Buy and sell anything 🛍️
                         </h3>
                         <p className="mt-3 max-w-xs text-sm leading-relaxed">
                             Your local marketplace for everyday deals — discover great
@@ -178,7 +178,7 @@ export default function Footer() {
                     {/* menu columns */}
                     {menuColumns.map(({ heading, links }) => (
                         <div key={heading}>
-                            <h4 className="text-sm font-bold text-indigo-400">{heading}</h4>
+                            <h4 className="text-sm font-bold text-white">{heading}</h4>
                             <ul className="mt-5 space-y-3.5">
                                 {links.map(({ label, href }) => (
                                     <li key={label}>
@@ -202,7 +202,7 @@ export default function Footer() {
 
                     {/* social */}
                     <div>
-                        <h4 className="text-sm font-bold text-indigo-400">Social</h4>
+                        <h4 className="text-sm font-bold text-white">Social</h4>
                         <ul className="mt-5 space-y-3.5">
                             {socials.map(({ icon: Icon, label }) => (
                                 <li key={label}>
@@ -219,14 +219,9 @@ export default function Footer() {
                     </div>
                 </div>
 
-                {/* app download bar */}
-
-                <p className="mt-14 mb-5 text-center text-sm text-slate-500">
-                    © {new Date().getFullYear()} Deal Pokket Limited  |  All rights reserved.
-                </p>
                 <div className="flex flex-col items-center justify-center gap-5 border-t border-white/5 py-8 sm:flex-row sm:gap-8">
-                    <p className="px-2 text-center text-sm font-semibold text-white sm:text-base">
-                        For better experience, download the Deal Pokket app now
+                    <p className="px-2 text-center text-sm font-semibold text-white">
+                        © {new Date().getFullYear()} Deal Pokket Limited — Made with ❤️ in India. All rights reserved.
                     </p>
                     <div className="flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center md:flex-row">
                         <StoreBadge
