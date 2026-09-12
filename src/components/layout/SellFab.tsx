@@ -65,6 +65,7 @@ export default function SellFab({ variant = "nav" }: SellFabProps) {
                     aria-label="Sell now"
                     onClick={handleOpen}
                     variant="sell"
+                    size="sm"
                 >
                     <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-white text-[#ff5a1f]">
                         <Plus className="h-3 w-3" strokeWidth={3} />
