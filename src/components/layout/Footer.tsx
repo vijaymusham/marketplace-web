@@ -135,7 +135,7 @@ function StoreBadge({
 
 export default function Footer() {
     return (
-        <footer className="overflow-hidden bg-[#0b0d12] text-slate-400 md:rounded-t-4xl">
+        <footer className="relative z-10 overflow-hidden bg-[#0b0d12] text-slate-400 md:rounded-t-4xl">
             <div className="mx-auto px-4 pt-10 lg:pt-16 sm:px-6 lg:px-12">
                 {/* main columns */}
                 <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr] lg:gap-12">

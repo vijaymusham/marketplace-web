@@ -8,13 +8,18 @@ import ImageCropModal from "./ImageCropModal";
 const DEFAULT_MAX_PHOTOS = 12;
 
 export type PhotoUploadProps = {
-    /** Called whenever the cropped photo list changes. */
+    /** Called whenever the photo list changes. */
     onChange: (files: File[]) => void;
     maxPhotos?: number;
     /** External error (e.g. from form submit). Cleared when photos change. */
     error?: string | null;
     label?: string;
     className?: string;
+    /**
+     * When true (default), each selected image opens the square crop modal.
+     * When false, originals are kept as-is; previews still render in square tiles via object-cover.
+     */
+    imageCrop?: boolean;
 };
 
 type PhotoItem = {
@@ -35,6 +40,7 @@ export default function PhotoUpload({
     error: externalError = null,
     label = "Photos",
     className = "",
+    imageCrop = true,
 }: PhotoUploadProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [photos, setPhotos] = useState<PhotoItem[]>([]);
@@ -69,6 +75,13 @@ export default function PhotoUpload({
 
         if (!next.length) {
             setInternalError("Please choose image files");
+            return;
+        }
+
+        // Keep originals; square crop is only applied visually in the grid via object-cover.
+        if (!imageCrop) {
+            emitChange([...photos, ...next]);
+            setInternalError(null);
             return;
         }
 
@@ -175,11 +188,10 @@ export default function PhotoUpload({
                         type="button"
                         aria-invalid={!!displayError}
                         onClick={() => fileInputRef.current?.click()}
-                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition-colors ${
-                            displayError
+                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition-colors ${displayError
                                 ? "border-red-400 bg-red-50/80 text-red-500"
                                 : "border-slate-200 bg-white text-slate-500 hover:border-primary hover:bg-primary/5 hover:text-primary"
-                        }`}
+                            }`}
                     >
                         <ImagePlus className="size-5" strokeWidth={1.75} />
                         <span className="text-[10px] font-bold">Add</span>
@@ -194,7 +206,7 @@ export default function PhotoUpload({
                         <img
                             src={photo.url}
                             alt={`Upload ${index + 1}`}
-                            className="size-full object-cover"
+                            className="size-full object-cover aspect-square"
                         />
                         {index === 0 && (
                             <span className="absolute top-1.5 left-1.5 rounded-md bg-primary px-1.5 py-0.5 text-[9px] font-bold text-white uppercase">
@@ -242,7 +254,7 @@ export default function PhotoUpload({
                 ) : null}
             </AnimatePresence>
 
-            {cropQueue[0] ? (
+            {imageCrop && cropQueue[0] ? (
                 <ImageCropModal
                     key={cropQueue[0].id}
                     imageSrc={cropQueue[0].url}

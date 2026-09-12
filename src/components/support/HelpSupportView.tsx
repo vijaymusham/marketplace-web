@@ -136,19 +136,19 @@ export default function HelpSupportView() {
             </SupportSection>
 
             <SupportSection id="reach-us" number={6} title="Reach Us">
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                     <SupportTile
                         icon={Mail}
                         title="Email"
-                        detail="support@DealPokket.in"
-                        href="mailto:support@DealPokket.in"
+                        detail="dealpokket@gmail.com"
+                        href="mailto:dealpokket@gmail.com"
                     />
-                    <SupportTile
+                    {/* <SupportTile
                         icon={Phone}
                         title="Phone"
                         detail="+91 1800-123-4567"
                         href="tel:+9118001234567"
-                    />
+                    /> */}
                     <SupportTile
                         icon={MessageCircleMore}
                         title="Chat"

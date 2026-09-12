@@ -88,8 +88,8 @@ export default function MyAdsCard({
             transition={{ duration: 0.5, ease: easeSmooth, delay }}
             aria-disabled={isSold || undefined}
             className={`overflow-hidden rounded-2xl border bg-white transition-colors ${isSold
-                    ? "cursor-not-allowed border-rose-200 bg-rose-50/30 opacity-75"
-                    : "border-slate-200 hover:border-primary/30 hover:bg-slate-50/40"
+                ? "cursor-not-allowed border-rose-200 bg-rose-50/30 opacity-75"
+                : "border-slate-200 hover:border-primary/30 hover:bg-slate-50/40"
                 }`}
         >
             <div className="grid grid-cols-1 md:grid-cols-[9.5rem_1fr]">
@@ -100,7 +100,7 @@ export default function MyAdsCard({
                             alt={ad.title}
                             fill
                             sizes="(min-width: 768px) 152px, 100vw"
-                            className="object-cover grayscale"
+                            className="object-cover grayscale aspect-square"
                         />
                         <span className="absolute inset-0 bg-rose-900/15" aria-hidden />
                     </div>
@@ -114,7 +114,7 @@ export default function MyAdsCard({
                             alt={ad.title}
                             fill
                             sizes="(min-width: 768px) 152px, 100vw"
-                            className="object-cover"
+                            className="object-cover aspect-square"
                         />
                     </Link>
                 )}
@@ -159,8 +159,8 @@ export default function MyAdsCard({
                     {ad.message && (
                         <p
                             className={`mt-3 border-l-2 px-3 py-2 text-xs leading-relaxed font-medium ${isSold
-                                    ? "border-rose-500 bg-rose-50 text-rose-700"
-                                    : "border-primary/50 bg-primary/5 text-slate-600"
+                                ? "border-rose-500 bg-rose-50 text-rose-700"
+                                : "border-primary/50 bg-primary/5 text-slate-600"
                                 }`}
                         >
                             {ad.message}

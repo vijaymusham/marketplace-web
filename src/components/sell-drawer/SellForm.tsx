@@ -874,6 +874,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                 hint="First photo becomes the cover."
                             >
                                 <PhotoUpload
+                                    imageCrop={false}
                                     onChange={(files) => {
                                         setPhotos(files);
                                         setPhotoError(null);

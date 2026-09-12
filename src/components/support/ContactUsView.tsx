@@ -59,19 +59,19 @@ export default function ContactUsView() {
             links={LINKS}
         >
             <SupportSection id="channels" number={1} title="Contact Channels">
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                     <SupportTile
                         icon={Mail}
                         title="Email"
-                        detail="support@DealPokket.in"
-                        href="mailto:support@DealPokket.in"
+                        detail="dealpokket@gmail.com"
+                        href="mailto:dealpokket@gmail.com"
                     />
-                    <SupportTile
+                    {/* <SupportTile
                         icon={Phone}
                         title="Phone"
                         detail="+91 1800-123-4567"
                         href="tel:+9118001234567"
-                    />
+                    /> */}
                     <SupportTile
                         icon={MapPin}
                         title="HQ"
@@ -163,17 +163,6 @@ export default function ContactUsView() {
                         </div>
                     </form>
                 )}
-            </SupportSection>
-
-            <SupportSection id="office" number={4} title="Office">
-                <div className="rounded-[1.25rem] bg-[#f3f4f8] px-4 py-4 sm:px-5 sm:py-5">
-                    <p className="text-sm font-extrabold text-slate-900">Deal Pokket Limited</p>
-                    <p className="mt-2 text-sm leading-relaxed font-medium text-slate-500">
-                        Andheri East, Mumbai
-                        <br />
-                        Maharashtra 400069, India
-                    </p>
-                </div>
             </SupportSection>
         </SupportShell>
     );

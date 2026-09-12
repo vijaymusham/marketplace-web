@@ -31,7 +31,7 @@ export type GlowButtonProps = GlowButtonAsButton | GlowButtonAsLink;
 function buttonClassName({
     className = "",
     variant = "primary",
-    size = "md",
+    size = "sm",
     fullWidth = false,
     disabled,
 }: Pick<GlowButtonProps, "className" | "variant" | "size" | "fullWidth"> & {

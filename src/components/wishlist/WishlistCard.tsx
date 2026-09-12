@@ -23,7 +23,7 @@ export default function WishlistCard({
                     alt={listing.title || "No image"}
                     fill
                     sizes="(min-width: 640px) 176px, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03] aspect-square"
                 />
             </Link>
 

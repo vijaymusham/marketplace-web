@@ -22,7 +22,7 @@ export default function WishlistEmpty() {
                     alt=""
                     fill
                     priority
-                    className="object-contain"
+                    className="object-contain aspect-square"
                     sizes="256px"
                 />
             </div>

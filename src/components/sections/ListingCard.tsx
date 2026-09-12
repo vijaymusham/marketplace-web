@@ -78,7 +78,7 @@ export default function ListingCard({
                             alt={listing.title || "No image"}
                             fill
                             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+                            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05] aspect-square"
                         />
                     ) : null}
                 </Link>

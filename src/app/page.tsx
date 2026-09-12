@@ -5,6 +5,7 @@ import FreshRecommendations from "@/components/home-ui/FreshRecommendations";
 import HorizontalList from "@/components/home-ui/HorizontalList";
 import BannerSection from "@/components/home-ui/BannerSection";
 import TestimonialsSection from "@/components/home-ui/TestimonialsSection";
+import CtaSection from "@/components/home-ui/CtaSection";
 import { useQuery } from "@tanstack/react-query";
 import { getAdsBySection } from "@/components/api/apis";
 import type { ApiAd, ApiAdsBySectionAd, ApiAdsSection } from "@/components/types/AllTypes";
@@ -83,6 +84,7 @@ export default function Home() {
                     })}
                 <BannerSection />
                 <TestimonialsSection />
+                <CtaSection />
             </main>
         </>
     );

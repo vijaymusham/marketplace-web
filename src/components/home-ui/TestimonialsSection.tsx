@@ -86,14 +86,14 @@ function TestimonialCard({ item }: { item: Testimonial }) {
                 {item.quote}
             </p>
             <div className="mt-3 flex items-center gap-2 sm:mt-5 sm:gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 font-heading text-[10px] font-extrabold tracking-wide text-primary sm:size-11 sm:text-[13px]">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-black font-heading text-[10px] font-extrabold tracking-wide text-white sm:size-8 sm:text-[13px]">
                     {item.initials}
                 </div>
                 <div className="min-w-0">
                     <p className="truncate font-heading text-xs font-bold tracking-tight text-slate-900 sm:text-[15px]">
                         {item.name}
                     </p>
-                    <p className="truncate text-[10px] text-slate-400 sm:text-[13px]">{item.detail}</p>
+                    {/* <p className="truncate text-[10px] text-slate-400 sm:text-[13px]">{item.detail}</p> */}
                 </div>
             </div>
         </article>
