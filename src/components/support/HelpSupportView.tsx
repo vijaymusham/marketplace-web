@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Mail, MessageCircleMore, Phone } from "lucide-react";
+import { ChevronDown, Mail, MessageCircleMore } from "lucide-react";
 import SupportShell, { SupportList, SupportSection, SupportTile } from "./SupportShell";
 
 const LINKS = [
@@ -39,7 +39,8 @@ export default function HelpSupportView() {
     return (
         <SupportShell
             eyebrow="Help Center"
-            title="Help When You Need It"
+            title="Stuck on a deal?"
+            titleAccent="We’ll unstick it."
             description="Quick answers for buying, selling, and managing your DealPokket account — plus ways to reach our support team."
             lastUpdated="July 23, 2026"
             links={LINKS}
@@ -79,52 +80,41 @@ export default function HelpSupportView() {
 
             <SupportSection id="account" number={4} title="Account & Login">
                 <p>
-                    Most account issues are fixed by retrying the OTP or signing in again
-                    with the same phone number. If your number changed, contact support so we
-                    can help recover access securely.
+                    Most account issues are fixed by retrying the OTP or signing in again with the
+                    same phone number. If your number changed, contact support so we can help
+                    recover access securely.
                 </p>
             </SupportSection>
 
             <SupportSection id="faq" number={5} title="FAQ">
-                <div className="flex flex-col gap-2.5 sm:gap-3">
+                <div className="flex flex-col">
                     {FAQS.map((item, i) => {
                         const isOpen = open === i;
                         return (
-                            <div
-                                key={item.q}
-                                className={`overflow-hidden rounded-2xl transition-colors duration-200 ${isOpen ? "bg-primary/8" : "bg-[#f3f4f8]"
-                                    }`}
-                            >
+                            <div key={item.q}>
                                 <button
                                     type="button"
                                     aria-expanded={isOpen}
                                     onClick={() => setOpen(isOpen ? -1 : i)}
-                                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left sm:px-5 sm:py-4"
+                                    className="flex w-full cursor-pointer items-center gap-3 py-3.5 text-left"
                                 >
                                     <span
-                                        className={`min-w-0 flex-1 text-sm font-bold sm:text-[15px] ${isOpen ? "text-primary" : "text-slate-800"
+                                        className={`min-w-0 flex-1 font-heading text-[15px] font-extrabold tracking-tight sm:text-base ${isOpen ? "text-primary" : "text-slate-900"
                                             }`}
                                     >
                                         {item.q}
                                     </span>
-                                    <span
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${isOpen
-                                            ? "bg-primary text-white"
-                                            : "bg-white text-slate-400"
+                                    <ChevronDown
+                                        className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-300 ease-out ${isOpen ? "rotate-180 text-primary" : ""
                                             }`}
-                                    >
-                                        <ChevronDown
-                                            className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""
-                                                }`}
-                                        />
-                                    </span>
+                                    />
                                 </button>
                                 <div
                                     className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                                         }`}
                                 >
                                     <div className="min-h-0 overflow-hidden">
-                                        <p className="px-4 pb-4 text-sm leading-relaxed font-medium text-slate-500 sm:px-5 sm:pb-5">
+                                        <p className="pb-3 text-sm leading-relaxed font-medium text-slate-500">
                                             {item.a}
                                         </p>
                                     </div>
@@ -143,12 +133,6 @@ export default function HelpSupportView() {
                         detail="dealpokket@gmail.com"
                         href="mailto:dealpokket@gmail.com"
                     />
-                    {/* <SupportTile
-                        icon={Phone}
-                        title="Phone"
-                        detail="+91 1800-123-4567"
-                        href="tel:+9118001234567"
-                    /> */}
                     <SupportTile
                         icon={MessageCircleMore}
                         title="Chat"

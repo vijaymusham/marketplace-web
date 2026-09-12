@@ -16,16 +16,17 @@ export default function PrivacyView() {
     return (
         <SupportShell
             eyebrow="Privacy Policy"
-            title="Your Data, Handled With Care"
-            description="This Privacy Policy explains how DealPokket collects, uses, and protects your information when you browse, buy, or sell on our marketplace."
+            title="Your data,"
+            titleAccent="handled with care."
+            description="How DealPokket collects, uses, and protects your information when you browse, buy, or sell on our marketplace."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
             <SupportSection id="overview" number={1} title="Overview">
                 <p>
-                    DealPokket is a local marketplace where people buy and sell near them.
-                    We only collect what we need to run accounts, listings, messaging, and
-                    safety features — and we never sell your personal data.
+                    DealPokket is a local marketplace where people buy and sell near them. We only
+                    collect what we need to run accounts, listings, messaging, and safety features —
+                    and we never sell your personal data.
                 </p>
             </SupportSection>
 
@@ -56,9 +57,9 @@ export default function PrivacyView() {
             <SupportSection id="cookies" number={4} title="Cookies">
                 <p>
                     We use cookies and similar technologies to keep you signed in, remember
-                    preferences, measure performance, and prevent abuse. You can control
-                    cookies through your browser settings; some features may not work if
-                    essential cookies are disabled.
+                    preferences, measure performance, and prevent abuse. You can control cookies
+                    through your browser settings; some features may not work if essential cookies
+                    are disabled.
                 </p>
             </SupportSection>
 
@@ -75,10 +76,9 @@ export default function PrivacyView() {
 
             <SupportSection id="security" number={6} title="Data Security">
                 <p>
-                    We use industry-standard safeguards such as encryption in transit,
-                    access controls, and monitoring. No method of transmission is 100%
-                    secure — please protect your OTP and never share passwords or bank
-                    details in chat.
+                    We use industry-standard safeguards such as encryption in transit, access
+                    controls, and monitoring. No method of transmission is 100% secure — please
+                    protect your OTP and never share passwords or bank details in chat.
                 </p>
             </SupportSection>
 

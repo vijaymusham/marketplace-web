@@ -1072,7 +1072,7 @@ function SellFormSession({ onClose }: { onClose: () => void }) {
                                         <input
                                             type="tel"
                                             inputMode="tel"
-                                            // disabled
+                                            disabled
                                             placeholder="+91 XXXXX XXXXX"
                                             className={inputClassName}
                                             aria-invalid={!!errors.mobile}

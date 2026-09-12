@@ -70,7 +70,7 @@ export default function SellFab({ variant = "nav" }: SellFabProps) {
                     <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-white text-[#ff5a1f]">
                         <Plus className="h-3 w-3" strokeWidth={3} />
                     </span>
-                    <span className="max-w-24 truncate font-bold">Sell Now</span>
+                    <span className="max-w-24 truncate font-bold text-sm">Post Free</span>
                 </GlowButton>
             </div>
             <SellForm open={open} onClose={() => setOpen(false)} />

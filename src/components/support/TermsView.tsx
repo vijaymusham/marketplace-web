@@ -15,16 +15,17 @@ export default function TermsView() {
     return (
         <SupportShell
             eyebrow="Terms & Conditions"
-            title="Terms That Keep Deals Fair"
+            title="Terms that keep"
+            titleAccent="deals fair."
             description="These Terms & Conditions govern your use of DealPokket. By creating an account or posting a listing, you agree to follow the rules below."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
             <SupportSection id="acceptance" number={1} title="Acceptance of Terms">
                 <p>
-                    Using DealPokket means you accept these Terms, our Privacy Policy, and
-                    any community guidelines we publish. If you disagree, please do not use
-                    the service.
+                    Using DealPokket means you accept these Terms, our Privacy Policy, and any
+                    community guidelines we publish. If you disagree, please do not use the
+                    service.
                 </p>
             </SupportSection>
 
@@ -40,10 +41,9 @@ export default function TermsView() {
 
             <SupportSection id="accounts" number={3} title="Accounts">
                 <p>
-                    You are responsible for activity under your account, including securing
-                    your phone and OTP. Notify us immediately if you suspect unauthorized
-                    access. We may suspend accounts that violate these Terms or harm other
-                    users.
+                    You are responsible for activity under your account, including securing your
+                    phone and OTP. Notify us immediately if you suspect unauthorized access. We may
+                    suspend accounts that violate these Terms or harm other users.
                 </p>
             </SupportSection>
 
@@ -80,19 +80,19 @@ export default function TermsView() {
 
             <SupportSection id="liability" number={7} title="Limitation of Liability">
                 <p>
-                    To the fullest extent permitted by law, DealPokket is not liable for
-                    indirect, incidental, or consequential damages arising from deals between
-                    users, listing content, or temporary service interruptions. Our total
-                    liability for any claim related to the service is limited to amounts you
-                    paid us (if any) in the 3 months before the claim.
+                    To the fullest extent permitted by law, DealPokket is not liable for indirect,
+                    incidental, or consequential damages arising from deals between users, listing
+                    content, or temporary service interruptions. Our total liability for any claim
+                    related to the service is limited to amounts you paid us (if any) in the 3
+                    months before the claim.
                 </p>
             </SupportSection>
 
             <SupportSection id="changes" number={8} title="Changes">
                 <p>
-                    We may update these Terms from time to time. Continued use after changes
-                    take effect means you accept the revised Terms. Material updates will be
-                    reflected with a new “Last updated” date on this page.
+                    We may update these Terms from time to time. Continued use after changes take
+                    effect means you accept the revised Terms. Material updates will be reflected
+                    with a new “Last updated” date on this page.
                 </p>
             </SupportSection>
         </SupportShell>

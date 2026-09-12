@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, Mail, MapPin, Phone } from "lucide-react";
+import { CheckCircle2, Mail, MapPin } from "lucide-react";
 import toast from "react-hot-toast";
 import { Field } from "@/constant/helper/TextField";
 import { inputClassName } from "@/constant/helper/classesHelper";
@@ -53,8 +53,9 @@ export default function ContactUsView() {
     return (
         <SupportShell
             eyebrow="Contact"
-            title="We’re Here to Help"
-            description="Reach DealPokket support by email, phone, or the form below. We typically reply within one business day."
+            title="We’re here"
+            titleAccent="to help."
+            description="Reach DealPokket support by email or the form below. We typically reply within one business day."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
@@ -66,12 +67,6 @@ export default function ContactUsView() {
                         detail="dealpokket@gmail.com"
                         href="mailto:dealpokket@gmail.com"
                     />
-                    {/* <SupportTile
-                        icon={Phone}
-                        title="Phone"
-                        detail="+91 1800-123-4567"
-                        href="tel:+9118001234567"
-                    /> */}
                     <SupportTile
                         icon={MapPin}
                         title="HQ"
@@ -87,8 +82,8 @@ export default function ContactUsView() {
                         Mon – Sat · 9:00 AM – 7:00 PM IST
                     </p>
                     <p className="mt-2 text-sm leading-relaxed font-medium text-slate-500">
-                        Safety and scam reports are prioritized. Outside these hours, email us
-                        and we’ll follow up on the next business day.
+                        Safety and scam reports are prioritized. Outside these hours, email us and
+                        we’ll follow up on the next business day.
                     </p>
                 </div>
             </SupportSection>
@@ -102,7 +97,7 @@ export default function ContactUsView() {
                             <button
                                 type="button"
                                 onClick={() => setSent(false)}
-                                className="mt-2 font-bold text-primary hover:underline"
+                                className="mt-2 cursor-pointer font-bold text-primary hover:underline"
                             >
                                 Send another message
                             </button>
@@ -163,6 +158,20 @@ export default function ContactUsView() {
                         </div>
                     </form>
                 )}
+            </SupportSection>
+
+            <SupportSection id="office" number={4} title="Office">
+                <p>
+                    DealPokket operates from Mumbai, India. For partnership or press inquiries,
+                    email{" "}
+                    <a
+                        href="mailto:dealpokket@gmail.com"
+                        className="font-bold text-primary hover:underline"
+                    >
+                        dealpokket@gmail.com
+                    </a>
+                    .
+                </p>
             </SupportSection>
         </SupportShell>
     );

@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Caveat } from "next/font/google";
 import { motion, useReducedMotion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+
+const caveat = Caveat({
+    subsets: ["latin"],
+    weight: ["600", "700"],
+    display: "swap",
+});
 
 export type SupportQuickLink = {
     id: string;
@@ -11,10 +19,13 @@ export type SupportQuickLink = {
 type SupportShellProps = {
     eyebrow?: string;
     title: string;
-    description: string;
+    titleAccent?: string;
+    description?: string;
     lastUpdated?: string;
     links: SupportQuickLink[];
-    children: React.ReactNode;
+    /** Hide the header jump list (rare) */
+    hideJumps?: boolean;
+    children: ReactNode;
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -22,13 +33,16 @@ const ease = [0.22, 1, 0.36, 1] as const;
 export default function SupportShell({
     eyebrow = "DealPokket Support",
     title,
+    titleAccent,
     description,
     lastUpdated,
     links,
+    hideJumps = false,
     children,
 }: SupportShellProps) {
     const reduce = useReducedMotion();
     const [activeId, setActiveId] = useState(links[0]?.id ?? "");
+    const jumpLinks = links.slice(0, 6);
 
     useEffect(() => {
         const sections = links
@@ -65,36 +79,44 @@ export default function SupportShell({
         <main className="relative flex-1 bg-slate-50">
             <div className="mx-auto px-4 py-7 sm:px-6 sm:py-10 md:py-10 lg:px-12">
                 <motion.header
-                    initial={reduce ? false : { opacity: 0, y: 18 }}
+                    initial={reduce ? false : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.55, ease }}
-                    className="relative rounded-[1.5rem] bg-white px-5 py-8 sm:rounded-[1.75rem] sm:px-9 sm:py-10 md:px-11 md:py-12"
+                    transition={{ duration: 0.5, ease }}
+                    className="mx-auto flex max-w-3xl flex-col items-center text-center lg:py-10"
                 >
-                    <div className="relative">
-                        <p className="text-[11px] font-bold tracking-[0.16em] text-primary uppercase">
+                    <div className="flex items-center justify-center gap-3">
+                        <span
+                            aria-hidden
+                            className="h-px w-8 bg-primary sm:w-10"
+                        />
+                        <p className="text-[11px] font-bold tracking-[0.18em] text-primary uppercase">
                             {eyebrow}
                         </p>
-                        <h1 className="mt-3 max-w-3xl font-heading text-[1.85rem] leading-[1.15] font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-[2.75rem] md:leading-[1.1]">
-                            {title}
-                        </h1>
-                        <p className="mt-3.5 max-w-2xl text-sm leading-relaxed font-medium text-slate-500 sm:mt-4 sm:text-[15px] sm:leading-7">
+                        <span
+                            aria-hidden
+                            className="h-px w-8 bg-primary sm:w-10"
+                        />
+                    </div>
+
+                    <h1 className="mt-4 font-heading text-[2.35rem] leading-[1.02] font-extrabold tracking-tight text-slate-900 sm:mt-5 sm:text-[2.75rem] md:text-[3.15rem] md:leading-[1.02]">
+                        {title} {titleAccent ? (
+                            <span className="relative mt-1.5  text-primary sm:mt-2">
+                                {titleAccent}
+                            </span>
+                        ) : null}
+                    </h1>
+
+                    {description ? (
+                        <p className="mt-4 max-w-md text-sm leading-relaxed font-medium text-slate-500 sm:mt-5 sm:text-[15px] sm:leading-7">
                             {description}
                         </p>
-                        {lastUpdated ? (
-                            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#f3f4f8] px-3.5 py-1.5">
-                                <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
-                                <p className="text-[11px] font-bold tracking-wide text-slate-500 uppercase">
-                                    Updated {lastUpdated}
-                                </p>
-                            </div>
-                        ) : null}
-                    </div>
+                    ) : null}
+
                 </motion.header>
 
-                {/* Mobile quick links — sticky under navbar */}
                 <nav
                     aria-label="On this page"
-                    className="sticky top-[6.75rem] z-20 -mx-4 mt-5 bg-slate-50/95 px-4 py-2.5 backdrop-blur-md sm:-mx-6 sm:px-6 lg:top-18 lg:hidden"
+                    className="sticky top-[6.75rem] z-20 -mx-4 mt-8 bg-slate-50/95 px-4 py-2.5 backdrop-blur-md sm:-mx-6 sm:mt-9 sm:px-6 lg:top-18 lg:hidden"
                 >
                     <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         {links.map(({ id, label }) => {
@@ -104,7 +126,7 @@ export default function SupportShell({
                                     key={id}
                                     type="button"
                                     onClick={() => scrollToSection(id)}
-                                    className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-bold whitespace-nowrap transition-colors duration-200 ${active
+                                    className={`cursor-pointer shrink-0 rounded-full px-3.5 py-2 text-xs font-bold whitespace-nowrap transition-colors duration-200 ${active
                                         ? "bg-primary text-white"
                                         : "bg-white text-slate-600 active:bg-primary/10"
                                         }`}
@@ -116,8 +138,7 @@ export default function SupportShell({
                     </div>
                 </nav>
 
-                <div className="mt-5 grid gap-4 sm:mt-6 sm:gap-5 lg:mt-5 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start lg:gap-5 xl:grid-cols-[268px_minmax(0,1fr)]">
-                    {/* Desktop quick links — sticky while content scrolls */}
+                <div className="mt-5 grid gap-4 sm:mt-6 sm:gap-5 lg:mt-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:items-start lg:gap-5 xl:grid-cols-[268px_minmax(0,1fr)]">
                     <aside className="hidden self-start lg:sticky lg:top-24 lg:block lg:z-10">
                         <nav
                             aria-label="On this page"
@@ -134,7 +155,7 @@ export default function SupportShell({
                                             <button
                                                 type="button"
                                                 onClick={() => scrollToSection(id)}
-                                                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors duration-200 ${active
+                                                className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors duration-200 ${active
                                                     ? "bg-primary/10 text-primary"
                                                     : "text-slate-500 hover:bg-[#f4f5f8] hover:text-slate-800"
                                                     }`}
@@ -221,7 +242,7 @@ export function SupportTile({
     return (
         <a
             href={href}
-            className="group flex flex-col rounded-[1.25rem] bg-[#f3f4f8] p-4 transition-colors duration-200 hover:bg-primary/8 sm:p-5"
+            className="group flex cursor-pointer flex-col rounded-[1.25rem] bg-[#f3f4f8] p-4 transition-colors duration-200 hover:bg-primary/8 sm:p-5"
         >
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary transition-colors group-hover:bg-primary group-hover:text-white">
                 <Icon className="h-5 w-5" strokeWidth={1.85} />

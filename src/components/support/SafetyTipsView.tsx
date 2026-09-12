@@ -14,8 +14,9 @@ export default function SafetyTipsView() {
     return (
         <SupportShell
             eyebrow="Safety Tips"
-            title="Stay Safe on Every Deal"
-            description="Simple habits that protect buyers and sellers — from first message to final handshake. Trust your instincts and keep deals transparent."
+            title="Stay safe"
+            titleAccent="on every deal."
+            description="Simple habits that protect buyers and sellers — from first message to final handshake."
             lastUpdated="July 23, 2026"
             links={LINKS}
         >
@@ -65,9 +66,9 @@ export default function SafetyTipsView() {
 
             <SupportSection id="reporting" number={5} title="Reporting">
                 <p>
-                    If something feels wrong, stop the deal and report the listing or user.
-                    Our team reviews reports for spam, scams, and prohibited items. For
-                    urgent danger, contact local authorities first, then let us know at{" "}
+                    If something feels wrong, stop the deal and report the listing or user. Our
+                    team reviews reports for spam, scams, and prohibited items. For urgent danger,
+                    contact local authorities first, then let us know at{" "}
                     <a
                         href="mailto:safety@DealPokket.in"
                         className="font-bold text-primary hover:underline"

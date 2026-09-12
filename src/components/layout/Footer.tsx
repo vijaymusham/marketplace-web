@@ -52,7 +52,7 @@ const menuColumns = [
     {
         heading: "Company",
         links: [
-            { label: "About Us", href: "#" },
+            { label: "About Us", href: "/about" },
             { label: "Safety Tips", href: "/safety" },
             { label: "Contact Us", href: "/contact" },
             // { label: "Careers", href: "#" },
@@ -221,7 +221,7 @@ export default function Footer() {
 
                 <div className="flex flex-col items-center justify-center gap-5 border-t border-white/5 py-8 sm:flex-row sm:gap-8">
                     <p className="px-2 text-center text-sm font-semibold text-white">
-                        © {new Date().getFullYear()} Deal Pokket Limited — Made with ❤️ in India. All rights reserved.
+                        © {new Date().getFullYear()} Deal Pokket — Made with ❤️ in India. All rights reserved.
                     </p>
                     <div className="flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center md:flex-row">
                         <StoreBadge
