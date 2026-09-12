@@ -240,7 +240,7 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                             setMenuOpen(false);
                             toast("Pro upgrades coming soon", { icon: "✨" });
                         }}
-                        className="group relative flex w-full cursor-pointer items-center justify-between gap-3 overflow-hidden rounded-2xl bg-linear-to-r from-[#2f8fff] via-[#5aacff] to-[#e6d4ad] px-3.5 py-3 text-left  transition-all duration-200 hover:brightness-[1.03] active:scale-[0.99]"
+                        className="group relative flex w-full cursor-pointer items-center justify-between gap-3 overflow-hidden rounded-2xl bg-linear-to-r from-primary to-primary/30 px-3.5 py-3 text-left  transition-all duration-200 hover:brightness-[1.03] active:scale-[0.99]"
                     >
                         <span
                             className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-linear-to-l from-white/20 to-transparent"
@@ -259,7 +259,7 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                                 Get more reach on every ad
                             </span>
                         </span>
-                        <span className="relative flex shrink-0 items-center gap-0.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-slate-900 ">
+                        <span className="relative flex shrink-0 items-center  rounded-full bg-white px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-slate-900 ">
                             PRO
                             <ChevronRight className="h-3 w-3 text-slate-400" strokeWidth={2.5} />
                         </span>
