@@ -6,7 +6,14 @@ const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 const nextConfig: NextConfig = {
   // Allow opening the dev server via public IP / LAN host
   allowedDevOrigins: ["157.15.235.48", "127.0.0.1", "localhost","https://marketplace-be-b3ki.onrender.com"],
+  // Tree-shake heavy icon / animation barrels from the critical client graph.
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion"],
+  },
   images: {
+    formats: ["image/avif", "image/webp"],
+    qualities: [70, 75],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: "https",
@@ -25,6 +32,72 @@ const nextConfig: NextConfig = {
       {
         source: "/backend/:path*",
         destination: `${apiOrigin}/:path*`,
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/olx-alternative",
+        destination: "/free-classifieds",
+        permanent: true,
+      },
+    ];
+  },
+  async headers() {
+    const isProd = process.env.NODE_ENV === "production";
+    const csp = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'self'",
+      "form-action 'self'",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' data:",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms https://maps.googleapis.com https://maps.gstatic.com https://www.gstatic.com https://apis.google.com https://accounts.google.com",
+      "connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:*",
+      "frame-src 'self' https://www.google.com https://maps.googleapis.com https://accounts.google.com https://apis.google.com https://*.firebaseapp.com https://*.google.com",
+      "worker-src 'self' blob:",
+      ...(isProd ? ["upgrade-insecure-requests"] : []),
+    ].join("; ");
+
+    const securityHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=(self), interest-cohort=()",
+      },
+      {
+        key: "Cross-Origin-Opener-Policy",
+        value: "same-origin-allow-popups",
+      },
+      { key: "Content-Security-Policy", value: csp },
+      ...(isProd
+        ? [
+            {
+              key: "Strict-Transport-Security",
+              value: "max-age=63072000; includeSubDomains; preload",
+            },
+          ]
+        : []),
+    ];
+
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
       },
     ];
   },

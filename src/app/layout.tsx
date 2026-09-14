@@ -12,6 +12,15 @@ import FcmProvider from "@/components/providers/FcmProvider";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { SocketProvider } from "@/components/socket/SocketProvider";
 import ClarityAnalytics from "@/components/layout/ClarityAnalytics";
+import JsonLd from "@/components/seo/JsonLd";
+import {
+    absoluteUrl,
+    DEFAULT_KEYWORDS,
+    getSiteUrl,
+    SITE_NAME,
+    SITE_NAME_SPACED,
+    SITE_TAGLINE,
+} from "@/lib/seo";
 
 /** Matches navbar top tint: primary (#2f3adf) at 15% over white */
 const THEME_COLOR = "#e0e1fa";
@@ -29,10 +38,60 @@ export const display = localFont({
 });
 
 export const metadata: Metadata = {
-    title: "Deal Pokket",
-    description: "Buy and sell used products near you",
+    metadataBase: new URL(getSiteUrl()),
+    title: {
+        default: `${SITE_NAME} — Free Second Hand Marketplace in India`,
+        template: `%s | ${SITE_NAME}`,
+    },
+    description: SITE_TAGLINE,
+    applicationName: SITE_NAME,
+    keywords: [...DEFAULT_KEYWORDS],
+    authors: [{ name: SITE_NAME_SPACED, url: absoluteUrl("/") }],
+    creator: SITE_NAME_SPACED,
+    publisher: SITE_NAME_SPACED,
+    category: "marketplace",
+    alternates: {
+        canonical: absoluteUrl("/"),
+    },
+    openGraph: {
+        type: "website",
+        locale: "en_IN",
+        url: absoluteUrl("/"),
+        siteName: SITE_NAME,
+        title: `${SITE_NAME} — Free Second Hand Marketplace | Classified Ads`,
+        description: SITE_TAGLINE,
+        images: [
+            {
+                url: absoluteUrl("/logo.png"),
+                width: 512,
+                height: 512,
+                alt: `${SITE_NAME} logo`,
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: `${SITE_NAME} — Free Second Hand Marketplace in India`,
+        description: SITE_TAGLINE,
+        images: [absoluteUrl("/logo.png")],
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+        },
+    },
     appleWebApp: {
         statusBarStyle: "default",
+        title: SITE_NAME,
+    },
+    other: {
+        "geo.region": "IN",
     },
 };
 
@@ -49,9 +108,49 @@ export default function RootLayout({
     return (
         <html
             lang="en"
-            className={`${display.variable} h-full antialiased intro-pending`}
+            className={`${display.variable} h-full antialiased`}
         >
             <body className="min-h-full flex flex-col bg-white font-display text-slate-900" suppressHydrationWarning>
+                <JsonLd
+                    data={[
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "Organization",
+                            name: SITE_NAME,
+                            alternateName: SITE_NAME_SPACED,
+                            url: absoluteUrl("/"),
+                            logo: absoluteUrl("/logo.png"),
+                            email: "dealpokket@gmail.com",
+                            description: SITE_TAGLINE,
+                            areaServed: {
+                                "@type": "Country",
+                                name: "India",
+                            },
+                            contactPoint: {
+                                "@type": "ContactPoint",
+                                contactType: "customer support",
+                                email: "dealpokket@gmail.com",
+                                availableLanguage: ["English", "Hindi"],
+                            },
+                        },
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "WebSite",
+                            name: SITE_NAME,
+                            url: absoluteUrl("/"),
+                            description: SITE_TAGLINE,
+                            inLanguage: "en-IN",
+                            potentialAction: {
+                                "@type": "SearchAction",
+                                target: {
+                                    "@type": "EntryPoint",
+                                    urlTemplate: `${absoluteUrl("/")}?q={search_term_string}`,
+                                },
+                                "query-input": "required name=search_term_string",
+                            },
+                        },
+                    ]}
+                />
                 <TanstackProvider>
                     <SocketProvider>
                         <AuthProvider>

@@ -13,7 +13,8 @@ export default function BannerSection() {
                         alt="DealPokket — Buy & Sell Anything. Coming soon."
                         fill
                         sizes="100vw"
-                        priority
+                        quality={75}
+                        loading="lazy"
                         className="object-cover object-center sm:hidden"
                     />
                     <Image
@@ -21,6 +22,8 @@ export default function BannerSection() {
                         alt="DealPokket — Buy & Sell Anything. Coming soon."
                         fill
                         sizes="100vw"
+                        quality={75}
+                        loading="lazy"
                         className="hidden object-cover object-center sm:block"
                     />
                 </div>

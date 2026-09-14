@@ -1,18 +1,11 @@
 "use client";
 import { useState } from "react";
-import { Caveat } from "next/font/google";
 import { useSelector } from "react-redux";
 import SellForm from "@/components/sell-drawer/SellForm";
 import { requestSignIn } from "@/lib/auth-events";
 import type { RootState } from "@/components/redux/store";
 import { Quote } from "lucide-react";
 import GlowButton from "../ui/GlowButton";
-
-const caveat = Caveat({
-    subsets: ["latin"],
-    weight: ["500", "600", "700"],
-    display: "swap",
-});
 
 /** Exact purple sampled from the reference screenshot */
 const CTA_BG = "#6702E6";
@@ -84,9 +77,7 @@ export default function CtaSection() {
             <HeartOutline className="pointer-events-none absolute -right-10 -bottom-12 size-52 text-white/15 sm:-right-6 sm:-bottom-20 sm:size-64 md:right-0 md:size-72 lg:right-6 lg:size-80" />
 
             <div className="relative z-10 mx-auto flex w-full flex-col items-center px-5 py-16 text-center sm:px-8 sm:py-20 md:py-24 lg:py-26">
-                <p
-                    className={`${caveat.className} text-[1.55rem] leading-none text-white sm:text-[1.85rem] md:text-[2.05rem]`}
-                >
+                <p className="font-heading text-[1.55rem] leading-none font-bold text-white sm:text-[1.85rem] md:text-[2.05rem]">
                     Buying &amp; selling made easy
                 </p>
 

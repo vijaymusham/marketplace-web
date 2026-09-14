@@ -80,7 +80,7 @@ export default function TrustedBrands() {
                                         {brands.map((b) => (
                                             <span
                                                 key={b.name}
-                                                className="flex items-center gap-2 font-display font-bold text-lg md:text-2xl whitespace-nowrap shrink-0 text-slate-400"
+                                                className="flex items-center gap-2 font-display font-bold text-lg md:text-2xl whitespace-nowrap shrink-0 text-slate-600"
                                             >
                                                 <BrandIcon type={b.icon} />
                                                 {b.name}

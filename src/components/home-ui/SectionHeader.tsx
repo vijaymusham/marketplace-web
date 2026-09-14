@@ -1,7 +1,6 @@
 "use client";
 
 import { Enter } from "@/components/animations/Motion";
-import ShinyText from "@/components/animations/ShinyText";
 
 type SectionHeaderProps = {
     eyebrow: string;
@@ -20,15 +19,14 @@ export default function SectionHeader({
         <Enter>
             <div className={showDivider ? "flex items-end justify-between gap-4" : undefined}>
                 <div className={showDivider ? "min-w-0" : undefined}>
-                    <ShinyText
-                        text={eyebrow}
-                        className="text-[10px] tracking-[0.14em] sm:text-xs"
-                    />
-                    <h2 className="mt-0.5 text-balance font-heading text-[1.2rem] font-extrabold leading-snug tracking-tight text-slate-900 sm:mt-1 sm:text-2xl md:text-[1.75rem]">
+                    <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase sm:text-xs">
+                        {eyebrow}
+                    </p>
+                    <h2 className="mt-0.5 text-balance font-heading text-[1.2rem] font-black leading-snug tracking-tight text-slate-900 sm:mt-1 sm:text-2xl md:text-[1.75rem]">
                         {title}
                     </h2>
                     {description ? (
-                        <p className="mt-1 max-w-xl text-pretty text-[13px] leading-relaxed text-slate-500 sm:mt-1.5 sm:text-sm md:text-[15px]">
+                        <p className="mt-1 max-w-xl text-pretty text-[13px] leading-relaxed text-slate-600 sm:mt-1.5 sm:text-sm md:text-[15px]">
                             {description}
                         </p>
                     ) : null}

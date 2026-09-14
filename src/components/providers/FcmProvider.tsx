@@ -35,58 +35,74 @@ export default function FcmProvider({ children }: { children: ReactNode }) {
         let unsubscribe: (() => void) | null = null;
         let cancelled = false;
         let promptTimer = 0;
+        let idleId: number | undefined;
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-        void (async () => {
-            if (typeof window === "undefined" || !("Notification" in window)) return;
+        const boot = () => {
+            void (async () => {
+                if (cancelled) return;
+                if (typeof window === "undefined" || !("Notification" in window)) return;
 
-            const permission = Notification.permission;
+                const permission = Notification.permission;
 
-            if (permission === "granted") {
-                const token = await getFcmToken();
-                if (token) localStorage.setItem("fcmToken", token);
-            } else if (permission === "default") {
-                const dismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
-                if (!dismissed) {
-                    promptTimer = window.setTimeout(() => {
-                        if (!cancelled && Notification.permission === "default") {
-                            setShowPrompt(true);
-                        }
-                    }, PROMPT_DELAY_MS);
+                if (permission === "granted") {
+                    const token = await getFcmToken();
+                    if (token) localStorage.setItem("fcmToken", token);
+                } else if (permission === "default") {
+                    const dismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
+                    if (!dismissed) {
+                        promptTimer = window.setTimeout(() => {
+                            if (!cancelled && Notification.permission === "default") {
+                                setShowPrompt(true);
+                            }
+                        }, PROMPT_DELAY_MS);
+                    }
                 }
-            }
 
-            const unsub = await subscribeForegroundMessages((payload) => {
-                const title =
-                    payload.notification?.title ||
-                    payload.data?.title ||
-                    "Deal Pokket";
-                const body =
-                    payload.notification?.body || payload.data?.body || "";
+                const unsub = await subscribeForegroundMessages((payload) => {
+                    const title =
+                        payload.notification?.title ||
+                        payload.data?.title ||
+                        "Deal Pokket";
+                    const body =
+                        payload.notification?.body || payload.data?.body || "";
 
-                pushNotification({
-                    title,
-                    body: body || "New notification",
-                    type:
-                        payload.data?.type === "chat.message" ||
-                            payload.data?.type === "message"
-                            ? "message"
-                            : payload.data?.type === "deal" ||
-                                payload.data?.type === "price" ||
-                                payload.data?.type === "system"
-                                ? payload.data.type
-                                : "system",
+                    pushNotification({
+                        title,
+                        body: body || "New notification",
+                        type:
+                            payload.data?.type === "chat.message" ||
+                                payload.data?.type === "message"
+                                ? "message"
+                                : payload.data?.type === "deal" ||
+                                    payload.data?.type === "price" ||
+                                    payload.data?.type === "system"
+                                    ? payload.data.type
+                                    : "system",
+                    });
                 });
-            });
 
-            if (cancelled) {
-                unsub?.();
-                return;
-            }
-            unsubscribe = unsub;
-        })();
+                if (cancelled) {
+                    unsub?.();
+                    return;
+                }
+                unsubscribe = unsub;
+            })();
+        };
+
+        // Keep Firebase messaging off the LCP / TBT critical path.
+        if ("requestIdleCallback" in window) {
+            idleId = window.requestIdleCallback(boot, { timeout: 8000 });
+        } else {
+            timeoutId = setTimeout(boot, 4000);
+        }
 
         return () => {
             cancelled = true;
+            if (idleId != null && "cancelIdleCallback" in window) {
+                window.cancelIdleCallback(idleId);
+            }
+            if (timeoutId != null) clearTimeout(timeoutId);
             window.clearTimeout(promptTimer);
             unsubscribe?.();
         };

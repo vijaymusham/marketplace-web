@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { useRef, ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useIntroReady } from "@/components/layout/IntroContext";
 
 /** Soft expo-out — quick lift, long buttery settle */
@@ -13,6 +13,18 @@ const fadeSlide = {
     y: { duration: 0.85, ease: easeOut },
     scale: { duration: 0.8, ease: easeOut },
 };
+
+/**
+ * Skip entrance hiding until after mount so SSR / first paint stay visible
+ * (opacity:0 initials destroy LCP when PersistGate/SSR finally emit HTML).
+ */
+function useMotionReady() {
+    const [motionReady, setMotionReady] = useState(false);
+    useEffect(() => {
+        setMotionReady(true);
+    }, []);
+    return motionReady;
+}
 
 export function Reveal({
     children,
@@ -27,22 +39,26 @@ export function Reveal({
 }) {
     const ready = useIntroReady();
     const reduce = useReducedMotion();
+    const motionReady = useMotionReady();
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "-4% 0px -4% 0px", amount: 0.12 });
     const show = ready && inView;
 
-    if (reduce) {
-        return <div className={className}>{children}</div>;
+    if (reduce || !motionReady) {
+        return (
+            <div ref={ref} className={className}>
+                {children}
+            </div>
+        );
     }
 
     return (
         <motion.div
             ref={ref}
             className={className}
-            initial={{ opacity: 0, y, scale: 0.985 }}
-            animate={show ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y, scale: 0.985 }}
+            initial={false}
+            animate={show ? { opacity: 1, y: 0, scale: 1 } : { opacity: 1, y: 0, scale: 1 }}
             transition={{ ...fadeSlide, delay }}
-            style={{ willChange: "transform, opacity" }}
         >
             {children}
         </motion.div>
@@ -60,12 +76,13 @@ export function RevealText({
 }) {
     const ready = useIntroReady();
     const reduce = useReducedMotion();
+    const motionReady = useMotionReady();
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "-8% 0px", amount: 0.2 });
     const show = ready && inView;
     const words = text.split(" ");
 
-    if (reduce) {
+    if (reduce || !motionReady) {
         return <span className={className}>{text}</span>;
     }
 
@@ -74,9 +91,9 @@ export function RevealText({
             {words.map((w, i) => (
                 <span key={i} style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top" }}>
                     <motion.span
-                        style={{ display: "inline-block", willChange: "transform" }}
-                        initial={{ y: "110%", opacity: 0 }}
-                        animate={show ? { y: 0, opacity: 1 } : { y: "110%", opacity: 0 }}
+                        style={{ display: "inline-block" }}
+                        initial={false}
+                        animate={show ? { y: 0, opacity: 1 } : { y: 0, opacity: 1 }}
                         transition={{
                             y: { duration: 0.7, ease: easeOut, delay: delay + i * 0.035 },
                             opacity: { duration: 0.4, ease: easeFade, delay: delay + i * 0.035 },
@@ -103,21 +120,21 @@ export function Enter({
 }) {
     const ready = useIntroReady();
     const reduce = useReducedMotion();
+    const motionReady = useMotionReady();
 
-    if (reduce) {
+    if (reduce || !motionReady) {
         return <div className={className}>{children}</div>;
     }
 
     return (
         <motion.div
             className={className}
-            initial={{ opacity: 0, y }}
-            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+            initial={false}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
             transition={{
                 opacity: { duration: 0.5, ease: easeFade, delay },
                 y: { duration: 0.75, ease: easeOut, delay },
             }}
-            style={{ willChange: "transform, opacity" }}
         >
             {children}
         </motion.div>
@@ -135,20 +152,25 @@ export function Stagger({
 }) {
     const ready = useIntroReady();
     const reduce = useReducedMotion();
+    const motionReady = useMotionReady();
     const ref = useRef(null);
     const inView = useInView(ref, { once: true, margin: "0px 0px -6% 0px", amount: 0.06 });
     const show = ready && inView;
 
-    if (reduce) {
-        return <div className={className}>{children}</div>;
+    if (reduce || !motionReady) {
+        return (
+            <div ref={ref} className={className}>
+                {children}
+            </div>
+        );
     }
 
     return (
         <motion.div
             ref={ref}
             className={className}
-            initial="hidden"
-            animate={show ? "show" : "hidden"}
+            initial={false}
+            animate={show ? "show" : "show"}
             variants={{
                 hidden: {},
                 show: {
@@ -165,13 +187,11 @@ export function Stagger({
 }
 
 /**
- * Listing / card item — fade + slide-up + soft scale settle.
- * Designed for grid cascades (buttery, not snappy).
+ * Listing / card item — stays visible on first paint; soft settle after mount.
  */
 export function StaggerItem({
     children,
     className = "",
-    y = 36,
 }: {
     children: ReactNode;
     className?: string;
@@ -180,12 +200,12 @@ export function StaggerItem({
     return (
         <motion.div
             className={className}
-            style={{ willChange: "transform, opacity" }}
+            initial={false}
             variants={{
                 hidden: {
-                    opacity: 0,
-                    y,
-                    scale: 0.94,
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
                 },
                 show: {
                     opacity: 1,

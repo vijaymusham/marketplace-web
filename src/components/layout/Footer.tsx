@@ -55,16 +55,19 @@ const menuColumns = [
             { label: "About Us", href: "/about" },
             { label: "Safety Tips", href: "/safety" },
             { label: "Contact Us", href: "/contact" },
-            // { label: "Careers", href: "#" },
-            // { label: "Press", href: "#" },
-            // { label: "Blog", href: "#" },
-            // { label: "Sitemap", href: "#" },
+        ],
+    },
+    {
+        heading: "Discover",
+        links: [
+            { label: "Free Classifieds", href: "/free-classifieds" },
+            { label: "Second Hand Marketplace", href: "/second-hand" },
+            { label: "Help & Support", href: "/help" },
         ],
     },
     {
         heading: "Support",
         links: [
-            { label: "Help & Support", href: "/help" },
             { label: "Terms & Conditions", href: "/terms" },
             { label: "Privacy Policy", href: "/privacy" },
         ],
@@ -72,9 +75,10 @@ const menuColumns = [
     {
         heading: "Available in",
         links: [
-            { label: "Mumbai", href: "#" },
-            { label: "Pune", href: "#" },
-            { label: "+ 680 more cities", href: "#" },
+            { label: "Mumbai", href: "/city/mumbai" },
+            { label: "Pune", href: "/city/pune" },
+            { label: "Delhi", href: "/city/delhi" },
+            { label: "Bengaluru", href: "/city/bengaluru" },
         ],
     },
 ];
@@ -135,10 +139,10 @@ function StoreBadge({
 
 export default function Footer() {
     return (
-        <footer className="relative z-10 overflow-hidden bg-[#0b0d12] text-slate-400 md:rounded-t-4xl">
+        <footer className="relative z-10 overflow-hidden bg-[#0b0d12] text-slate-300 md:rounded-t-4xl">
             <div className="mx-auto px-4 pt-10 lg:pt-16 sm:px-6 lg:px-12">
                 {/* main columns */}
-                <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr] lg:gap-12">
+                <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))] lg:gap-10">
                     {/* brand */}
                     <div className="col-span-2 md:col-span-3 lg:col-span-1">
                         <Link
@@ -156,11 +160,11 @@ export default function Footer() {
                         </Link>
 
                         <h3 className="mt-6 font-heading text-lg font-extrabold text-white">
-                            Buy and sell anything 🛍️
+                            Buy and sell second-hand near you
                         </h3>
                         <p className="mt-3 max-w-xs text-sm leading-relaxed">
-                            Your local marketplace for everyday deals — discover great
-                            finds nearby and list what you no longer need.
+                            DealPokket is a free second-hand marketplace in India — discover
+                            local deals and list what you no longer need.
                         </p>
 
                         {/* <button className="mt-6 flex items-center gap-3 rounded-full bg-white/10 py-1.5 pr-1.5 pl-5 text-sm font-semibold text-white transition-colors hover:bg-white/15">

@@ -36,7 +36,7 @@ const HorizontalList = ({
                             {loading ? (
                                 <Skeleton className="mt-2 h-3.5 w-48 max-w-full rounded" />
                             ) : description ? (
-                                <p className="mt-1.5 max-w-xl text-pretty text-[13px] leading-relaxed text-slate-500 sm:text-sm md:text-[15px]">
+                                <p className="mt-1.5 max-w-xl text-pretty text-[13px] leading-relaxed text-slate-700 sm:text-sm md:text-[15px]">
                                     {description}
                                 </p>
                             ) : null}

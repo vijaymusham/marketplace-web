@@ -10,13 +10,27 @@ import type { ApiCity } from "../types/AllTypes";
 import { CITY_ROW, WithSkeleton } from "../ui/Skeleton";
 import SectionHeader from "./SectionHeader";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { DEFAULT_INDIA_LOCATION } from "@/lib/geo";
 
-export default function CityExplorer() {
+export default function CityExplorer({
+    initialCities = [],
+}: {
+    initialCities?: ApiCity[];
+}) {
     const { latitude, longitude } = useUserLocation();
+    const usingDefaultLocation =
+        latitude === DEFAULT_INDIA_LOCATION.latitude &&
+        longitude === DEFAULT_INDIA_LOCATION.longitude;
+
     const { data, isLoading } = useQuery({
         queryKey: ["popularCities", latitude, longitude],
         queryFn: () => getPopularCities({ latitude, longitude }),
+        initialData: usingDefaultLocation && initialCities.length ? initialCities : undefined,
+        initialDataUpdatedAt: usingDefaultLocation ? Date.now() : undefined,
     });
+
+    const cities = data ?? initialCities;
+    const showSkeleton = isLoading && cities.length === 0;
 
     return (
         <section className="relative">
@@ -38,7 +52,7 @@ export default function CityExplorer() {
                     />
 
                     <WithSkeleton
-                        loading={isLoading}
+                        loading={showSkeleton}
                         count={12}
                         variant="city"
                         gridClassName={CITY_ROW}
@@ -47,7 +61,7 @@ export default function CityExplorer() {
                             className={`${CITY_ROW} snap-x snap-mandatory`}
                             stagger={0.055}
                         >
-                            {data?.map((city: ApiCity) => (
+                            {cities.map((city: ApiCity, index: number) => (
                                 <StaggerItem
                                     key={city.name}
                                     className="w-21 shrink-0 snap-start sm:w-28 md:w-28 lg:w-30"
@@ -75,6 +89,9 @@ export default function CityExplorer() {
                                                 alt={`Deals in ${city.name || "No name"}`}
                                                 fill
                                                 sizes="(max-width: 640px) 76px, (max-width: 768px) 112px, 144px"
+                                                priority={index < 4}
+                                                loading={index < 4 ? "eager" : "lazy"}
+                                                fetchPriority={index < 4 ? "high" : "auto"}
                                                 className="rounded-full border-2 border-dotted border-orange-500 object-cover p-0.5 transition-transform duration-500 group-hover:scale-105 sm:p-1"
                                             />
                                         </div>

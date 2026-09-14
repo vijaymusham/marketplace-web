@@ -57,7 +57,7 @@ function SearchSuggestionItem({
                 >
                     {suggestion.text}
                     {suggestion.category && (
-                        <h4 className="text-[11px] font-semibold text-slate-400 sm:text-xs">
+                        <h4 className="text-[11px] font-semibold text-slate-600 sm:text-xs">
                             {" "}
                             in {suggestion.subcategory}
                         </h4>
@@ -87,44 +87,39 @@ function PlaceholderCarousel({
     }, []);
 
     return (
-        <motion.button
-            type="button"
+        <motion.div
             key="carousel"
-            initial={{ opacity: 0 }}
+            role="presentation"
+            initial={false}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
             onClick={onActivate}
             className={`absolute inset-y-0 left-9 flex cursor-text items-center overflow-hidden text-left ${compact ? "right-3 sm:left-10" : "right-12 sm:left-11 sm:right-28"
                 }`}
-            tabIndex={-1}
             aria-hidden
         >
-            <span className={`shrink-0 font-medium text-slate-400 ${compact ? "text-xs sm:text-sm" : "hidden text-sm sm:inline sm:text-base"}`}>
+            <span className={`shrink-0 font-medium text-slate-700 ${compact ? "text-xs sm:text-sm" : "hidden text-sm sm:inline sm:text-base"}`}>
                 {compact ? "Search " : "Search for\u00a0"}
             </span>
             <span className={`relative flex-1 overflow-hidden ${compact ? "h-5" : "h-5 sm:h-6"}`}>
                 <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                         key={SUGGESTIONS[index]}
-                        initial={{ y: 10, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -10, opacity: 0 }}
+                        initial={{ y: 10 }}
+                        animate={{ y: 0 }}
+                        exit={{ y: -10 }}
                         transition={{
                             y: { type: "spring", stiffness: 140, damping: 20 },
-                            opacity: {
-                                duration: 0.45,
-                                ease: [0.4, 0.0, 0.2, 1],
-                            },
                         }}
-                        className={`absolute inset-0 truncate font-semibold text-slate-500 capitalize ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"
+                        className={`absolute inset-0 truncate font-semibold text-slate-800 capitalize ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"
                             }`}
                     >
                         &quot;{SUGGESTIONS[index]}&quot;
                     </motion.span>
                 </AnimatePresence>
             </span>
-        </motion.button>
+        </motion.div>
     );
 }
 
@@ -186,7 +181,7 @@ function SearchInput({ compact = false }: { compact?: boolean }) {
     return (
         <div className="group relative z-40 flex min-w-0 flex-1 items-center">
             <Search
-                className={`pointer-events-none absolute z-10 text-slate-400 transition-colors group-focus-within:text-primary ${compact
+                className={`pointer-events-none absolute z-10 text-slate-500 transition-colors group-focus-within:text-primary ${compact
                     ? "left-3 h-4 w-4"
                     : "left-3 h-4.5 w-4.5 sm:left-4 sm:h-5 sm:w-5"
                     }`}
@@ -210,8 +205,8 @@ function SearchInput({ compact = false }: { compact?: boolean }) {
                     aria-label="Search for products, brands and more"
                     className={
                         compact
-                            ? "w-full min-w-0 rounded-xl border-2 border-slate-200 bg-white py-2.5 pr-3 pl-9 text-base font-medium text-slate-700 placeholder:text-sm placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:py-2.5 sm:pl-10 sm:text-sm"
-                            : "w-full min-w-0 rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-sm font-medium text-slate-700 shadow-inner shadow-slate-100 transition-all duration-300 placeholder:text-slate-400 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-base"
+                            ? "w-full min-w-0 rounded-xl border-2 border-slate-200 bg-white py-2.5 pr-3 pl-9 text-base font-medium text-slate-900 placeholder:text-sm placeholder:text-slate-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:py-2.5 sm:pl-10 sm:text-sm"
+                            : "w-full min-w-0 rounded-full border border-slate-200 bg-slate-50 py-2.5 pr-28 pl-11 text-sm font-medium text-slate-900 shadow-inner shadow-slate-100 transition-all duration-300 placeholder:text-slate-600 focus:border-primary focus:bg-white focus:shadow-lg focus:shadow-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/25 sm:text-base"
                     }
                 />
 

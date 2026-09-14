@@ -7,12 +7,7 @@ import {
     useState,
     type ReactNode,
 } from "react";
-import {
-    onAuthStateChanged,
-    signOut as firebaseSignOut,
-    type User,
-} from "firebase/auth";
-import { auth } from "@/constant/firebase/firebase";
+import type { User } from "firebase/auth";
 
 type AuthContextValue = {
     user: User | null;
@@ -23,7 +18,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue>({
     user: null,
     loading: true,
-    signOut: async () => { },
+    signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -32,37 +27,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         let settled = false;
+        let unsubscribe: (() => void) | undefined;
+        let cancelled = false;
 
-        const unsubscribe = onAuthStateChanged(
-            auth,
-            (next) => {
-                settled = true;
-                setUser(next);
-                setLoading(false);
-            },
-            () => {
-                // Auth listener failed (bad config / network) — still unlock UI.
-                settled = true;
-                setUser(null);
-                setLoading(false);
-            }
-        );
+        const boot = async () => {
+            const [{ onAuthStateChanged }, { auth }] = await Promise.all([
+                import("firebase/auth"),
+                import("@/constant/firebase/firebase"),
+            ]);
+            if (cancelled) return;
 
-        // Safety: never leave the navbar stuck on a non-clickable skeleton.
-        const timeout = window.setTimeout(() => {
-            if (!settled) {
-                setLoading(false);
-            }
+            unsubscribe = onAuthStateChanged(
+                auth,
+                (next) => {
+                    settled = true;
+                    setUser(next);
+                    setLoading(false);
+                },
+                () => {
+                    settled = true;
+                    setUser(null);
+                    setLoading(false);
+                },
+            );
+        };
+
+        // Defer Firebase well past LCP (idle or ~2.5s).
+        const delay = window.setTimeout(() => {
+            void boot();
+        }, 2500);
+
+        const safety = window.setTimeout(() => {
+            if (!settled) setLoading(false);
         }, 4000);
 
         return () => {
-            unsubscribe();
-            window.clearTimeout(timeout);
+            cancelled = true;
+            window.clearTimeout(delay);
+            window.clearTimeout(safety);
+            unsubscribe?.();
         };
     }, []);
 
     const signOut = async () => {
+        const [{ signOut: firebaseSignOut }, { auth }] = await Promise.all([
+            import("firebase/auth"),
+            import("@/constant/firebase/firebase"),
+        ]);
         await firebaseSignOut(auth);
+        setUser(null);
     };
 
     return (

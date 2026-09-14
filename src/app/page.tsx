@@ -1,91 +1,59 @@
-"use client";
-import CategoryTabs from "@/components/layout/CategoryTabs";
-import CityExplorer from "@/components/home-ui/CityExplorer";
-import FreshRecommendations from "@/components/home-ui/FreshRecommendations";
-import HorizontalList from "@/components/home-ui/HorizontalList";
-import BannerSection from "@/components/home-ui/BannerSection";
-import TestimonialsSection from "@/components/home-ui/TestimonialsSection";
-import CtaSection from "@/components/home-ui/CtaSection";
-import { useQuery } from "@tanstack/react-query";
-import { getAdsBySection } from "@/components/api/apis";
-import type { ApiAd, ApiAdsBySectionAd, ApiAdsSection } from "@/components/types/AllTypes";
-import TrustedBrands from "@/components/home-ui/TrustedBrands";
-import { useUserLocation } from "@/hooks/useUserLocation";
+import type { Metadata } from "next";
+import HomeView from "@/components/home-ui/HomeView";
+import JsonLd from "@/components/seo/JsonLd";
+import { getHomeBootstrap } from "@/lib/home-data";
+import {
+  absoluteUrl,
+  DEFAULT_KEYWORDS,
+  SITE_NAME,
+  SITE_TAGLINE,
+} from "@/lib/seo";
 
-function toListing(ad: ApiAdsBySectionAd): ApiAd {
-    return {
-        id: ad.id,
-        title: ad.title,
-        imageUrl: ad.imageUrl,
-        isFavorite: ad.isFavorite,
-        price: ad.price,
-        currency: ad.currency,
-        location: ad.location,
-        metadata: "",
-        postedAt: ad.postedAt,
-        postedAtLabel: ad.postedAtLabel || ad.postedAt,
-    };
-}
-
-const SECTION_BG: Record<string, string> = {
-    "bg-sky-50": "bg-sky-50",
-    "bg-white": "bg-white",
-    "bg-violet-50": "bg-violet-50",
-    "bg-amber-50": "bg-amber-50",
-    "bg-emerald-50": "bg-emerald-50",
-    "bg-rose-50": "bg-rose-50",
-    "bg-orange-50": "bg-orange-50",
-    "bg-slate-50": "bg-slate-50",
+export const metadata: Metadata = {
+  title: {
+    absolute:
+      "DealPokket — Free Second Hand Marketplace in India | Classified Ads",
+  },
+  description:
+    "DealPokket is a free second-hand marketplace across India. Buy & sell used mobiles, bikes, furniture & more near you — free classified ads with local chat.",
+  keywords: [...DEFAULT_KEYWORDS],
+  alternates: {
+    canonical: absoluteUrl("/"),
+  },
+  openGraph: {
+    title: "DealPokket — Free Second Hand Marketplace | Classified Ads",
+    description: SITE_TAGLINE,
+    url: absoluteUrl("/"),
+    siteName: SITE_NAME,
+    type: "website",
+    locale: "en_IN",
+  },
 };
 
-const SECTION_PLACEHOLDERS = [
-    { title: "Popular near you", bgClass: "bg-sky-50" },
-    { title: "Trending now", bgClass: "bg-violet-50" },
-];
+export default async function HomePage() {
+  const { cities, freshAds } = await getHomeBootstrap();
 
-export default function Home() {
-    const { latitude, longitude } = useUserLocation();
-
-    const { data, isLoading } = useQuery({
-        queryKey: ["adsBySection", latitude, longitude],
-        queryFn: () => getAdsBySection({ latitude, longitude }),
-    });
-
-    return (
-        <>
-            <CategoryTabs />
-            <main className="flex-1 bg-white relative">
-                <CityExplorer />
-                <FreshRecommendations />
-                <TrustedBrands />
-                {isLoading
-                    ? SECTION_PLACEHOLDERS.map((item) => (
-                        <HorizontalList
-                            key={item.title}
-                            className={`${SECTION_BG[item.bgClass] ?? "bg-slate-50"} my-8`}
-                            title={item.title}
-                            data={[]}
-                            loading
-                        />
-                    ))
-                    : data &&
-                    Object.values(data).map((item: ApiAdsSection) => {
-                        if (!item.ads?.length) return null;
-                        const bg = SECTION_BG[item.bgClass] ?? "bg-slate-50";
-                        return (
-                            <HorizontalList
-                                key={item.title}
-                                className={`${bg} my-8`}
-                                title={item.title}
-                                description={item.subtitle}
-                                data={item.ads.map(toListing)}
-                            />
-                        );
-                    })}
-                <BannerSection />
-                <TestimonialsSection />
-                <CtaSection />
-            </main>
-        </>
-    );
+  return (
+    <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "DealPokket — Free Second Hand Marketplace in India",
+          description: SITE_TAGLINE,
+          url: absoluteUrl("/"),
+          isPartOf: {
+            "@type": "WebSite",
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+          },
+          about: {
+            "@type": "Thing",
+            name: "Second-hand marketplace and classified ads in India",
+          },
+        }}
+      />
+      <HomeView initialCities={cities} initialFreshAds={freshAds} />
+    </>
+  );
 }

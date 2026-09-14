@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import WishlistView from "@/components/wishlist/WishlistView";
 
 export const metadata: Metadata = {
-    title: "Wishlist | DealPokket",
+    title: "Wishlist",
     description: "Your saved deals and favorite listings on DealPokket.",
+    robots: { index: false, follow: false },
 };
 
 export default function WishlistPage() {

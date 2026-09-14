@@ -81,9 +81,9 @@ export default function Navbar() {
                             }}
                             className="group flex shrink-0 items-center"
                         >
-                            <Image src="/logo.png" alt="DealPokket" width={100} height={100} className="w-16 h-16" />
-                            <span className="font-heading text-3xl font-black tracking-tight text-[#2340FD]">
-                                Deal<span className="text-black">Pokket</span>
+                            <Image src="/logo.png" alt="DealPokket" width={64} height={64} priority className="h-16 w-16" />
+                            <span className="font-heading text-3xl font-black tracking-tight text-primary">
+                                Deal<span className="text-slate-900">Pokket</span>
                             </span>
                         </Link>
 

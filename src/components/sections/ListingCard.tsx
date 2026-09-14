@@ -17,10 +17,12 @@ function formatPrice(price: number, currency?: string) {
 }
 
 export default function ListingCard({
-    listing
+    listing,
+    priority = false,
 }: {
     listing: ApiAd;
     liked?: boolean;
+    priority?: boolean;
 }) {
     const queryClient = useQueryClient();
     const isLoggedIn = useIsLoggedIn();
@@ -75,9 +77,12 @@ export default function ListingCard({
                     {listing.imageUrl ? (
                         <Image
                             src={listing.imageUrl || "/no_image.jpeg"}
-                            alt={listing.title || "No image"}
+                            alt={listing.title || "Listing image"}
                             fill
                             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                            quality={70}
+                            priority={priority}
+                            loading={priority ? "eager" : "lazy"}
                             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05] aspect-square"
                         />
                     ) : null}
@@ -105,14 +110,14 @@ export default function ListingCard({
             </div>
 
             <Link href={`/listing/${listing.id}`} className="flex flex-1 flex-col pt-3.5">
-                <p className="min-h-4 truncate text-[11px] font-medium tracking-wide text-slate-400 uppercase sm:text-xs">
+                <p className="min-h-4 truncate text-[11px] font-medium tracking-wide text-slate-600 uppercase sm:text-xs">
                     {listing.metadata}
                 </p>
                 <h3 className="mt-1 truncate text-sm font-bold tracking-tight text-slate-900 transition-colors duration-200 group-hover:text-primary sm:text-[15px]">
                     {listing.title}
                 </h3>
-                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-500 sm:text-xs">
-                    <MapPin className="h-3 w-3 shrink-0 text-slate-400 sm:h-3.5 sm:w-3.5" />
+                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-600 sm:text-xs">
+                    <MapPin className="h-3 w-3 shrink-0 text-slate-500 sm:h-3.5 sm:w-3.5" />
                     <span className="truncate">{listing.location}</span>
                 </p>
 
@@ -120,7 +125,7 @@ export default function ListingCard({
                     <p className="truncate text-sm font-extrabold tracking-tight text-slate-900 sm:text-[15px]">
                         {formatPrice(listing.price, listing.currency)}
                     </p>
-                    <p className="shrink-0 text-[11px] text-slate-400 sm:text-xs">
+                    <p className="shrink-0 text-[11px] text-slate-600 sm:text-xs">
                         {listing.postedAtLabel || listing.postedAt}
                     </p>
                 </div>

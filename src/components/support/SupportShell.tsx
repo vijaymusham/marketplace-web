@@ -9,6 +9,7 @@ const caveat = Caveat({
     subsets: ["latin"],
     weight: ["600", "700"],
     display: "swap",
+    preload: false,
 });
 
 export type SupportQuickLink = {

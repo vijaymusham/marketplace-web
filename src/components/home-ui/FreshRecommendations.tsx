@@ -11,6 +11,7 @@ import {
 import type { ApiAd, ApiFreshRecommendation } from "../types/AllTypes";
 import SectionHeader from "./SectionHeader";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { DEFAULT_INDIA_LOCATION } from "@/lib/geo";
 
 function toListingCard(listing: ApiFreshRecommendation): ApiAd {
     return {
@@ -27,13 +28,25 @@ function toListingCard(listing: ApiFreshRecommendation): ApiAd {
     };
 }
 
-export default function FreshRecommendations() {
+export default function FreshRecommendations({
+    initialAds = [],
+}: {
+    initialAds?: ApiFreshRecommendation[];
+}) {
     const { latitude, longitude } = useUserLocation();
+    const usingDefaultLocation =
+        latitude === DEFAULT_INDIA_LOCATION.latitude &&
+        longitude === DEFAULT_INDIA_LOCATION.longitude;
 
-    const { data = [], isLoading } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["freshRecommendations", latitude, longitude],
         queryFn: () => getFreshAds({ latitude, longitude }),
+        initialData: usingDefaultLocation && initialAds.length ? initialAds : undefined,
+        initialDataUpdatedAt: usingDefaultLocation ? Date.now() : undefined,
     });
+
+    const ads = data ?? initialAds;
+    const showSkeleton = isLoading && ads.length === 0;
 
     return (
         <section className="mx-auto px-4 pt-6 pb-10 sm:px-6 sm:pt-8 sm:pb-12 lg:px-12 lg:pt-9">
@@ -46,15 +59,18 @@ export default function FreshRecommendations() {
 
             <div className="mt-7 sm:mt-8">
                 <WithSkeleton
-                    loading={isLoading}
+                    loading={showSkeleton}
                     count={10}
                     variant="listing"
                     gridClassName={HOME_LISTINGS_GRID}
                 >
                     <Stagger className={HOME_LISTINGS_GRID} stagger={0.08}>
-                        {data.map((listing) => (
+                        {ads.map((listing, index) => (
                             <StaggerItem key={listing.id} y={40}>
-                                <ListingCard listing={toListingCard(listing)} />
+                                <ListingCard
+                                    listing={toListingCard(listing)}
+                                    priority={index < 2}
+                                />
                             </StaggerItem>
                         ))}
                     </Stagger>

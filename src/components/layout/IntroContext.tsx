@@ -8,7 +8,8 @@ const IntroContext = createContext<{ ready: boolean; markReady: () => void }>({
 });
 
 export function IntroProvider({ children }: { children: ReactNode }) {
-    const [ready, setReady] = useState(false);
+    // Start ready so SSR/first paint isn't stuck at opacity:0 waiting for the preloader effect.
+    const [ready, setReady] = useState(true);
     const markReady = useCallback(() => setReady(true), []);
     return <IntroContext.Provider value={{ ready, markReady }}>{children}</IntroContext.Provider>;
 }

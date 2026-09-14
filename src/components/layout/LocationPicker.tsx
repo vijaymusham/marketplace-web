@@ -4,13 +4,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, X, LocateFixed, Search, MapPin } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { setAddress, setLocation } from "../redux/slices/authSlice";
 import { toast } from "react-hot-toast";
-import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { geocodePlace } from "@/lib/geo";
 import GlowButton from "@/components/ui/GlowButton";
+
+const GooglePlacesAutocomplete = dynamic(
+    () => import("react-google-places-autocomplete"),
+    { ssr: false, loading: () => (
+        <div className="h-12 w-full animate-pulse rounded-full bg-slate-100" aria-hidden />
+    ) },
+);
 
 function shortAddress(address: string | null | undefined) {
     if (!address) return "India";
@@ -218,7 +225,7 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
 
                                         <div className="flex items-center gap-3">
                                             <span className="h-px flex-1 bg-slate-200" />
-                                            <span className="rounded-full border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-400">
+                                            <span className="rounded-full border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-600">
                                                 OR
                                             </span>
                                             <span className="h-px flex-1 bg-slate-200" />
@@ -290,7 +297,7 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
                                                         }),
                                                         placeholder: (base) => ({
                                                             ...base,
-                                                            color: "#94a3b8",
+                                                            color: "#475569",
                                                             fontSize: "0.875rem",
                                                             fontWeight: 500,
                                                         }),
