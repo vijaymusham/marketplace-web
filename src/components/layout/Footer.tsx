@@ -1,5 +1,4 @@
 import type { SVGProps } from "react";
-import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { scrollToTop } from "@/lib/lenis";
@@ -40,10 +39,18 @@ function TikTokLogo(props: SVGProps<SVGSVGElement>) {
     );
 }
 
-function YouTubeLogo(props: SVGProps<SVGSVGElement>) {
+function LinkedinLogo(props: SVGProps<SVGSVGElement>) {
     return (
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
-            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+            <path d="M18.335 18.339H15.67v-4.177c0-.996-.02-2.278-1.39-2.278-1.389 0-1.601 1.084-1.601 2.205v4.25h-2.666V9.75h2.56v1.17h.035c.358-.674 1.228-1.387 2.528-1.387 2.7 0 3.2 1.778 3.2 4.091v4.715zM7.995 6.4h3.995V16.h-3.995V6.4zM6.595 4.207C5.879 4.207 5.2 4.814 5.2 5.576c0 .676.595 1.24 1.323 1.24h.016c.723 0 1.32-.564 1.32-1.24 0-.762-.609-1.368-1.323-1.368z" />
+        </svg>
+    );
+}
+
+function XLogo(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
         </svg>
     );
 }
@@ -84,9 +91,10 @@ const menuColumns = [
 ];
 
 const socials = [
-    { icon: FacebookLogo, label: "Facebook" },
-    { icon: InstagramLogo, label: "Instagram" },
-    { icon: YouTubeLogo, label: "YouTube" },
+    { icon: FacebookLogo, label: "Facebook", href: "https://www.facebook.com/profile.php?id=61594007414127" },
+    { icon: InstagramLogo, label: "Instagram", href: "https://www.instagram.com/dealpokket" },
+    { icon: LinkedinLogo, label: "Linkedin", href: "https://www.linkedin.com/in/dealpokket" },
+    { icon: XLogo, label: "X", href: "https://x.com/DealPokket" },
 ];
 
 function AppleLogo() {
