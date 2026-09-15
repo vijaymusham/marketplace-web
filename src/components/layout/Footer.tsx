@@ -216,10 +216,12 @@ export default function Footer() {
                     <div>
                         <h4 className="text-sm font-bold text-white">Social</h4>
                         <ul className="mt-5 space-y-3.5">
-                            {socials.map(({ icon: Icon, label }) => (
+                            {socials.map(({ icon: Icon, label, href }) => (
                                 <li key={label}>
                                     <Link
-                                        href="#"
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="flex items-center gap-2.5 text-sm transition-colors hover:text-white"
                                     >
                                         <Icon className="h-4 w-4" />
