@@ -7,13 +7,12 @@ import toast from "react-hot-toast";
 import { X, ArrowLeft } from "lucide-react";
 import { useDispatch } from "react-redux";
 import {
-    initializeRecaptchaConfig,
     RecaptchaVerifier,
     signInWithPhoneNumber,
     type ConfirmationResult,
     type User,
 } from "firebase/auth";
-import { auth } from "@/constant/firebase/firebase";
+import { auth, ensureRecaptchaConfig } from "@/constant/firebase/firebase";
 import {
     ensureNotificationPermission,
     getFcmToken,
@@ -40,15 +39,51 @@ function currentHostLabel() {
     return window.location.hostname;
 }
 
+function isFirebaseAuthError(error: unknown): boolean {
+    return (
+        !!error &&
+        typeof error === "object" &&
+        "code" in error &&
+        String((error as { code: unknown }).code).startsWith("auth/")
+    );
+}
+
+function firebaseErrorFields(error: unknown) {
+    if (!error || typeof error !== "object") {
+        return { code: "", message: "", name: "", customData: undefined as unknown };
+    }
+    const e = error as {
+        code?: unknown;
+        message?: unknown;
+        name?: unknown;
+        customData?: unknown;
+    };
+    return {
+        code: e.code != null ? String(e.code) : "",
+        message: e.message != null ? String(e.message) : "",
+        name: e.name != null ? String(e.name) : "",
+        customData: e.customData,
+    };
+}
+
+function logFirebaseAuthError(stage: string, error: unknown) {
+    const fields = firebaseErrorFields(error);
+    console.error("[Firebase Auth]", {
+        stage,
+        hostname: typeof window !== "undefined" ? window.location.hostname : "",
+        origin: typeof window !== "undefined" ? window.location.origin : "",
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+        code: fields.code,
+        message: fields.message,
+        name: fields.name,
+        customData: fields.customData,
+        error,
+    });
+}
+
 function firebaseAuthErrorMessage(error: unknown): string {
-    const code =
-        error && typeof error === "object" && "code" in error
-            ? String((error as { code: string }).code)
-            : "";
-    const message =
-        error && typeof error === "object" && "message" in error
-            ? String((error as { message: string }).message)
-            : "";
+    const { code, message } = firebaseErrorFields(error);
 
     if (
         code === "auth/invalid-app-credential" ||
@@ -75,9 +110,28 @@ function firebaseAuthErrorMessage(error: unknown): string {
             return "SMS quota exceeded. Try again later.";
         case "auth/billing-not-enabled":
             return "Real SMS requires Firebase Blaze billing to be enabled.";
+        case "auth/unauthorized-domain":
+            return "This domain is not authorized for phone sign-in. Please try again later.";
+        case "auth/operation-not-allowed":
+            return "Phone sign-in is currently unavailable.";
+        case "auth/network-request-failed":
+            return "Network error. Check your connection and try again.";
+        case "auth/internal-error":
+            return "Phone verification could not start. Please refresh and try again.";
+        case "auth/missing-app-credential":
+        case "auth/argument-error":
+            return "Verification widget failed to load. Please refresh and try again.";
         default:
             return "Something went wrong. Please try again.";
     }
+}
+
+function toastAuthOrApiError(error: unknown) {
+    toast.error(
+        isFirebaseAuthError(error)
+            ? firebaseAuthErrorMessage(error)
+            : apiErrorMessage(error, firebaseAuthErrorMessage(error))
+    );
 }
 
 export default function AuthDrawer({
@@ -135,9 +189,94 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
     const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
     const confirmationRef = useRef<ConfirmationResult | null>(null);
     const verifierRef = useRef<RecaptchaVerifier | null>(null);
+    const verifierReadyRef = useRef<Promise<RecaptchaVerifier> | null>(null);
 
     // Backend phone/check result — Firebase is only used for SMS OTP.
     const phoneExistsRef = useRef(false);
+
+    const resetRecaptchaContainer = () => {
+        const el = document.getElementById(RECAPTCHA_ID);
+        if (el) el.innerHTML = "";
+    };
+
+    const removeOrphanRecaptchaFrames = () => {
+        document.querySelectorAll("iframe[src*='recaptcha']").forEach((iframe) => {
+            const wrap = iframe.parentElement;
+            iframe.remove();
+            if (wrap && wrap !== document.body && wrap.childNodes.length === 0) {
+                wrap.remove();
+            }
+        });
+        document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
+    };
+
+    const clearVerifier = () => {
+        try {
+            verifierRef.current?.clear();
+        } catch {
+            /* ignore stale widget */
+        }
+        verifierRef.current = null;
+        verifierReadyRef.current = null;
+        resetRecaptchaContainer();
+        removeOrphanRecaptchaFrames();
+    };
+
+    const ensureVerifier = async (): Promise<RecaptchaVerifier> => {
+        if (verifierRef.current) return verifierRef.current;
+        if (verifierReadyRef.current) return verifierReadyRef.current;
+
+        const create = (async () => {
+            await ensureRecaptchaConfig();
+
+            const el = document.getElementById(RECAPTCHA_ID);
+            if (!el) {
+                throw new Error("reCAPTCHA container is not in the DOM");
+            }
+            if (el.childNodes.length > 0) {
+                el.innerHTML = "";
+            }
+
+            let verifier: RecaptchaVerifier;
+            try {
+                verifier = new RecaptchaVerifier(auth, RECAPTCHA_ID, {
+                    size: "invisible",
+                    callback: () => {
+                        /* token delivered to signInWithPhoneNumber */
+                    },
+                    "expired-callback": () => {
+                        clearVerifier();
+                    },
+                    "error-callback": () => {
+                        clearVerifier();
+                    },
+                });
+            } catch (error) {
+                logFirebaseAuthError("B. RecaptchaVerifier construction", error);
+                throw error;
+            }
+
+            verifierRef.current = verifier;
+
+            try {
+                await verifier.render();
+            } catch (error) {
+                logFirebaseAuthError("C. RecaptchaVerifier.render()", error);
+                clearVerifier();
+                throw error;
+            }
+
+            return verifier;
+        })();
+
+        verifierReadyRef.current = create;
+        try {
+            return await create;
+        } catch (error) {
+            verifierReadyRef.current = null;
+            throw error;
+        }
+    };
 
     const completeBackendAuth = async (
         firebaseUser: User,
@@ -192,38 +331,26 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         let cancelled = false;
         let timer = 0;
 
+        if (process.env.NODE_ENV !== "production") {
+            console.info("[Firebase Auth] drawer session", {
+                hostname: window.location.hostname,
+                projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+                authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+            });
+        }
+
         const setup = async () => {
-            // Wait a frame so the captcha container is in the DOM.
             await new Promise<void>((resolve) => {
                 timer = window.setTimeout(() => resolve(), 50);
             });
             if (cancelled) return;
 
             try {
-                try {
-                    await initializeRecaptchaConfig(auth);
-                } catch {
-                    // Optional — older projects may not need Enterprise config.
-                }
-
-                const el = document.getElementById(RECAPTCHA_ID);
-                if (!el || cancelled) return;
-
-                el.innerHTML = "";
-                const verifier = new RecaptchaVerifier(auth, RECAPTCHA_ID, {
-                    size: "normal",
-                    callback: () => {
-                        /* solved */
-                    },
-                    "expired-callback": () => {
-                        toast.error("Captcha expired. Please solve it again.");
-                    },
-                });
-                verifierRef.current = verifier;
-                await verifier.render();
-            } catch {
+                await ensureVerifier();
+            } catch (error) {
                 if (!cancelled) {
-                    toast.error("Could not load captcha. You can still try Continue.");
+                    logFirebaseAuthError("C. RecaptchaVerifier.render() (session setup)", error);
+                    toast.error(firebaseAuthErrorMessage(error));
                 }
             }
         };
@@ -233,13 +360,10 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         return () => {
             cancelled = true;
             window.clearTimeout(timer);
-            try {
-                verifierRef.current?.clear();
-            } catch {
-                /* ignore */
-            }
-            verifierRef.current = null;
+            clearVerifier();
         };
+        // Session unmounts whenever the drawer closes (portal returns null).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const phoneValid = /^\d{10}$/.test(phone);
@@ -260,35 +384,29 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
 
             phoneExistsRef.current = check.exists;
 
-            let appVerifier = verifierRef.current;
-            if (!appVerifier) {
-                const el = document.getElementById(RECAPTCHA_ID);
-                if (el) el.innerHTML = "";
-                appVerifier = new RecaptchaVerifier(auth, RECAPTCHA_ID, {
-                    size: "normal",
-                });
-                verifierRef.current = appVerifier;
-                await appVerifier.render();
-            }
+            const appVerifier = await ensureVerifier();
 
-            const confirmation = await signInWithPhoneNumber(
-                auth,
-                `+91${phone}`,
-                appVerifier
-            );
-            confirmationRef.current = confirmation;
-            setOtp(Array(OTP_LENGTH).fill(""));
-            setView("otp");
-            toast.success("OTP sent to your phone");
-            setTimeout(() => otpRefs.current[0]?.focus(), 250);
-        } catch (error) {
             try {
-                verifierRef.current?.clear();
-            } catch {
-                /* ignore */
+                const confirmation = await signInWithPhoneNumber(
+                    auth,
+                    `+91${phone}`,
+                    appVerifier
+                );
+                confirmationRef.current = confirmation;
+                setOtp(Array(OTP_LENGTH).fill(""));
+                setView("otp");
+                toast.success("OTP sent to your phone");
+                setTimeout(() => otpRefs.current[0]?.focus(), 250);
+            } catch (error) {
+                logFirebaseAuthError(
+                    "D/E/F. reCAPTCHA execute + signInWithPhoneNumber (Identity Toolkit)",
+                    error
+                );
+                clearVerifier();
+                throw error;
             }
-            verifierRef.current = null;
-            toast.error(apiErrorMessage(error, firebaseAuthErrorMessage(error)));
+        } catch (error) {
+            toastAuthOrApiError(error);
         } finally {
             setSending(false);
         }
@@ -349,7 +467,8 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
             toast.success("Logged in successfully!");
             onClose();
         } catch (error) {
-            toast.error(apiErrorMessage(error, firebaseAuthErrorMessage(error)));
+            logFirebaseAuthError("OTP confirm()", error);
+            toastAuthOrApiError(error);
         } finally {
             setVerifying(false);
         }
@@ -372,7 +491,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
             toast.success("Account created successfully!");
             onClose();
         } catch (error) {
-            toast.error(apiErrorMessage(error, firebaseAuthErrorMessage(error)));
+            toastAuthOrApiError(error);
         } finally {
             setSavingProfile(false);
         }
@@ -497,9 +616,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                         >
                             <PhoneField value={phone} onChange={setPhone} />
 
-                            <div className="flex min-h-19.5 justify-center py-1">
-                                <div id={RECAPTCHA_ID} />
-                            </div>
+                            <div id={RECAPTCHA_ID} />
 
                             <GlowButton
                                 type="submit"

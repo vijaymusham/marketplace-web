@@ -1,9 +1,7 @@
-"use client";
-
+"use client";;
 import { useEffect, useState, type ReactNode } from "react";
 import { Caveat } from "next/font/google";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
 
 const caveat = Caveat({
     subsets: ["latin"],

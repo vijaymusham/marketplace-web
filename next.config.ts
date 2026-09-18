@@ -55,9 +55,11 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' data:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms https://maps.googleapis.com https://maps.gstatic.com https://www.gstatic.com https://apis.google.com https://accounts.google.com",
+      // reCAPTCHA (Firebase Phone Auth) loads api.js / enterprise.js from google.com + gstatic.
+      // Omitting these causes RecaptchaVerifier.render() to fail with auth/internal-error (script onerror).
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms https://maps.googleapis.com https://maps.gstatic.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.recaptcha.net/recaptcha/",
       "connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:*",
-      "frame-src 'self' https://www.google.com https://maps.googleapis.com https://accounts.google.com https://apis.google.com https://*.firebaseapp.com https://*.google.com",
+      "frame-src 'self' https://www.google.com https://www.google.com/recaptcha/ https://recaptcha.google.com https://www.recaptcha.net https://maps.googleapis.com https://accounts.google.com https://apis.google.com https://*.firebaseapp.com https://*.google.com",
       "worker-src 'self' blob:",
       ...(isProd ? ["upgrade-insecure-requests"] : []),
     ].join("; ");
