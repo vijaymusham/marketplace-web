@@ -17,6 +17,8 @@ import {
     absoluteUrl,
     DEFAULT_KEYWORDS,
     getSiteUrl,
+    HOMEPAGE_DESCRIPTION,
+    HOMEPAGE_TITLE,
     SITE_NAME,
     SITE_NAME_SPACED,
     SITE_TAGLINE,
@@ -40,16 +42,20 @@ export const display = localFont({
 export const metadata: Metadata = {
     metadataBase: new URL(getSiteUrl()),
     title: {
-        default: `${SITE_NAME} — Free Second Hand Marketplace in India`,
+        default: HOMEPAGE_TITLE,
         template: `%s | ${SITE_NAME}`,
     },
-    description: SITE_TAGLINE,
+    description: HOMEPAGE_DESCRIPTION,
     applicationName: SITE_NAME,
     keywords: [...DEFAULT_KEYWORDS],
     authors: [{ name: SITE_NAME_SPACED, url: absoluteUrl("/") }],
     creator: SITE_NAME_SPACED,
     publisher: SITE_NAME_SPACED,
     category: "marketplace",
+    icons: {
+        icon: "/logo.png",
+        apple: "/logo.png",
+    },
     alternates: {
         canonical: absoluteUrl("/"),
     },
@@ -59,7 +65,7 @@ export const metadata: Metadata = {
         url: absoluteUrl("/"),
         siteName: SITE_NAME,
         title: `${SITE_NAME} — Free Second Hand Marketplace | Classified Ads`,
-        description: SITE_TAGLINE,
+        description: HOMEPAGE_DESCRIPTION,
         images: [
             {
                 url: absoluteUrl("/logo.png"),
@@ -72,7 +78,7 @@ export const metadata: Metadata = {
     twitter: {
         card: "summary_large_image",
         title: `${SITE_NAME} — Free Second Hand Marketplace in India`,
-        description: SITE_TAGLINE,
+        description: HOMEPAGE_DESCRIPTION,
         images: [absoluteUrl("/logo.png")],
     },
     robots: {
@@ -121,7 +127,7 @@ export default function RootLayout({
                             url: absoluteUrl("/"),
                             logo: absoluteUrl("/logo.png"),
                             email: "dealpokket@gmail.com",
-                            description: SITE_TAGLINE,
+                            description: HOMEPAGE_DESCRIPTION,
                             areaServed: {
                                 "@type": "Country",
                                 name: "India",
@@ -138,7 +144,7 @@ export default function RootLayout({
                             "@type": "WebSite",
                             name: SITE_NAME,
                             url: absoluteUrl("/"),
-                            description: SITE_TAGLINE,
+                            description: HOMEPAGE_DESCRIPTION,
                             inLanguage: "en-IN",
                             potentialAction: {
                                 "@type": "SearchAction",

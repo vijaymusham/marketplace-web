@@ -5,23 +5,21 @@ import { getHomeBootstrap } from "@/lib/home-data";
 import {
     absoluteUrl,
     DEFAULT_KEYWORDS,
+    HOMEPAGE_DESCRIPTION,
+    HOMEPAGE_TITLE,
     SITE_NAME,
     SITE_TAGLINE,
 } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: {
-        absolute:
-            "DealPokket — Buy & Sell Second Hand Products in India",
-    },
-    description:
-        "Buy and sell second hand and pre-owned products in India with DealPokket. Discover great products, connect with sellers, and find your next deal.",
+    title: { absolute: HOMEPAGE_TITLE },
+    description: HOMEPAGE_DESCRIPTION,
     keywords: [...DEFAULT_KEYWORDS],
     alternates: {
         canonical: absoluteUrl("/"),
     },
     openGraph: {
-        title: "DealPokket — Buy & Sell Second Hand Products in India",
+        title: HOMEPAGE_TITLE,
         description: SITE_TAGLINE,
         url: absoluteUrl("/"),
         siteName: SITE_NAME,

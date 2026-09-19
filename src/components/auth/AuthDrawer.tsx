@@ -190,6 +190,8 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
     const confirmationRef = useRef<ConfirmationResult | null>(null);
     const verifierRef = useRef<RecaptchaVerifier | null>(null);
     const verifierReadyRef = useRef<Promise<RecaptchaVerifier> | null>(null);
+    const widgetIdRef = useRef<number | null>(null);
+    const [captchaSolved, setCaptchaSolved] = useState(false);
 
     // Backend phone/check result — Firebase is only used for SMS OTP.
     const phoneExistsRef = useRef(false);
@@ -199,18 +201,22 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         if (el) el.innerHTML = "";
     };
 
-    const removeOrphanRecaptchaFrames = () => {
-        document.querySelectorAll("iframe[src*='recaptcha']").forEach((iframe) => {
-            const wrap = iframe.parentElement;
-            iframe.remove();
-            if (wrap && wrap !== document.body && wrap.childNodes.length === 0) {
-                wrap.remove();
-            }
-        });
-        document.querySelectorAll(".grecaptcha-badge").forEach((el) => el.remove());
+    const resetWidget = () => {
+        setCaptchaSolved(false);
+        const widgetId = widgetIdRef.current;
+        const grecaptcha = (window as unknown as {
+            grecaptcha?: { reset?: (id?: number) => void };
+        }).grecaptcha;
+        if (widgetId == null || !grecaptcha?.reset) return;
+        try {
+            grecaptcha.reset(widgetId);
+        } catch {
+            /* widget already gone */
+        }
     };
 
     const clearVerifier = () => {
+        setCaptchaSolved(false);
         try {
             verifierRef.current?.clear();
         } catch {
@@ -218,8 +224,8 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         }
         verifierRef.current = null;
         verifierReadyRef.current = null;
+        widgetIdRef.current = null;
         resetRecaptchaContainer();
-        removeOrphanRecaptchaFrames();
     };
 
     const ensureVerifier = async (): Promise<RecaptchaVerifier> => {
@@ -239,16 +245,18 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
 
             let verifier: RecaptchaVerifier;
             try {
+                // Visible widget: token is created from a real user solve, so it
+                // remains valid after authPhoneCheck() (invisible execute cannot).
                 verifier = new RecaptchaVerifier(auth, RECAPTCHA_ID, {
-                    size: "invisible",
+                    size: "normal",
                     callback: () => {
-                        /* token delivered to signInWithPhoneNumber */
+                        setCaptchaSolved(true);
                     },
                     "expired-callback": () => {
-                        clearVerifier();
+                        setCaptchaSolved(false);
                     },
                     "error-callback": () => {
-                        clearVerifier();
+                        setCaptchaSolved(false);
                     },
                 });
             } catch (error) {
@@ -259,7 +267,8 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
             verifierRef.current = verifier;
 
             try {
-                await verifier.render();
+                const widgetId = await verifier.render();
+                widgetIdRef.current = typeof widgetId === "number" ? widgetId : null;
             } catch (error) {
                 logFirebaseAuthError("C. RecaptchaVerifier.render()", error);
                 clearVerifier();
@@ -373,8 +382,9 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
 
         setSending(true);
         try {
-            // Prompt for notifications on Continue click (user gesture).
-            await ensureNotificationPermission();
+            // Do not await the permission prompt before Firebase — it steals the
+            // click gesture and can invalidate an unsolved/invisible captcha.
+            void ensureNotificationPermission();
 
             const check = await authPhoneCheck(`+91${phone}`);
             if (check == null || typeof check.exists !== "boolean") {
@@ -396,13 +406,14 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                 setOtp(Array(OTP_LENGTH).fill(""));
                 setView("otp");
                 toast.success("OTP sent to your phone");
+                resetWidget();
                 setTimeout(() => otpRefs.current[0]?.focus(), 250);
             } catch (error) {
                 logFirebaseAuthError(
                     "D/E/F. reCAPTCHA execute + signInWithPhoneNumber (Identity Toolkit)",
                     error
                 );
-                clearVerifier();
+                resetWidget();
                 throw error;
             }
         } catch (error) {
@@ -578,57 +589,64 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                 </header>
 
                 <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-8 sm:py-6">
-                    <div
-                        className={
-                            view === "phone"
-                                ? undefined
-                                : "pointer-events-none absolute top-0 left-[-9999px] opacity-0"
-                        }
-                        aria-hidden={view !== "phone"}
-                    >
-                        {(isLocalhostHost() ||
+                    {view === "phone" &&
+                        (isLocalhostHost() ||
                             /^\d{1,3}(\.\d{1,3}){3}$/.test(currentHostLabel())) && (
-                                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed font-medium text-amber-900">
-                                    {isLocalhostHost() ? (
-                                        <>
-                                            Real SMS OTP does not work on{" "}
-                                            <span className="font-bold">localhost</span>. Use a Firebase{" "}
-                                            <span className="font-bold">test phone number</span>, or open{" "}
-                                            <span className="font-bold">http://127.0.0.1:3000</span>.
-                                        </>
-                                    ) : (
-                                        <>
-                                            Add <span className="font-bold">{currentHostLabel()}</span> in Firebase →
-                                            Authentication → Settings →{" "}
-                                            <span className="font-bold">Authorized domains</span> or real SMS OTP
-                                            will fail with INVALID_APP_CREDENTIAL.
-                                        </>
-                                    )}
-                                </div>
-                            )}
+                            <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed font-medium text-amber-900">
+                                {isLocalhostHost() ? (
+                                    <>
+                                        Real SMS OTP does not work on{" "}
+                                        <span className="font-bold">localhost</span>. Use a Firebase{" "}
+                                        <span className="font-bold">test phone number</span>, or open{" "}
+                                        <span className="font-bold">http://127.0.0.1:3000</span>.
+                                    </>
+                                ) : (
+                                    <>
+                                        Add <span className="font-bold">{currentHostLabel()}</span> in Firebase →
+                                        Authentication → Settings →{" "}
+                                        <span className="font-bold">Authorized domains</span> or real SMS OTP
+                                        will fail with INVALID_APP_CREDENTIAL.
+                                    </>
+                                )}
+                            </div>
+                        )}
 
-                        <form
-                            className="flex flex-col gap-4"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                void sendOtp();
-                            }}
-                        >
+                    <form
+                        className="flex flex-col gap-4"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            if (view === "phone") void sendOtp();
+                        }}
+                    >
+                        {view === "phone" ? (
                             <PhoneField value={phone} onChange={setPhone} />
+                        ) : null}
 
+                        {/* Keep the widget on-screen. Off-canvas / display:none breaks reCAPTCHA. */}
+                        <div
+                            className={
+                                view === "details"
+                                    ? "h-0 overflow-visible"
+                                    : "flex min-h-19.5 justify-center py-1"
+                            }
+                        >
                             <div id={RECAPTCHA_ID} />
+                        </div>
 
+                        {view === "phone" ? (
                             <GlowButton
                                 type="submit"
-                                disabled={!phoneValid || sending}
+                                disabled={!phoneValid || !captchaSolved || sending}
                                 fullWidth
                                 size="lg"
                                 className="mt-1"
                             >
                                 {sending ? "Sending OTP..." : "Continue"}
                             </GlowButton>
-                        </form>
+                        ) : null}
+                    </form>
 
+                    {view === "phone" ? (
                         <p className="mx-auto mt-4 max-w-80 text-center text-xs leading-relaxed font-semibold text-slate-400">
                             By clicking on Continue, I accept the{" "}
                             <span className="cursor-pointer font-semibold text-slate-600 underline hover:text-primary">
@@ -639,7 +657,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                 Privacy Policy
                             </span>
                         </p>
-                    </div>
+                    ) : null}
 
                     <AnimatePresence mode="wait">
                         {view === "otp" && (
@@ -686,11 +704,15 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                     Didn&apos;t receive it?{" "}
                                     <button
                                         type="button"
-                                        disabled={sending}
+                                        disabled={sending || !captchaSolved}
                                         onClick={() => void sendOtp()}
                                         className="cursor-pointer font-semibold text-primary hover:text-primary-hover disabled:opacity-60"
                                     >
-                                        {sending ? "Sending..." : "Resend OTP"}
+                                        {sending
+                                            ? "Sending..."
+                                            : captchaSolved
+                                                ? "Resend OTP"
+                                                : "Solve captcha to resend"}
                                     </button>
                                 </p>
                             </motion.div>

@@ -6,6 +6,10 @@ export const SITE_NAME = "DealPokket";
 export const SITE_NAME_SPACED = "Deal Pokket";
 export const SITE_TAGLINE =
   "Buy & sell second-hand goods near you — free classified ads across India";
+export const HOMEPAGE_TITLE =
+  "DealPokket — Buy & Sell Second Hand Products in India";
+export const HOMEPAGE_DESCRIPTION =
+  "Buy and sell second hand and pre-owned products in India with DealPokket. Discover great products, connect with sellers, and find your next deal.";
 
 export function getSiteUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
