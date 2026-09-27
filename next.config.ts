@@ -2,6 +2,9 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const firebaseHostingOrigin = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  ? `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseapp.com`
+  : "";
 
 const nextConfig: NextConfig = {
   // Allow opening the dev server via public IP / LAN host
@@ -27,12 +30,29 @@ const nextConfig: NextConfig = {
   },
   // Proxy API through Next so browser calls are same-origin (visible in Network, no CORS).
   async rewrites() {
-    if (!apiOrigin) return [];
     return [
-      {
-        source: "/backend/:path*",
-        destination: `${apiOrigin}/:path*`,
-      },
+      ...(apiOrigin
+        ? [
+            {
+              source: "/backend/:path*",
+              destination: `${apiOrigin}/:path*`,
+            },
+          ]
+        : []),
+      // Serves Firebase's auth handler from our own domain so Google's account chooser shows it
+      // (requires NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN to be this site's host).
+      ...(firebaseHostingOrigin
+        ? [
+            {
+              source: "/__/auth/:path*",
+              destination: `${firebaseHostingOrigin}/__/auth/:path*`,
+            },
+            {
+              source: "/__/firebase/:path*",
+              destination: `${firebaseHostingOrigin}/__/firebase/:path*`,
+            },
+          ]
+        : []),
     ];
   },
   async redirects() {
@@ -54,7 +74,7 @@ const nextConfig: NextConfig = {
       "form-action 'self'",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' data:",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
       // reCAPTCHA (Firebase Phone Auth) loads api.js / enterprise.js from google.com + gstatic.
       // Omitting these causes RecaptchaVerifier.render() to fail with auth/internal-error (script onerror).
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms https://maps.googleapis.com https://maps.gstatic.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.recaptcha.net/recaptcha/",

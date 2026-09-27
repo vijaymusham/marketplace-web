@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import Preloader from "@/components/layout/Preloader";
 import { IntroProvider } from "@/components/layout/IntroContext";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import GoogleOneTap from "@/components/auth/GoogleOneTap";
 import TanstackProvider from "@/components/providers/TanstackProvider";
 import FcmProvider from "@/components/providers/FcmProvider";
 import SiteChrome from "@/components/layout/SiteChrome";
@@ -165,6 +166,7 @@ export default function RootLayout({
                                     <SmoothScroll>
                                         <Preloader />
                                         <Navbar />
+                                        <GoogleOneTap />
                                         {children}
                                         <Toaster
                                             position="top-right"

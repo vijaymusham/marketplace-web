@@ -57,14 +57,49 @@ export type AuthEmailVerifyPayload = {
     fcmToken?: string;
 };
 
+export type AuthEmailRequestOtpResponse =
+    | { exists: true; message?: string; expiresIn?: number }
+    | { exists: false; message?: string };
+
+/** Emails a login OTP when the account exists; otherwise reports `exists: false` so the app can show signup. */
 export const authEmailRequestOtp = async (
     email: string,
-): Promise<{ message?: string }> => {
+): Promise<AuthEmailRequestOtpResponse> => {
     try {
         const { data } = await customAxios.post("/auth/email/otp/request", { email });
         return data;
     } catch (error) {
         rethrow("authEmailRequestOtp", error);
+    }
+};
+
+export type AuthRegisterPayload = {
+    email: string;
+    name: string;
+    phone: string;
+    referralCode?: string;
+};
+
+export type AuthRegisterResponse = {
+    ready: boolean;
+    message?: string;
+    expiresIn?: number;
+};
+
+/** Stores pending signup details and emails a verification OTP. Calling again resends (after a 60s cooldown). */
+export const authRegister = async (
+    payload: AuthRegisterPayload,
+): Promise<AuthRegisterResponse> => {
+    try {
+        const { data } = await customAxios.post("/auth/register", {
+            email: payload.email,
+            name: payload.name,
+            phone: payload.phone,
+            referralCode: payload.referralCode || undefined,
+        });
+        return data;
+    } catch (error) {
+        rethrow("authRegister", error);
     }
 };
 
@@ -79,6 +114,49 @@ export const authEmailVerifyOtp = async (payload: AuthEmailVerifyPayload) => {
         return data;
     } catch (error) {
         rethrow("authEmailVerifyOtp", error);
+    }
+};
+
+export type AuthGooglePayload = {
+    /** Firebase ID token from a Google sign-in (valid for ~1 hour). */
+    idToken: string;
+    /** Required only to create a new account. */
+    phone?: string;
+    name?: string;
+    referralCode?: string;
+    platform?: "ios" | "android" | "web";
+    fcmToken?: string;
+};
+
+export type AuthGoogleProfile = {
+    email: string;
+    name?: string;
+    profilePhoto?: string;
+};
+
+export type AuthGoogleNewUserResponse = {
+    exists: false;
+    message?: string;
+    profile: AuthGoogleProfile;
+};
+
+/**
+ * Signs in with a Google-backed Firebase ID token. Unknown emails get `{ exists: false, profile }`;
+ * call again with `phone` (plus optional `name` / `referralCode`) to create the account.
+ */
+export const authGoogle = async (payload: AuthGooglePayload) => {
+    try {
+        const { data } = await customAxios.post("/auth/google", {
+            idToken: payload.idToken,
+            phone: payload.phone,
+            name: payload.name,
+            referralCode: payload.referralCode || undefined,
+            platform: payload.platform ?? "web",
+            fcmToken: payload.fcmToken,
+        });
+        return data;
+    } catch (error) {
+        rethrow("authGoogle", error);
     }
 };
 

@@ -32,7 +32,8 @@ import {
     enablePushNotifications,
     getStoredFcmToken,
 } from "@/lib/fcmDeviceToken";
-import { SIGN_IN_EVENT } from "@/lib/auth-events";
+import { SIGN_IN_EVENT, type SignInEventDetail } from "@/lib/auth-events";
+import type { PendingGoogleSignup } from "./useCompleteAuth";
 
 const menuItemClass =
     "group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[13px] font-semibold text-slate-700 transition-all duration-150 hover:bg-white hover:text-slate-900 ";
@@ -61,6 +62,7 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
     const dispatch = useDispatch<AppDispatch>();
     const authData = useSelector((state: RootState) => state.user.user);
     const [open, setOpen] = useState(false);
+    const [pendingGoogleSignup, setPendingGoogleSignup] = useState<PendingGoogleSignup | null>(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [pushEnabled, setPushEnabled] = useState(false);
@@ -76,10 +78,19 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
     }, [setMounted]);
 
     useEffect(() => {
-        const onRequestSignIn = () => setOpen(true);
+        const onRequestSignIn = (event: Event) => {
+            const detail = (event as CustomEvent<SignInEventDetail | undefined>).detail;
+            setPendingGoogleSignup(detail?.googleSignup ?? null);
+            setOpen(true);
+        };
         window.addEventListener(SIGN_IN_EVENT, onRequestSignIn);
         return () => window.removeEventListener(SIGN_IN_EVENT, onRequestSignIn);
     }, []);
+
+    const closeAuthDrawer = () => {
+        setOpen(false);
+        setPendingGoogleSignup(null);
+    };
 
     useEffect(() => {
         if (!menuOpen || !isMenuTrigger) return;
@@ -458,7 +469,11 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                     </>
                 )}
 
-                <AuthDrawer open={open} onClose={() => setOpen(false)} />
+                <AuthDrawer
+                    open={open}
+                    onClose={closeAuthDrawer}
+                    initialGoogleSignup={pendingGoogleSignup}
+                />
             </div>
         );
     }
@@ -485,7 +500,11 @@ export default function SignInButton({ trigger = "profile" }: SignInButtonProps)
                 </button>
             )}
 
-            <AuthDrawer open={open} onClose={() => setOpen(false)} />
+            <AuthDrawer
+                open={open}
+                onClose={closeAuthDrawer}
+                initialGoogleSignup={pendingGoogleSignup}
+            />
         </>
     );
 }
