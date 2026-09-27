@@ -10,8 +10,6 @@ import {
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
 } from "react";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/components/redux/store";
 import {
     ArrowDown,
     ArrowLeft,
@@ -33,8 +31,9 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/components/redux/store";
 import ChatAvatar from "./ChatAvatar";
-import { useAuth } from "@/components/auth/AuthProvider";
 import {
     createOffer,
     deleteChat,
@@ -148,11 +147,13 @@ export default function ChatWindow({
     onBack,
     onChatRemoved,
 }: ChatWindowProps) {
-    const { user } = useAuth();
     const socket = useSocket();
     const queryClient = useQueryClient();
     const myUserId = useSelector(
         (state: RootState) => state.user.user?.user?.id ?? null,
+    );
+    const profile = useSelector(
+        (state: RootState) => state.user.user?.user ?? null,
     );
     const [text, setText] = useState("");
     const [replyTo, setReplyTo] = useState<ApiChatMessage | null>(null);
@@ -166,8 +167,11 @@ export default function ChatWindow({
     const typingActiveRef = useRef(false);
     const stopTypingTimerRef = useRef<number | null>(null);
 
-    const meName = user?.displayName || "You";
-    const mePhoto = user?.photoURL ?? null;
+    const meName =
+        [profile?.firstName, profile?.lastName].filter(Boolean).join(" ") ||
+        profile?.username ||
+        "You";
+    const mePhoto = profile?.profilePhoto ?? null;
     const cachedChat = findChatInCache(queryClient, activeChat);
 
     const { data: conversation, isLoading: conversationLoading } = useQuery({

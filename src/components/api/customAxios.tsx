@@ -4,9 +4,7 @@ import axios, {
     AxiosError,
     type InternalAxiosRequestConfig,
 } from "axios";
-import { signOut } from "firebase/auth";
 import toast from "react-hot-toast";
-import { auth } from "@/constant/firebase/firebase";
 import { clearuser } from "@/components/redux/slices/authSlice";
 import { persistor, store } from "@/components/redux/store";
 
@@ -17,8 +15,8 @@ export type ApiError = {
 };
 
 const PUBLIC_API_PATHS = [
-    "/auth/phone/check",
-    "/auth/firebase/verify",
+    "/auth/email/otp/request",
+    "/auth/email/otp/verify",
     "/categories",
     "/states",
     "/cities",
@@ -68,24 +66,7 @@ function isUnauthorizedPayload(data: unknown): boolean {
 
 async function getAccessToken(): Promise<string | null> {
     if (typeof window === "undefined") return null;
-
-    // Prefer app token first so interceptors never block the XHR on Firebase.
-    const stored = localStorage.getItem("token");
-    if (stored) return stored;
-
-    const user = auth.currentUser;
-    if (!user) return null;
-
-    try {
-        return await Promise.race([
-            user.getIdToken(),
-            new Promise<null>((resolve) => {
-                window.setTimeout(() => resolve(null), 2500);
-            }),
-        ]);
-    } catch {
-        return null;
-    }
+    return localStorage.getItem("token");
 }
 
 async function clearAuthData() {
@@ -110,7 +91,6 @@ async function clearAuthData() {
     localStorage.removeItem("fcmToken");
     store.dispatch(clearuser());
     await persistor.purge();
-    await signOut(auth);
 }
 
 async function handleAutoLogout() {

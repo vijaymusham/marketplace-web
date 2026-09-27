@@ -48,44 +48,37 @@ function rethrow(label: string, error: unknown): never {
     throw error;
 }
 
-// ==================== AUTH API ====================
+// ==================== AUTH API (email OTP via backend / nodemailer) ====================
 
-export const authApi = async (
-    idToken: string,
-    payload?: {
-        name?: string;
-        email?: string;
-        referralCode?: string;
-        platform?: "ios" | "android" | "web";
-        fcmToken?: string;
-    },
-) => {
+export type AuthEmailVerifyPayload = {
+    email: string;
+    code: string;
+    platform?: "ios" | "android" | "web";
+    fcmToken?: string;
+};
+
+export const authEmailRequestOtp = async (
+    email: string,
+): Promise<{ message?: string }> => {
     try {
-        const { data } = await customAxios.post("/auth/firebase/verify", {
-            idToken,
-            name: payload?.name,
-            email: payload?.email,
-            referralCode: payload?.referralCode,
-            platform: payload?.platform ?? "web",
-            fcmToken: payload?.fcmToken,
-        });
+        const { data } = await customAxios.post("/auth/email/otp/request", { email });
         return data;
     } catch (error) {
-        rethrow("authApi", error);
+        rethrow("authEmailRequestOtp", error);
     }
 };
 
-export const authPhoneCheck = async (
-    phone: string,
-): Promise<{
-    exists: boolean;
-    message?: string;
-}> => {
+export const authEmailVerifyOtp = async (payload: AuthEmailVerifyPayload) => {
     try {
-        const { data } = await customAxios.post("/auth/phone/check", { phone });
+        const { data } = await customAxios.post("/auth/email/otp/verify", {
+            email: payload.email,
+            code: payload.code,
+            platform: payload.platform ?? "web",
+            fcmToken: payload.fcmToken,
+        });
         return data;
     } catch (error) {
-        rethrow("authPhoneCheck", error);
+        rethrow("authEmailVerifyOtp", error);
     }
 };
 

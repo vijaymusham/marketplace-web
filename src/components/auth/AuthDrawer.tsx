@@ -7,131 +7,31 @@ import toast from "react-hot-toast";
 import { X, ArrowLeft } from "lucide-react";
 import { useDispatch } from "react-redux";
 import {
-    RecaptchaVerifier,
-    signInWithPhoneNumber,
-    type ConfirmationResult,
-    type User,
-} from "firebase/auth";
-import { auth, ensureRecaptchaConfig } from "@/constant/firebase/firebase";
-import {
     ensureNotificationPermission,
     getFcmToken,
 } from "@/constant/firebase/messaging";
-import { authApi, authPhoneCheck, getUser } from "@/components/api/apis";
+import {
+    authEmailRequestOtp,
+    authEmailVerifyOtp,
+    getUser,
+} from "@/components/api/apis";
 import type { ApiError } from "@/components/api/customAxios";
-import { setUser } from "@/components/redux/slices/authSlice";
+import { setUser, type userState } from "@/components/redux/slices/authSlice";
 import type { AppDispatch } from "@/components/redux/store";
 import GlowButton from "@/components/ui/GlowButton";
 
-type View = "phone" | "otp" | "details";
+type View = "email" | "otp";
+type AuthSession = NonNullable<userState["user"]>;
 
 const OTP_LENGTH = 6;
-const RECAPTCHA_ID = "firebase-recaptcha";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function isLocalhostHost() {
-    if (typeof window === "undefined") return false;
-    const host = window.location.hostname;
-    return host === "localhost" || host === "[::1]";
-}
-
-function currentHostLabel() {
-    if (typeof window === "undefined") return "";
-    return window.location.hostname;
-}
-
-function isFirebaseAuthError(error: unknown): boolean {
-    return (
-        !!error &&
-        typeof error === "object" &&
-        "code" in error &&
-        String((error as { code: unknown }).code).startsWith("auth/")
-    );
-}
-
-function firebaseErrorFields(error: unknown) {
-    if (!error || typeof error !== "object") {
-        return { code: "", message: "", name: "", customData: undefined as unknown };
+function apiErrorMessage(error: unknown, fallback = "Something went wrong. Please try again.") {
+    if (error && typeof error === "object" && "message" in error) {
+        const message = String((error as ApiError).message || "").trim();
+        if (message) return message;
     }
-    const e = error as {
-        code?: unknown;
-        message?: unknown;
-        name?: unknown;
-        customData?: unknown;
-    };
-    return {
-        code: e.code != null ? String(e.code) : "",
-        message: e.message != null ? String(e.message) : "",
-        name: e.name != null ? String(e.name) : "",
-        customData: e.customData,
-    };
-}
-
-function logFirebaseAuthError(stage: string, error: unknown) {
-    const fields = firebaseErrorFields(error);
-    console.error("[Firebase Auth]", {
-        stage,
-        hostname: typeof window !== "undefined" ? window.location.hostname : "",
-        origin: typeof window !== "undefined" ? window.location.origin : "",
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-        code: fields.code,
-        message: fields.message,
-        name: fields.name,
-        customData: fields.customData,
-        error,
-    });
-}
-
-function firebaseAuthErrorMessage(error: unknown): string {
-    const { code, message } = firebaseErrorFields(error);
-
-    if (
-        code === "auth/invalid-app-credential" ||
-        message.includes("INVALID_APP_CREDENTIAL")
-    ) {
-        if (isLocalhostHost()) {
-            return "Real SMS does not work on localhost. Use a Firebase test number, or open the app on 127.0.0.1 / a deployed domain.";
-        }
-        return "Phone verification failed. Confirm this domain is authorized in Firebase Authentication settings.";
-    }
-
-    switch (code) {
-        case "auth/invalid-phone-number":
-            return "Invalid phone number.";
-        case "auth/too-many-requests":
-            return "Too many attempts. Try again later.";
-        case "auth/invalid-verification-code":
-            return "Incorrect OTP. Please try again.";
-        case "auth/code-expired":
-            return "OTP expired. Request a new one.";
-        case "auth/captcha-check-failed":
-            return "Captcha failed. Refresh and try again.";
-        case "auth/quota-exceeded":
-            return "SMS quota exceeded. Try again later.";
-        case "auth/billing-not-enabled":
-            return "Real SMS requires Firebase Blaze billing to be enabled.";
-        case "auth/unauthorized-domain":
-            return "This domain is not authorized for phone sign-in. Please try again later.";
-        case "auth/operation-not-allowed":
-            return "Phone sign-in is currently unavailable.";
-        case "auth/network-request-failed":
-            return "Network error. Check your connection and try again.";
-        case "auth/internal-error":
-            return "Phone verification could not start. Please refresh and try again.";
-        case "auth/missing-app-credential":
-        case "auth/argument-error":
-            return "Verification widget failed to load. Please refresh and try again.";
-        default:
-            return "Something went wrong. Please try again.";
-    }
-}
-
-function toastAuthOrApiError(error: unknown) {
-    toast.error(
-        isFirebaseAuthError(error)
-            ? firebaseAuthErrorMessage(error)
-            : apiErrorMessage(error, firebaseAuthErrorMessage(error))
-    );
+    return fallback;
 }
 
 export default function AuthDrawer({
@@ -166,154 +66,26 @@ export default function AuthDrawer({
     );
 }
 
-function apiErrorMessage(error: unknown, fallback = "Something went wrong. Please try again.") {
-    if (error && typeof error === "object" && "message" in error) {
-        const message = String((error as ApiError).message || "").trim();
-        if (message) return message;
-    }
-    return fallback;
-}
-
 function AuthDrawerSession({ onClose }: { onClose: () => void }) {
     const dispatch = useDispatch<AppDispatch>();
-    const [view, setView] = useState<View>("phone");
-    const [phone, setPhone] = useState("");
-    const [name, setName] = useState("");
+    const [view, setView] = useState<View>("email");
     const [email, setEmail] = useState("");
-    const [referral, setReferral] = useState("");
-    const [showReferral, setShowReferral] = useState(false);
     const [sending, setSending] = useState(false);
     const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
     const [verifying, setVerifying] = useState(false);
-    const [savingProfile, setSavingProfile] = useState(false);
     const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-    const confirmationRef = useRef<ConfirmationResult | null>(null);
-    const verifierRef = useRef<RecaptchaVerifier | null>(null);
-    const verifierReadyRef = useRef<Promise<RecaptchaVerifier> | null>(null);
-    const widgetIdRef = useRef<number | null>(null);
-    const [captchaSolved, setCaptchaSolved] = useState(false);
 
-    // Backend phone/check result — Firebase is only used for SMS OTP.
-    const phoneExistsRef = useRef(false);
+    const emailValid = EMAIL_RE.test(email.trim());
+    const otpFilled = otp.every((d) => d);
 
-    const resetRecaptchaContainer = () => {
-        const el = document.getElementById(RECAPTCHA_ID);
-        if (el) el.innerHTML = "";
-    };
-
-    const resetWidget = () => {
-        setCaptchaSolved(false);
-        const widgetId = widgetIdRef.current;
-        const grecaptcha = (window as unknown as {
-            grecaptcha?: { reset?: (id?: number) => void };
-        }).grecaptcha;
-        if (widgetId == null || !grecaptcha?.reset) return;
-        try {
-            grecaptcha.reset(widgetId);
-        } catch {
-            /* widget already gone */
-        }
-    };
-
-    const clearVerifier = () => {
-        setCaptchaSolved(false);
-        try {
-            verifierRef.current?.clear();
-        } catch {
-            /* ignore stale widget */
-        }
-        verifierRef.current = null;
-        verifierReadyRef.current = null;
-        widgetIdRef.current = null;
-        resetRecaptchaContainer();
-    };
-
-    const ensureVerifier = async (): Promise<RecaptchaVerifier> => {
-        if (verifierRef.current) return verifierRef.current;
-        if (verifierReadyRef.current) return verifierReadyRef.current;
-
-        const create = (async () => {
-            await ensureRecaptchaConfig();
-
-            const el = document.getElementById(RECAPTCHA_ID);
-            if (!el) {
-                throw new Error("reCAPTCHA container is not in the DOM");
-            }
-            if (el.childNodes.length > 0) {
-                el.innerHTML = "";
-            }
-
-            let verifier: RecaptchaVerifier;
-            try {
-                // Visible widget: token is created from a real user solve, so it
-                // remains valid after authPhoneCheck() (invisible execute cannot).
-                verifier = new RecaptchaVerifier(auth, RECAPTCHA_ID, {
-                    size: "normal",
-                    callback: () => {
-                        setCaptchaSolved(true);
-                    },
-                    "expired-callback": () => {
-                        setCaptchaSolved(false);
-                    },
-                    "error-callback": () => {
-                        setCaptchaSolved(false);
-                    },
-                });
-            } catch (error) {
-                logFirebaseAuthError("B. RecaptchaVerifier construction", error);
-                throw error;
-            }
-
-            verifierRef.current = verifier;
-
-            try {
-                const widgetId = await verifier.render();
-                widgetIdRef.current = typeof widgetId === "number" ? widgetId : null;
-            } catch (error) {
-                logFirebaseAuthError("C. RecaptchaVerifier.render()", error);
-                clearVerifier();
-                throw error;
-            }
-
-            return verifier;
-        })();
-
-        verifierReadyRef.current = create;
-        try {
-            return await create;
-        } catch (error) {
-            verifierReadyRef.current = null;
-            throw error;
-        }
-    };
-
-    const completeBackendAuth = async (
-        firebaseUser: User,
-        profile: { name: string; email: string; referralCode?: string; exists?: boolean }
-    ) => {
-        const idToken = await firebaseUser.getIdToken(true);
-
-        const fcmToken = await getFcmToken();
-
-        const authData = await authApi(idToken, {
-            ...(!profile?.exists
-                ? {
-                    name: profile.name.trim(),
-                    email: profile.email.trim(),
-                    referralCode: profile.referralCode?.trim() || undefined,
-                }
-                : {}),
-            platform: "web",
-            fcmToken: fcmToken || undefined,
-        });
-
+    const completeBackendAuth = async (authData: AuthSession) => {
         if (authData?.accessToken) {
             localStorage.setItem("token", authData.accessToken);
         }
 
+        const fcmToken = await getFcmToken();
         if (fcmToken) {
             localStorage.setItem("fcmToken", fcmToken);
-            // Refresh/register on the dedicated endpoint so this account owns the token.
             try {
                 const { registerDeviceToken } = await import("@/components/api/apis");
                 await registerDeviceToken({ token: fcmToken, platform: "web" });
@@ -336,88 +108,23 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
         return authData;
     };
 
-    useEffect(() => {
-        let cancelled = false;
-        let timer = 0;
-
-        if (process.env.NODE_ENV !== "production") {
-            console.info("[Firebase Auth] drawer session", {
-                hostname: window.location.hostname,
-                projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-                authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-            });
-        }
-
-        const setup = async () => {
-            await new Promise<void>((resolve) => {
-                timer = window.setTimeout(() => resolve(), 50);
-            });
-            if (cancelled) return;
-
-            try {
-                await ensureVerifier();
-            } catch (error) {
-                if (!cancelled) {
-                    logFirebaseAuthError("C. RecaptchaVerifier.render() (session setup)", error);
-                    toast.error(firebaseAuthErrorMessage(error));
-                }
-            }
-        };
-
-        void setup();
-
-        return () => {
-            cancelled = true;
-            window.clearTimeout(timer);
-            clearVerifier();
-        };
-        // Session unmounts whenever the drawer closes (portal returns null).
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const phoneValid = /^\d{10}$/.test(phone);
-
     const sendOtp = async () => {
-        if (!phoneValid || sending) return;
+        if (!emailValid || sending) return;
 
         setSending(true);
         try {
-            // Do not await the permission prompt before Firebase — it steals the
-            // click gesture and can invalidate an unsolved/invisible captcha.
             void ensureNotificationPermission();
 
-            const check = await authPhoneCheck(`+91${phone}`);
-            if (check == null || typeof check.exists !== "boolean") {
-                toast.error("Unable to verify this phone number. Please try again.");
-                return;
-            }
+            const normalized = email.trim().toLowerCase();
+            setEmail(normalized);
 
-            phoneExistsRef.current = check.exists;
-
-            const appVerifier = await ensureVerifier();
-
-            try {
-                const confirmation = await signInWithPhoneNumber(
-                    auth,
-                    `+91${phone}`,
-                    appVerifier
-                );
-                confirmationRef.current = confirmation;
-                setOtp(Array(OTP_LENGTH).fill(""));
-                setView("otp");
-                toast.success("OTP sent to your phone");
-                resetWidget();
-                setTimeout(() => otpRefs.current[0]?.focus(), 250);
-            } catch (error) {
-                logFirebaseAuthError(
-                    "D/E/F. reCAPTCHA execute + signInWithPhoneNumber (Identity Toolkit)",
-                    error
-                );
-                resetWidget();
-                throw error;
-            }
+            await authEmailRequestOtp(normalized);
+            setOtp(Array(OTP_LENGTH).fill(""));
+            setView("otp");
+            toast.success("OTP sent to your email");
+            setTimeout(() => otpRefs.current[0]?.focus(), 250);
         } catch (error) {
-            toastAuthOrApiError(error);
+            toast.error(apiErrorMessage(error));
         } finally {
             setSending(false);
         }
@@ -454,61 +161,30 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
     };
 
     const handleVerify = async () => {
-        if (otp.some((d) => !d) || verifying || !confirmationRef.current) return;
+        if (!otpFilled || verifying) return;
         setVerifying(true);
         try {
-            // Ask for push permission on this click (browsers require a user gesture).
             await ensureNotificationPermission();
+            const code = otp.join("");
+            const normalized = email.trim().toLowerCase();
+            const fcmToken = await getFcmToken();
 
-            // Firebase: verify OTP only. Account create/login is backend-only.
-            const result = await confirmationRef.current.confirm(otp.join(""));
+            const authData = (await authEmailVerifyOtp({
+                email: normalized,
+                code,
+                platform: "web",
+                fcmToken: fcmToken || undefined,
+            })) as AuthSession;
 
-            if (!phoneExistsRef.current) {
-                // New number → collect profile, then create account on backend.
-                setView("details");
-                return;
-            }
-
-            // Existing number → login via backend with Firebase idToken.
-            await completeBackendAuth(result.user, {
-                name: result.user.displayName || "",
-                email: result.user.email || "",
-                exists: phoneExistsRef.current,
-            });
+            await completeBackendAuth(authData);
             toast.success("Logged in successfully!");
             onClose();
         } catch (error) {
-            logFirebaseAuthError("OTP confirm()", error);
-            toastAuthOrApiError(error);
+            toast.error(apiErrorMessage(error));
         } finally {
             setVerifying(false);
         }
     };
-
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-
-    const handleSaveProfile = async () => {
-        if (!name.trim() || !emailValid || savingProfile || !auth.currentUser) return;
-        setSavingProfile(true);
-        try {
-            await ensureNotificationPermission();
-            // Signup: send name/email/referral + Firebase idToken to backend only.
-            await completeBackendAuth(auth.currentUser, {
-                name: name.trim(),
-                email: email.trim(),
-                referralCode: referral.trim() || undefined,
-                exists: phoneExistsRef.current,
-            });
-            toast.success("Account created successfully!");
-            onClose();
-        } catch (error) {
-            toastAuthOrApiError(error);
-        } finally {
-            setSavingProfile(false);
-        }
-    };
-
-    const otpFilled = otp.every((d) => d);
 
     const heading =
         view === "otp"
@@ -517,19 +193,14 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                 subtitle: (
                     <>
                         Enter the 6-digit code sent to{" "}
-                        <span className="font-semibold text-slate-900">+91 {phone}</span>
+                        <span className="font-semibold text-slate-900">{email}</span>
                     </>
                 ),
             }
-            : view === "details"
-                ? {
-                    title: "Almost done",
-                    subtitle: "Tell us a bit about yourself to finish signup",
-                }
-                : {
-                    title: "Login",
-                    subtitle: "Enter your phone number to continue",
-                };
+            : {
+                title: "Login",
+                subtitle: "Enter your email to continue",
+            };
 
     return (
         <div
@@ -557,10 +228,10 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                 <header className="relative z-10 shrink-0 bg-linear-to-b from-primary/15 via-primary/8 to-white px-5 pt-5 pb-4 sm:px-8 sm:pt-7 sm:pb-5">
                     <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                            {view !== "phone" ? (
+                            {view !== "email" ? (
                                 <button
                                     type="button"
-                                    onClick={() => setView(view === "details" ? "otp" : "phone")}
+                                    onClick={() => setView("email")}
                                     className="mb-3 inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1.5 text-sm font-bold text-primary transition-colors duration-300 hover:bg-primary hover:text-white"
                                 >
                                     <ArrowLeft className="size-3.5" strokeWidth={2.5} />
@@ -589,54 +260,21 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                 </header>
 
                 <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-8 sm:py-6">
-                    {view === "phone" &&
-                        (isLocalhostHost() ||
-                            /^\d{1,3}(\.\d{1,3}){3}$/.test(currentHostLabel())) && (
-                            <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed font-medium text-amber-900">
-                                {isLocalhostHost() ? (
-                                    <>
-                                        Real SMS OTP does not work on{" "}
-                                        <span className="font-bold">localhost</span>. Use a Firebase{" "}
-                                        <span className="font-bold">test phone number</span>, or open{" "}
-                                        <span className="font-bold">http://127.0.0.1:3000</span>.
-                                    </>
-                                ) : (
-                                    <>
-                                        Add <span className="font-bold">{currentHostLabel()}</span> in Firebase →
-                                        Authentication → Settings →{" "}
-                                        <span className="font-bold">Authorized domains</span> or real SMS OTP
-                                        will fail with INVALID_APP_CREDENTIAL.
-                                    </>
-                                )}
-                            </div>
-                        )}
-
                     <form
                         className="flex flex-col gap-4"
                         onSubmit={(e) => {
                             e.preventDefault();
-                            if (view === "phone") void sendOtp();
+                            if (view === "email") void sendOtp();
                         }}
                     >
-                        {view === "phone" ? (
-                            <PhoneField value={phone} onChange={setPhone} />
+                        {view === "email" ? (
+                            <EmailField value={email} onChange={setEmail} />
                         ) : null}
 
-                        {/* Keep the widget on-screen. Off-canvas / display:none breaks reCAPTCHA. */}
-                        <div
-                            className={
-                                view === "details"
-                                    ? "h-0 overflow-visible"
-                                    : "flex min-h-19.5 justify-center py-1"
-                            }
-                        >
-                            <div id={RECAPTCHA_ID} />
-                        </div>
-
-                        {view === "phone" ? (
+                        {view === "email" ? (
                             <GlowButton
                                 type="submit"
-                                disabled={!phoneValid || !captchaSolved || sending}
+                                disabled={!emailValid || sending}
                                 fullWidth
                                 size="lg"
                                 className="mt-1"
@@ -646,7 +284,7 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                         ) : null}
                     </form>
 
-                    {view === "phone" ? (
+                    {view === "email" ? (
                         <p className="mx-auto mt-4 max-w-80 text-center text-xs leading-relaxed font-semibold text-slate-400">
                             By clicking on Continue, I accept the{" "}
                             <span className="cursor-pointer font-semibold text-slate-600 underline hover:text-primary">
@@ -704,99 +342,13 @@ function AuthDrawerSession({ onClose }: { onClose: () => void }) {
                                     Didn&apos;t receive it?{" "}
                                     <button
                                         type="button"
-                                        disabled={sending || !captchaSolved}
+                                        disabled={sending}
                                         onClick={() => void sendOtp()}
                                         className="cursor-pointer font-semibold text-primary hover:text-primary-hover disabled:opacity-60"
                                     >
-                                        {sending
-                                            ? "Sending..."
-                                            : captchaSolved
-                                                ? "Resend OTP"
-                                                : "Solve captcha to resend"}
+                                        {sending ? "Sending..." : "Resend OTP"}
                                     </button>
                                 </p>
-                            </motion.div>
-                        )}
-
-                        {view === "details" && (
-                            <motion.div
-                                key="details"
-                                initial={{ opacity: 0, x: 24 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -24 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <form
-                                    className="flex flex-col gap-4"
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        if (name.trim() && emailValid) void handleSaveProfile();
-                                    }}
-                                >
-                                    <Field label="Phone number">
-                                        <span className="flex items-center gap-2">
-                                            <span className="text-base font-semibold text-slate-500">
-                                                +91
-                                            </span>
-                                            <span className="text-base font-semibold text-slate-900">
-                                                {phone}
-                                            </span>
-                                        </span>
-                                    </Field>
-
-                                    <Field label="Name">
-                                        <input
-                                            type="text"
-                                            autoFocus
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            placeholder="Your full name"
-                                            className="w-full bg-transparent text-base font-semibold text-slate-900 placeholder:font-medium placeholder:text-slate-400 focus:outline-none"
-                                        />
-                                    </Field>
-
-                                    <Field label="Email">
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="you@example.com"
-                                            className="w-full bg-transparent text-base font-semibold text-slate-900 placeholder:font-medium placeholder:text-slate-400 focus:outline-none"
-                                        />
-                                    </Field>
-
-                                    {showReferral ? (
-                                        <Field label="Referral code">
-                                            <input
-                                                type="text"
-                                                value={referral}
-                                                onChange={(e) =>
-                                                    setReferral(e.target.value.toUpperCase())
-                                                }
-                                                placeholder="Optional"
-                                                className="w-full bg-transparent text-base font-semibold tracking-widest text-slate-900 placeholder:font-medium placeholder:tracking-normal placeholder:text-slate-400 focus:outline-none"
-                                            />
-                                        </Field>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowReferral(true)}
-                                            className="self-start cursor-pointer text-sm font-semibold text-primary hover:text-primary-hover"
-                                        >
-                                            Have a referral code?
-                                        </button>
-                                    )}
-
-                                    <GlowButton
-                                        type="submit"
-                                        disabled={!name.trim() || !emailValid || savingProfile}
-                                        fullWidth
-                                        size="lg"
-                                        className="mt-1"
-                                    >
-                                        {savingProfile ? "Saving..." : "Finish"}
-                                    </GlowButton>
-                                </form>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -825,7 +377,7 @@ function Field({
     );
 }
 
-function PhoneField({
+function EmailField({
     value,
     onChange,
 }: {
@@ -833,21 +385,16 @@ function PhoneField({
     onChange: (v: string) => void;
 }) {
     return (
-        <Field label="Phone number">
-            <span className="flex items-center gap-2">
-                <span className="text-base font-semibold text-slate-500">+91</span>
-                <input
-                    type="tel"
-                    inputMode="numeric"
-                    autoFocus
-                    value={value}
-                    onChange={(e) =>
-                        onChange(e.target.value.replace(/\D/g, "").slice(0, 10))
-                    }
-                    placeholder="10-digit mobile number"
-                    className="w-full bg-transparent text-base font-semibold text-slate-900 placeholder:font-semibold placeholder:text-slate-400 focus:outline-none"
-                />
-            </span>
+        <Field label="Email">
+            <input
+                type="email"
+                autoFocus
+                autoComplete="email"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-transparent text-base font-semibold text-slate-900 placeholder:font-semibold placeholder:text-slate-400 focus:outline-none"
+            />
         </Field>
     );
 }

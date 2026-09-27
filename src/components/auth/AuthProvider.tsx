@@ -2,86 +2,45 @@
 
 import {
     createContext,
+    useCallback,
     useContext,
-    useEffect,
-    useState,
+    useMemo,
     type ReactNode,
 } from "react";
-import type { User } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { clearuser } from "@/components/redux/slices/authSlice";
+import { persistor, type AppDispatch } from "@/components/redux/store";
 
 type AuthContextValue = {
-    user: User | null;
     loading: boolean;
     signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue>({
-    user: null,
-    loading: true,
+    loading: false,
     signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch<AppDispatch>();
 
-    useEffect(() => {
-        let settled = false;
-        let unsubscribe: (() => void) | undefined;
-        let cancelled = false;
+    const signOut = useCallback(async () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("fcmToken");
+        dispatch(clearuser());
+        await persistor.purge();
+    }, [dispatch]);
 
-        const boot = async () => {
-            const [{ onAuthStateChanged }, { auth }] = await Promise.all([
-                import("firebase/auth"),
-                import("@/constant/firebase/firebase"),
-            ]);
-            if (cancelled) return;
-
-            unsubscribe = onAuthStateChanged(
-                auth,
-                (next) => {
-                    settled = true;
-                    setUser(next);
-                    setLoading(false);
-                },
-                () => {
-                    settled = true;
-                    setUser(null);
-                    setLoading(false);
-                },
-            );
-        };
-
-        // Defer Firebase well past LCP (idle or ~2.5s).
-        const delay = window.setTimeout(() => {
-            void boot();
-        }, 2500);
-
-        const safety = window.setTimeout(() => {
-            if (!settled) setLoading(false);
-        }, 4000);
-
-        return () => {
-            cancelled = true;
-            window.clearTimeout(delay);
-            window.clearTimeout(safety);
-            unsubscribe?.();
-        };
-    }, []);
-
-    const signOut = async () => {
-        const [{ signOut: firebaseSignOut }, { auth }] = await Promise.all([
-            import("firebase/auth"),
-            import("@/constant/firebase/firebase"),
-        ]);
-        await firebaseSignOut(auth);
-        setUser(null);
-    };
+    const value = useMemo(
+        () => ({
+            loading: false,
+            signOut,
+        }),
+        [signOut]
+    );
 
     return (
-        <AuthContext.Provider value={{ user, loading, signOut }}>
-            {children}
-        </AuthContext.Provider>
+        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
     );
 }
 
