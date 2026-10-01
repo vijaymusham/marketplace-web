@@ -70,10 +70,10 @@ export default function SafetyTipsView() {
                     team reviews reports for spam, scams, and prohibited items. For urgent danger,
                     contact local authorities first, then let us know at{" "}
                     <a
-                        href="mailto:safety@DealPokket.in"
+                        href="mailto:support@DealPokket.com"
                         className="font-bold text-primary hover:underline"
                     >
-                        safety@DealPokket.in
+                        support@DealPokket.com
                     </a>
                     .
                 </p>

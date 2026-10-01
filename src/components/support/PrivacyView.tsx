@@ -97,10 +97,10 @@ export default function PrivacyView() {
                 <p>
                     Questions about this policy? Email{" "}
                     <a
-                        href="mailto:privacy@DealPokket.in"
+                        href="mailto:support@DealPokket.com"
                         className="font-bold text-primary hover:underline"
                     >
-                        privacy@DealPokket.in
+                        support@DealPokket.com
                     </a>{" "}
                     or visit our{" "}
                     <Link href="/contact" className="font-bold text-primary hover:underline">
