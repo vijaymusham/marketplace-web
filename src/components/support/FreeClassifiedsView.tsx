@@ -189,18 +189,22 @@ export default function FreeClassifiedsView() {
             <SupportSection id="best-for" number={4} title="Which free classifieds site is best for you?">
                 <SupportList
                     items={[
-                        "Choose DealPokket for local second-hand buys and sells with free ads.",
+                        "Choose DealPokket for local second-hand buys and sells with free ads — an OLX alternative when you want nearby listings first.",
                         "Choose Facebook Marketplace if your network already lives on Facebook.",
                         "Choose Quikr if you want another large general classifieds channel.",
                         "List on more than one site only when you can reply quickly on each.",
                     ]}
                 />
                 <p>
-                    Selling furniture, bikes, or electronics? See our{" "}
+                    Selling furniture, bikes, or electronics? See the{" "}
                     <Link href="/second-hand" className="font-bold text-primary hover:underline">
                         second-hand marketplace guide
                     </Link>{" "}
-                    for category tips and city browsing.
+                    or the{" "}
+                    <Link href="/olx-alternative" className="font-bold text-primary hover:underline">
+                        OLX alternative
+                    </Link>{" "}
+                    page for how to sell easily and keep the best value.
                 </p>
             </SupportSection>
 

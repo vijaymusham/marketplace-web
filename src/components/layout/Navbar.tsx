@@ -81,7 +81,7 @@ export default function Navbar() {
                             }}
                             className="group flex shrink-0 items-center"
                         >
-                            <Image src="/logo.png" alt="DealPokket" width={64} height={64} priority className="h-16 w-16" />
+                            <Image src="/logo.png" alt="Deal Pokket second hand marketplace" width={64} height={64} priority className="h-16 w-16" />
                             <span className="font-heading text-3xl font-black tracking-tight text-primary">
                                 Deal<span className="text-slate-900">Pokket</span>
                             </span>

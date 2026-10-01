@@ -68,6 +68,7 @@ const menuColumns = [
         heading: "Discover",
         links: [
             { label: "Free Classifieds", href: "/free-classifieds" },
+            { label: "OLX Alternative", href: "/olx-alternative" },
             { label: "Second Hand Marketplace", href: "/second-hand" },
             { label: "Help & Support", href: "/help" },
         ],

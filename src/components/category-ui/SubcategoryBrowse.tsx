@@ -213,7 +213,7 @@ export default function SubcategoryBrowse({
                     <div className="flex items-center justify-between gap-3 lg:contents">
                         <header className="min-w-0 flex-1 lg:hidden">
                             <h1 className="text-balance font-heading text-lg font-extrabold leading-snug tracking-tight text-slate-900">
-                                {activeSubcategory}
+                                Second hand {activeSubcategory} for sale
                             </h1>
                             {showSkeleton ? (
                                 <Skeleton className="mt-1 h-3.5 w-36 rounded" />
@@ -238,7 +238,7 @@ export default function SubcategoryBrowse({
                         <Enter>
                             <header className="mb-8 hidden lg:block">
                                 <h1 className="text-balance font-heading text-2xl font-extrabold leading-snug tracking-tight text-slate-900 md:text-3xl">
-                                    {activeSubcategory}
+                                    Second hand {activeSubcategory} for sale
                                 </h1>
                                 {showSkeleton ? (
                                     <Skeleton className="mt-2 h-4 w-40 rounded" />

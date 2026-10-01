@@ -116,7 +116,7 @@ const CityDetails = () => {
                                 </p>
                             )}
                             <h1 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
-                                Deals in {city.name}
+                                Second hand deals in {city.name}
                             </h1>
                         </div>
                     </div>

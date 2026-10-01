@@ -36,10 +36,28 @@ export default function CityExplorer({
         <section className="relative">
             <div className="mx-auto px-4 pt-6 pb-3 sm:px-6 sm:pt-8 sm:pb-4 lg:px-12 lg:pt-10">
                 <SectionHeader
-                    eyebrow="Explore nearby"
-                    title="Quick and easy deal finder"
-                    description="Pick a city and explore the top deals across India"
+                    heading="h1"
+                    eyebrow="Deal Pokket"
+                    title="Second hand marketplace in India"
+                    description="Buy and sell used mobiles, bikes, furniture and more near you. Pick a city to browse local deals."
                 />
+                <p className="mt-2 text-[13px] font-semibold text-slate-700 sm:text-sm">
+                    <Link href="/second-hand" className="text-primary hover:underline">
+                        Second hand deals
+                    </Link>
+                    <span className="mx-2 text-slate-300" aria-hidden>
+                        ·
+                    </span>
+                    <Link href="/free-classifieds" className="text-primary hover:underline">
+                        Free classified ads
+                    </Link>
+                    <span className="mx-2 text-slate-300" aria-hidden>
+                        ·
+                    </span>
+                    <Link href="/olx-alternative" className="text-primary hover:underline">
+                        OLX alternative
+                    </Link>
+                </p>
 
                 <div className="relative mt-5 sm:mt-6">
                     <div

@@ -68,9 +68,6 @@ export default function HomeView({
         <>
             <CategoryTabs />
             <main className="flex-1 bg-white relative">
-                <h1 className="sr-only">
-                    DealPokket — free second-hand marketplace and classified ads in India
-                </h1>
                 <CityExplorer initialCities={initialCities} />
                 <FreshRecommendations initialAds={initialFreshAds} />
                 <TrustedBrands />

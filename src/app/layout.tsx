@@ -22,7 +22,7 @@ import {
     HOMEPAGE_TITLE,
     SITE_NAME,
     SITE_NAME_SPACED,
-    SITE_TAGLINE,
+    SOCIAL_PROFILES,
 } from "@/lib/seo";
 
 /** Matches navbar top tint: primary (#2f3adf) at 15% over white */
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     metadataBase: new URL(getSiteUrl()),
     title: {
         default: HOMEPAGE_TITLE,
-        template: `%s | ${SITE_NAME}`,
+        template: `%s | ${SITE_NAME_SPACED}`,
     },
     description: HOMEPAGE_DESCRIPTION,
     applicationName: SITE_NAME,
@@ -64,8 +64,8 @@ export const metadata: Metadata = {
         type: "website",
         locale: "en_IN",
         url: absoluteUrl("/"),
-        siteName: SITE_NAME,
-        title: `${SITE_NAME} — Free Second Hand Marketplace | Classified Ads`,
+        siteName: SITE_NAME_SPACED,
+        title: HOMEPAGE_TITLE,
         description: HOMEPAGE_DESCRIPTION,
         images: [
             {
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: `${SITE_NAME} — Free Second Hand Marketplace in India`,
+        title: HOMEPAGE_TITLE,
         description: HOMEPAGE_DESCRIPTION,
         images: [absoluteUrl("/logo.png")],
     },
@@ -123,11 +123,12 @@ export default function RootLayout({
                         {
                             "@context": "https://schema.org",
                             "@type": "Organization",
-                            name: SITE_NAME,
-                            alternateName: SITE_NAME_SPACED,
+                            name: SITE_NAME_SPACED,
+                            alternateName: [SITE_NAME, "deal pokket", "dealpokket"],
                             url: absoluteUrl("/"),
                             logo: absoluteUrl("/logo.png"),
                             email: "dealpokket@gmail.com",
+                            sameAs: [...SOCIAL_PROFILES],
                             description: HOMEPAGE_DESCRIPTION,
                             areaServed: {
                                 "@type": "Country",
@@ -143,7 +144,8 @@ export default function RootLayout({
                         {
                             "@context": "https://schema.org",
                             "@type": "WebSite",
-                            name: SITE_NAME,
+                            name: SITE_NAME_SPACED,
+                            alternateName: [SITE_NAME, "deal pokket"],
                             url: absoluteUrl("/"),
                             description: HOMEPAGE_DESCRIPTION,
                             inLanguage: "en-IN",

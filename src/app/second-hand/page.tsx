@@ -5,7 +5,7 @@ import { absoluteUrl, SITE_NAME } from "@/lib/seo";
 
 const title = "Second Hand Marketplace India — Free Buy & Sell Near You";
 const description =
-  "DealPokket is a free second-hand marketplace in India. Buy & sell used mobiles, bikes, furniture and more near you with free ad posting and local chat.";
+  "Deal Pokket is a free second-hand marketplace in India. Sell used mobiles, bikes and furniture easily near you, and keep the best value with local chat.";
 
 export const metadata: Metadata = {
   title,

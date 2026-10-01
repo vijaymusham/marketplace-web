@@ -55,15 +55,6 @@ const nextConfig: NextConfig = {
         : []),
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: "/olx-alternative",
-        destination: "/free-classifieds",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
     const csp = [

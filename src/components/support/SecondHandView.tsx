@@ -116,7 +116,14 @@ export default function SecondHandView() {
                     ]}
                 />
                 <p>
-                    Comparing platforms? Read our{" "}
+                    Comparing platforms? Read the{" "}
+                    <Link
+                        href="/olx-alternative"
+                        className="font-bold text-primary hover:underline"
+                    >
+                        OLX alternative
+                    </Link>{" "}
+                    page or the{" "}
                     <Link
                         href="/free-classifieds"
                         className="font-bold text-primary hover:underline"

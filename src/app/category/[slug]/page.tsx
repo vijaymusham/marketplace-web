@@ -115,7 +115,7 @@ export default function CategoryPage() {
                         <header className="mb-5 flex items-start justify-between gap-3 sm:mb-7 sm:gap-4 md:mb-9">
                             <div className="min-w-0 flex-1">
                                 <h1 className="text-balance font-heading text-lg font-extrabold leading-snug tracking-tight text-slate-900 sm:text-2xl md:text-3xl">
-                                    {category.name} for Sale
+                                    Second hand {category.name} for sale
                                 </h1>
                                 {showAdsSkeleton ? (
                                     <div className="mt-1.5 space-y-2 sm:mt-2">
@@ -128,9 +128,8 @@ export default function CategoryPage() {
                                             {ads.length}+ listings near you
                                         </span>
                                         <span className="hidden sm:inline">
-                                            Browse all {category.name.toLowerCase()} listings near you.
-                                            Verified sellers, great prices and {ads.length}+ fresh ads
-                                            posted every day.
+                                            Browse second hand {category.name.toLowerCase()} on Deal Pokket.
+                                            {ads.length}+ listings near you, with local chat and free ads.
                                         </span>
                                     </p>
                                 )}
