@@ -1,6 +1,6 @@
 /**
  * Central SEO config for DealPokket.
- * Override with NEXT_PUBLIC_SITE_URL in production (e.g. https://dealpokket.in).
+ * Override with NEXT_PUBLIC_SITE_URL in production (e.g. https://www.dealpokket.com).
  */
 export const SITE_NAME = "DealPokket";
 export const SITE_NAME_SPACED = "Deal Pokket";
@@ -28,7 +28,7 @@ export function getSiteUrl(): string {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
   }
-  return "https://dealpokket.in";
+  return "https://www.dealpokket.com";
 }
 
 export const DEFAULT_KEYWORDS = [

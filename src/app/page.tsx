@@ -46,9 +46,25 @@ export default async function HomePage() {
                             url: absoluteUrl("/"),
                         },
                         about: {
-                            "@type": "Thing",
-                            name: "Second hand marketplace and classified ads in India",
+                            "@type": "Brand",
+                            name: SITE_NAME_SPACED,
+                            alternateName: ["DealPokket", "deal pokket"],
+                            description: HOMEPAGE_DESCRIPTION,
                         },
+                    },
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "FAQPage",
+                        mainEntity: [
+                            {
+                                "@type": "Question",
+                                name: "What is Deal Pokket?",
+                                acceptedAnswer: {
+                                    "@type": "Answer",
+                                    text: "Deal Pokket is a free second hand marketplace in India. Buy and sell used mobiles, bikes, furniture and more near you.",
+                                },
+                            },
+                        ],
                     },
                     ...(freshAds.length
                         ? [

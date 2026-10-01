@@ -37,9 +37,9 @@ export default function CityExplorer({
             <div className="mx-auto px-4 pt-6 pb-3 sm:px-6 sm:pt-8 sm:pb-4 lg:px-12 lg:pt-10">
                 <SectionHeader
                     heading="h1"
-                    eyebrow="Deal Pokket"
-                    title="Second hand marketplace in India"
-                    description="Buy and sell used mobiles, bikes, furniture and more near you. Pick a city to browse local deals."
+                    eyebrow="Second hand marketplace in India"
+                    title="Deal Pokket"
+                    description="Deal Pokket is a free second hand marketplace in India. Buy and sell used mobiles, bikes, furniture and more near you. Pick a city to browse local deals."
                 />
                 <div className="relative mt-5 sm:mt-6">
                     <div
